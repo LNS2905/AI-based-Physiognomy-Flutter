@@ -10,6 +10,7 @@ import '../../features/survey/presentation/pages/survey_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/face_scan/presentation/pages/face_scan_page.dart';
 import '../../features/face_scan/presentation/pages/camera_screen.dart';
+import '../../features/face_scan/presentation/pages/user_guide_page.dart';
 
 /// Application router configuration using GoRouter
 class AppRouter {
@@ -76,6 +77,13 @@ class AppRouter {
         path: AppConstants.faceScanningRoute,
         name: 'face-scanning',
         builder: (context, state) => const FaceScanPage(),
+      ),
+
+      // User Guide Route
+      GoRoute(
+        path: AppConstants.userGuideRoute,
+        name: 'user-guide',
+        builder: (context, state) => const UserGuidePage(),
       ),
 
       // Camera Route
@@ -160,6 +168,7 @@ class AppRouter {
   static void goToDemographics() => _router.go(AppConstants.demographicsRoute);
   static void goToHome() => _router.go(AppConstants.homeRoute);
   static void goToFaceScanning() => _router.go(AppConstants.faceScanningRoute);
+  static void goToUserGuide() => _router.go(AppConstants.userGuideRoute);
   static void goToCamera() => _router.go(AppConstants.cameraRoute);
   static void goToResult() => _router.go(AppConstants.resultRoute);
   static void goToChatbot() => _router.go(AppConstants.chatbotRoute);
@@ -173,6 +182,7 @@ class AppRouter {
   static void pushDemographics() => _router.push(AppConstants.demographicsRoute);
   static void pushHome() => _router.push(AppConstants.homeRoute);
   static void pushFaceScanning() => _router.push(AppConstants.faceScanningRoute);
+  static void pushUserGuide() => _router.push(AppConstants.userGuideRoute);
   static void pushCamera() => _router.push(AppConstants.cameraRoute);
   static void pushResult() => _router.push(AppConstants.resultRoute);
   static void pushChatbot() => _router.push(AppConstants.chatbotRoute);

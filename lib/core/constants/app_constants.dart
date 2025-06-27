@@ -26,6 +26,7 @@ class AppConstants {
   static const String demographicsRoute = '/demographics';
   static const String homeRoute = '/home';
   static const String faceScanningRoute = '/face-scanning';
+  static const String userGuideRoute = '/user-guide';
   static const String cameraRoute = '/camera';
   static const String resultRoute = '/result';
   static const String chatbotRoute = '/chatbot';

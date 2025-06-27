@@ -45,7 +45,6 @@ dependencies:
   json_annotation: ^4.9.0
   camera: ^0.11.1
   face_camera: ^0.1.4
-  permission_handler: ^12.0.0+1
   path_provider: ^2.1.5
   path: ^1.9.1
 

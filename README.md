@@ -64,10 +64,27 @@ The app is designed to support the following core screens:
 - **Login Page** - User authentication (to be implemented)
 - **Demographic Questions** - User profile setup (to be implemented)
 - **Home Page** - Main dashboard (to be implemented)
-- **Face Scanning** - AI-powered face analysis (to be implemented)
+- **Face Scanning** - AI-powered face analysis ✅ **IMPLEMENTED**
+- **User Guide** - Step-by-step face scanning instructions ✅ **IMPLEMENTED**
 - **Result** - Analysis results display (to be implemented)
 - **Chatbot Page** - AI assistant interaction (to be implemented)
 - **Profile Page** - User profile management (to be implemented)
+
+### ✅ Implemented Features
+
+#### Face Scanning & User Guide
+- **Face Scan Page**: Complete UI following Figma design with camera integration
+- **User Guide Page**: Step-by-step instructions for optimal face scanning
+- **Navigation**: Seamless navigation between screens using GoRouter
+- **Interactive Elements**: Animated components and modal details
+- **Responsive Design**: Works on both Android and iOS devices
+
+**User Guide Features:**
+- 4 detailed steps covering the entire face scanning process
+- Interactive step cards with animations
+- Modal popups with detailed instructions for each step
+- Professional design matching the app's visual identity
+- Easy navigation from face scanning screen
 
 ## 🛠️ Technology Stack
 
