@@ -30,6 +30,7 @@ class AppConstants {
   static const String cameraRoute = '/camera';
   static const String resultRoute = '/result';
   static const String chatbotRoute = '/chatbot';
+  static const String aiConversationRoute = '/ai-conversation';
   static const String profileRoute = '/profile';
   
   // Error Messages

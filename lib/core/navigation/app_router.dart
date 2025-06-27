@@ -11,6 +11,7 @@ import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/face_scan/presentation/pages/face_scan_page.dart';
 import '../../features/face_scan/presentation/pages/camera_screen.dart';
 import '../../features/face_scan/presentation/pages/user_guide_page.dart';
+import '../../features/ai_conversation/presentation/pages/ai_conversation_page.dart';
 
 /// Application router configuration using GoRouter
 class AppRouter {
@@ -104,15 +105,21 @@ class AppRouter {
         ),
       ),
 
-      // Chatbot Route
+      // Chatbot Route (Legacy - redirects to AI Conversation)
       GoRoute(
         path: AppConstants.chatbotRoute,
         name: 'chatbot',
-        builder: (context, state) => const Scaffold(
-          body: Center(
-            child: Text('Chatbot Screen - To be implemented'),
-          ),
-        ),
+        redirect: (context, state) => AppConstants.aiConversationRoute,
+      ),
+
+      // AI Conversation Route
+      GoRoute(
+        path: AppConstants.aiConversationRoute,
+        name: 'ai-conversation',
+        builder: (context, state) {
+          final conversationId = state.uri.queryParameters['id'];
+          return AIConversationPage(conversationId: conversationId);
+        },
       ),
 
       // Profile Route
@@ -172,6 +179,12 @@ class AppRouter {
   static void goToCamera() => _router.go(AppConstants.cameraRoute);
   static void goToResult() => _router.go(AppConstants.resultRoute);
   static void goToChatbot() => _router.go(AppConstants.chatbotRoute);
+  static void goToAiConversation({String? conversationId}) {
+    final uri = conversationId != null
+        ? '${AppConstants.aiConversationRoute}?id=$conversationId'
+        : AppConstants.aiConversationRoute;
+    _router.go(uri);
+  }
   static void goToProfile() => _router.go(AppConstants.profileRoute);
 
   /// Push navigation methods
@@ -186,6 +199,12 @@ class AppRouter {
   static void pushCamera() => _router.push(AppConstants.cameraRoute);
   static void pushResult() => _router.push(AppConstants.resultRoute);
   static void pushChatbot() => _router.push(AppConstants.chatbotRoute);
+  static void pushAiConversation({String? conversationId}) {
+    final uri = conversationId != null
+        ? '${AppConstants.aiConversationRoute}?id=$conversationId'
+        : AppConstants.aiConversationRoute;
+    _router.push(uri);
+  }
   static void pushProfile() => _router.push(AppConstants.profileRoute);
 
   /// Go back

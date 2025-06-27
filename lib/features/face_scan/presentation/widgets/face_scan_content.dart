@@ -145,6 +145,7 @@ class _FaceScanContentState extends State<FaceScanContent>
             ),
           ],
         ),
+      ),
     );
   }
 }

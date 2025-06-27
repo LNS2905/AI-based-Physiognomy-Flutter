@@ -569,7 +569,7 @@ class HomePage extends StatelessWidget {
               icon: Icons.chat_bubble_outline,
               title: 'AI Chatbot',
               description: 'Chat with AI assistant',
-              onTap: () => context.go('/chatbot'),
+              onTap: () => context.go('/ai-conversation'),
             ),
           ),
         ],
@@ -760,7 +760,7 @@ class HomePage extends StatelessWidget {
               context.go('/face-scanning');
               break;
             case 2:
-              context.go('/chatbot');
+              context.go('/ai-conversation');
               break;
             case 3:
               context.go('/profile');

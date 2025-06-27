@@ -8,6 +8,7 @@ import 'core/utils/logger.dart';
 import 'features/auth/presentation/providers/auth_provider.dart';
 import 'features/survey/presentation/providers/survey_provider.dart';
 import 'features/face_scan/presentation/providers/face_scan_provider.dart';
+import 'features/ai_conversation/presentation/providers/chat_provider.dart';
 
 void main() async {
   // Ensure Flutter binding is initialized
@@ -68,6 +69,11 @@ class MyApp extends StatelessWidget {
         // Face Scan Provider
         ChangeNotifierProvider(
           create: (context) => FaceScanProvider(),
+        ),
+
+        // AI Chat Provider
+        ChangeNotifierProvider(
+          create: (context) => ChatProvider()..initialize(),
         ),
 
         // Add other providers here as needed
