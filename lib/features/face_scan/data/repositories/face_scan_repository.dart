@@ -10,6 +10,8 @@ import '../../../../core/network/http_service.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/utils/logger.dart';
 import '../../../../core/errors/exceptions.dart';
+import '../../../../core/constants/app_constants.dart';
+import '../../../../core/config/api_config.dart';
 import '../models/face_scan_request_model.dart';
 import '../models/face_scan_response_model.dart';
 
@@ -151,7 +153,8 @@ class FaceScanRepository {
     try {
       AppLogger.info('Analyzing face directly via API');
 
-      const apiUrl = "https://202f-34-16-157-125.ngrok-free.app/analyze-face/";
+      final apiUrl = ApiConfig.currentFaceAnalysisUrl;
+      AppLogger.info('Using API URL: $apiUrl');
 
       final file = File(imagePath);
       if (!file.existsSync()) {
@@ -174,7 +177,7 @@ class FaceScanRepository {
 
       // Send request
       final streamedResponse = await request.send().timeout(
-        const Duration(seconds: 90),
+        ApiConfig.requestTimeout,
       );
       final response = await http.Response.fromStream(streamedResponse);
 

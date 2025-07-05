@@ -7,6 +7,9 @@ class AppConstants {
   // API Configuration
   static const String baseUrl = 'https://api.example.com'; // Replace with actual API URL
   static const String apiVersion = 'v1';
+
+  // Face Analysis API Configuration
+  static const String faceAnalysisApiUrl = 'https://202f-34-16-157-125.ngrok-free.app/analyze-face/'; // Update this with your current ngrok URL
   static const Duration requestTimeout = Duration(seconds: 30);
   static const Duration connectTimeout = Duration(seconds: 15);
   
