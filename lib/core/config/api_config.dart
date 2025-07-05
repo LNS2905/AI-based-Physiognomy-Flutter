@@ -6,8 +6,8 @@ class ApiConfig {
   static const String apiVersion = 'v1';
   
   // Face Analysis API Configuration
-  // TODO: Update this URL with your current ngrok tunnel or production API
-  static const String faceAnalysisApiUrl = 'https://202f-34-16-157-125.ngrok-free.app/analyze-face/';
+  // Updated with new ngrok URL
+  static const String faceAnalysisApiUrl = 'https://fa01-34-73-47-22.ngrok-free.app/analyze-face/';
   
   // Alternative URLs for different environments
   static const String faceAnalysisApiUrlLocal = 'http://localhost:8000/analyze-face/';

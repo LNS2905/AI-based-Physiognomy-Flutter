@@ -5,6 +5,7 @@ import 'package:archive/archive.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 import '../../../../core/network/api_result.dart';
 import '../../../../core/network/http_service.dart';
 import '../../../../core/errors/failures.dart';
@@ -167,19 +168,41 @@ class FaceScanRepository {
       // Create multipart request
       final request = http.MultipartRequest('POST', Uri.parse(apiUrl));
 
-      // Add file with correct field name
+      // Add headers for ngrok
+      request.headers.addAll({
+        'ngrok-skip-browser-warning': 'true',
+        'Accept': 'application/json',
+      });
+
+      // Add file with correct field name and content type
+      final contentType = _getContentType(imagePath);
       final multipartFile = await http.MultipartFile.fromPath(
         'file', // API expects 'file' field name
         imagePath,
         filename: path.basename(imagePath),
+        contentType: contentType,
       );
       request.files.add(multipartFile);
+
+      AppLogger.info('Request headers: ${request.headers}');
+      AppLogger.info('Request files: ${request.files.length}');
+      AppLogger.info('File field name: file');
+      AppLogger.info('File name: ${path.basename(imagePath)}');
+      AppLogger.info('File content type: $contentType');
+      AppLogger.info('File extension: ${path.extension(imagePath)}');
 
       // Send request
       final streamedResponse = await request.send().timeout(
         ApiConfig.requestTimeout,
       );
       final response = await http.Response.fromStream(streamedResponse);
+
+      AppLogger.info('Response status: ${response.statusCode}');
+      AppLogger.info('Response headers: ${response.headers}');
+      AppLogger.info('Response body length: ${response.body.length}');
+      if (response.statusCode != 200) {
+        AppLogger.error('Response body: ${response.body}');
+      }
 
       if (response.statusCode == 200) {
         AppLogger.info('Face analysis completed successfully');
@@ -265,6 +288,27 @@ class FaceScanRepository {
         message: 'Failed to process analysis results: ${e.toString()}',
         code: 'ZIP_PROCESSING_ERROR',
       );
+    }
+  }
+
+  /// Get content type based on file extension
+  MediaType _getContentType(String filePath) {
+    final extension = path.extension(filePath).toLowerCase();
+    switch (extension) {
+      case '.jpg':
+      case '.jpeg':
+        return MediaType('image', 'jpeg');
+      case '.png':
+        return MediaType('image', 'png');
+      case '.gif':
+        return MediaType('image', 'gif');
+      case '.bmp':
+        return MediaType('image', 'bmp');
+      case '.webp':
+        return MediaType('image', 'webp');
+      default:
+        // Default to JPEG for unknown image types
+        return MediaType('image', 'jpeg');
     }
   }
 }
