@@ -3,10 +3,12 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/error_handler.dart';
+import '../../../../core/utils/logger.dart';
 import '../providers/face_scan_provider.dart';
 import '../widgets/face_analysis_demo.dart';
 import '../widgets/face_scan_tab_navigation.dart';
 import '../widgets/face_scan_content.dart';
+import 'analysis_results_page.dart';
 
 /// Face scan screen following the exact Figma design
 class FaceScanPage extends StatefulWidget {
@@ -295,84 +297,87 @@ class _FaceScanPageState extends State<FaceScanPage> {
   }
 
   Widget _buildUploadPhotoContent() {
-    return Container(
-      width: 376,
-      height: 80,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Colors.white,
-            AppColors.surfaceVariant.withOpacity(0.3),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
+    return GestureDetector(
+      onTap: _handleUploadPhoto,
+      child: Container(
+        width: 376,
+        height: 80,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Colors.white,
+              AppColors.surfaceVariant.withOpacity(0.3),
+            ],
           ),
-        ],
-        border: Border.all(
-          color: AppColors.primary.withOpacity(0.2),
-          width: 1,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 20,
+              offset: const Offset(0, 10),
+            ),
+          ],
+          border: Border.all(
+            color: AppColors.primary.withOpacity(0.2),
+            width: 1,
+          ),
         ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Row(
-          children: [
-            // Icon
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            children: [
+              // Icon
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  Icons.cloud_upload_outlined,
+                  size: 20,
+                  color: AppColors.primary,
+                ),
               ),
-              child: Icon(
-                Icons.cloud_upload_outlined,
-                size: 20,
+
+              const SizedBox(width: 12),
+
+              // Text content
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text(
+                      'Upload Photo',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    const Text(
+                      'Choose a photo from your gallery for analysis',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Arrow icon
+              Icon(
+                Icons.arrow_forward_ios,
+                size: 16,
                 color: AppColors.primary,
               ),
-            ),
-
-            const SizedBox(width: 12),
-
-            // Text content
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text(
-                    'Upload Photo',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  const Text(
-                    'Choose a photo from your gallery for analysis',
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            // Arrow icon
-            Icon(
-              Icons.arrow_forward_ios,
-              size: 16,
-              color: AppColors.primary,
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -588,6 +593,83 @@ class _FaceScanPageState extends State<FaceScanPage> {
         ErrorHandler.handleError(context, e, showSnackBar: true);
         provider.setLoading(false);
       }
+    }
+  }
+
+  /// Handle upload photo button tap
+  Future<void> _handleUploadPhoto() async {
+    final provider = context.read<FaceScanProvider>();
+
+    try {
+      AppLogger.info('Upload photo button tapped');
+
+      // Pick image and analyze
+      final success = await provider.pickImageAndAnalyze();
+
+      if (mounted) {
+        if (success) {
+          // Show success message
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Image uploaded and analyzed successfully!'),
+              backgroundColor: AppColors.success,
+              duration: Duration(seconds: 2),
+            ),
+          );
+
+          // Navigate to results page or show results
+          _showAnalysisResults(provider);
+        } else {
+          // Show error message
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Failed to upload and analyze image. Please try again.'),
+              backgroundColor: AppColors.error,
+              duration: Duration(seconds: 3),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      AppLogger.error('Failed to handle upload photo', e);
+      if (mounted) {
+        ErrorHandler.handleError(context, e, showSnackBar: true);
+      }
+    }
+  }
+
+  /// Show analysis results
+  void _showAnalysisResults(FaceScanProvider provider) {
+    final analysisData = provider.analysisData;
+    final annotatedImagePath = provider.annotatedImagePath;
+    final reportImagePath = provider.reportImagePath;
+
+    if (analysisData != null) {
+      // Navigate to dedicated results page
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => AnalysisResultsPage(
+            analysisData: analysisData,
+            annotatedImagePath: annotatedImagePath,
+            reportImagePath: reportImagePath,
+          ),
+        ),
+      );
+    } else {
+      // Show error dialog if no analysis data
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Analysis Error'),
+          content: const Text('No analysis data available. Please try again.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
     }
   }
 }

@@ -2,6 +2,7 @@ import 'dart:io';
 import '../../../../core/providers/base_provider.dart';
 import '../../../../core/utils/logger.dart';
 import '../../../../core/services/camera_service.dart';
+import '../../../../core/services/image_picker_service.dart';
 import '../../data/models/face_scan_request_model.dart';
 import '../../data/models/face_scan_response_model.dart';
 import '../../data/repositories/face_scan_repository.dart';
@@ -10,6 +11,7 @@ import '../../data/repositories/face_scan_repository.dart';
 class FaceScanProvider extends BaseProvider {
   final FaceScanRepository _repository;
   final CameraService _cameraService = CameraService.instance;
+  final ImagePickerService _imagePickerService = ImagePickerService();
 
   FaceScanProvider({FaceScanRepository? repository})
       : _repository = repository ?? FaceScanRepository();
@@ -243,12 +245,74 @@ class FaceScanProvider extends BaseProvider {
   /// Check if image file exists and is valid
   bool isValidImageFile(String? path) {
     if (path == null || path.isEmpty) return false;
-    
+
     final file = File(path);
     if (!file.existsSync()) return false;
-    
+
     final extension = path.toLowerCase().split('.').last;
     return ['jpg', 'jpeg', 'png', 'bmp', 'webp'].contains(extension);
+  }
+
+  /// Pick image from gallery and start analysis
+  Future<bool> pickImageAndAnalyze() async {
+    try {
+      setLoading(true);
+      AppLogger.info('Starting image selection from gallery');
+
+      // Pick image from gallery
+      final imagePath = await _imagePickerService.pickImageFromGallery();
+
+      if (imagePath == null) {
+        AppLogger.info('No image selected from gallery');
+        setLoading(false);
+        return false;
+      }
+
+      AppLogger.info('Image selected: $imagePath');
+      setSelectedImagePath(imagePath);
+
+      // Start face analysis directly
+      final result = await executeApiOperation(
+        () => _repository.analyzeFaceDirectly(imagePath),
+        operationName: 'analyzeFaceDirectly',
+      );
+
+      if (result != null) {
+        // Store analysis result
+        _currentAnalysisResult = result;
+        AppLogger.info('Face analysis completed successfully');
+        return true;
+      } else {
+        AppLogger.error('Face analysis failed');
+        return false;
+      }
+    } catch (e) {
+      AppLogger.error('Failed to pick image and analyze', e);
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // Store analysis result
+  Map<String, dynamic>? _currentAnalysisResult;
+
+  /// Get current analysis result
+  Map<String, dynamic>? get currentAnalysisResult => _currentAnalysisResult;
+
+  /// Get annotated image path from current analysis
+  String? get annotatedImagePath => _currentAnalysisResult?['annotated_image_path'];
+
+  /// Get report image path from current analysis
+  String? get reportImagePath => _currentAnalysisResult?['report_image_path'];
+
+  /// Get analysis data from current analysis
+  Map<String, dynamic>? get analysisData => _currentAnalysisResult?['analysis_data'];
+
+  /// Clear current analysis result
+  void clearAnalysisResult() {
+    _currentAnalysisResult = null;
+    notifyListeners();
   }
 
   @override
