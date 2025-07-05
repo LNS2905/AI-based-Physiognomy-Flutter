@@ -6,7 +6,7 @@ import 'package:http/http.dart' as http;
 void main() async {
   // Test URLs - update these with your actual URLs
   final testUrls = [
-    'https://fa01-34-73-47-22.ngrok-free.app/analyze-face/'
+    'https://mako-fast-bobcat.ngrok-free.app/analyze-face/'
     // Add your other API URLs here
   ];
 

@@ -292,6 +292,7 @@ class FaceScanRepository {
   }
 
   /// Get content type based on file extension
+  /// Supports: ["image/jpeg", "image/png", "image/webp", "image/heic", "image/heif"]
   MediaType _getContentType(String filePath) {
     final extension = path.extension(filePath).toLowerCase();
     switch (extension) {
@@ -300,12 +301,12 @@ class FaceScanRepository {
         return MediaType('image', 'jpeg');
       case '.png':
         return MediaType('image', 'png');
-      case '.gif':
-        return MediaType('image', 'gif');
-      case '.bmp':
-        return MediaType('image', 'bmp');
       case '.webp':
         return MediaType('image', 'webp');
+      case '.heic':
+        return MediaType('image', 'heic');
+      case '.heif':
+        return MediaType('image', 'heif');
       default:
         // Default to JPEG for unknown image types
         return MediaType('image', 'jpeg');

@@ -10,6 +10,9 @@ import '../../data/repositories/face_scan_repository.dart';
 /// Provider for face scanning functionality
 class FaceScanProvider extends BaseProvider {
   final FaceScanRepository _repository;
+
+  /// Expose repository for direct access when needed
+  FaceScanRepository get repository => _repository;
   final CameraService _cameraService = CameraService.instance;
   final ImagePickerService _imagePickerService = ImagePickerService();
 
@@ -58,6 +61,13 @@ class FaceScanProvider extends BaseProvider {
       AppLogger.logStateChange(runtimeType.toString(), 'setSelectedImagePath', path);
       notifyListeners();
     }
+  }
+
+  /// Set current analysis result
+  void setCurrentAnalysisResult(Map<String, dynamic> result) {
+    _currentAnalysisResult = result;
+    AppLogger.logStateChange(runtimeType.toString(), 'setCurrentAnalysisResult', 'Analysis result set');
+    notifyListeners();
   }
 
   /// Initialize camera service

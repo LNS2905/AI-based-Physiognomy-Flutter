@@ -7,6 +7,7 @@ import '../../../../core/services/camera_service.dart';
 import '../../../../core/utils/error_handler.dart';
 import '../../../../core/utils/logger.dart';
 import '../providers/face_scan_provider.dart';
+import 'analysis_results_page.dart';
 
 /// Camera screen for face scanning with beautiful UI design
 class CameraScreen extends StatefulWidget {
@@ -90,22 +91,36 @@ class _CameraScreenState extends State<CameraScreen>
         // Get the face scan provider
         final faceScanProvider = context.read<FaceScanProvider>();
 
-        // Start face analysis
-        final success = await faceScanProvider.startFaceAnalysisFromCamera(imagePath);
+        // Set the captured image path
+        faceScanProvider.setSelectedImagePath(imagePath);
+
+        // Start face analysis using the same method as gallery upload
+        final result = await faceScanProvider.executeApiOperation(
+          () => faceScanProvider.repository.analyzeFaceDirectly(imagePath),
+          operationName: 'analyzeFaceDirectly',
+        );
+
+        final success = result != null;
 
         if (mounted) {
           if (success) {
-            // Navigate back to face scan page or results
+            // Store analysis result (same as gallery upload)
+            faceScanProvider.setCurrentAnalysisResult(result!);
+
+            // Navigate back to face scan page
             context.pop();
 
-            // Show success message
+            // Show success message and navigate to results
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
-                content: Text('Image captured! Starting face analysis...'),
+                content: Text('Image captured and analyzed successfully!'),
                 backgroundColor: AppColors.success,
                 duration: Duration(seconds: 2),
               ),
             );
+
+            // Navigate to results page (same as gallery upload)
+            _showAnalysisResults(context, faceScanProvider);
           } else {
             // Show error message
             ScaffoldMessenger.of(context).showSnackBar(
@@ -388,5 +403,40 @@ class _CameraScreenState extends State<CameraScreen>
         ),
       ),
     );
+  }
+
+  /// Show analysis results (same as face_scan_page.dart)
+  void _showAnalysisResults(BuildContext context, FaceScanProvider provider) {
+    final analysisData = provider.analysisData;
+    final annotatedImagePath = provider.annotatedImagePath;
+    final reportImagePath = provider.reportImagePath;
+
+    if (analysisData != null) {
+      // Navigate to dedicated results page
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => AnalysisResultsPage(
+            analysisData: analysisData,
+            annotatedImagePath: annotatedImagePath,
+            reportImagePath: reportImagePath,
+          ),
+        ),
+      );
+    } else {
+      // Show error dialog if no analysis data
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Analysis Error'),
+          content: const Text('No analysis data available. Please try again.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+    }
   }
 }
