@@ -2,16 +2,22 @@ import 'package:flutter/material.dart';
 import 'app_colors.dart';
 import '../constants/app_constants.dart';
 
-/// Application theme configuration
+/// Application theme configuration inspired by Bagua (Eight Trigrams) philosophy
+/// Implements traditional Chinese Five Elements color harmony
 class AppTheme {
-  /// Light theme
+  /// Light theme - Yang aspect of Bagua
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
       colorScheme: ColorScheme.fromSeed(
-        seedColor: AppColors.primary,
+        seedColor: AppColors.primary, // Traditional Chinese Gold
         brightness: Brightness.light,
+        primary: AppColors.primary,
+        secondary: AppColors.secondary,
+        error: AppColors.error,
+        surface: AppColors.surface,
+        background: AppColors.background,
       ),
       
       // App Bar Theme
@@ -28,16 +34,17 @@ class AppTheme {
         ),
       ),
 
-      // Elevated Button Theme
+      // Elevated Button Theme - Gold (Earth Element)
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primary,
-          foregroundColor: Colors.white,
+          backgroundColor: AppColors.primary, // Traditional Chinese Gold
+          foregroundColor: AppColors.textPrimary, // Sophisticated Black
           minimumSize: const Size(double.infinity, AppConstants.buttonHeight),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppConstants.borderRadius),
           ),
-          elevation: 2,
+          elevation: 3, // Slightly elevated for imperial feel
+          shadowColor: AppColors.primary.withValues(alpha: 0.3),
           textStyle: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
@@ -45,15 +52,16 @@ class AppTheme {
         ),
       ),
 
-      // Outlined Button Theme
+      // Outlined Button Theme - Gold Border (Earth Element)
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          foregroundColor: AppColors.primary,
+          foregroundColor: AppColors.primary, // Gold text
+          backgroundColor: Colors.transparent,
           minimumSize: const Size(double.infinity, AppConstants.buttonHeight),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppConstants.borderRadius),
           ),
-          side: const BorderSide(color: AppColors.primary, width: 1.5),
+          side: const BorderSide(color: AppColors.primary, width: 2), // Stronger gold border
           textStyle: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,

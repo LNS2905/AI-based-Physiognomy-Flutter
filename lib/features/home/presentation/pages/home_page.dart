@@ -355,7 +355,7 @@ class HomePage extends StatelessWidget {
               ),
               TextButton(
                 onPressed: () {
-                  // Navigate to news page
+                  context.push('/news');
                 },
                 child: Text(
                   'See All',
@@ -409,9 +409,18 @@ class HomePage extends StatelessWidget {
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            // Navigate to news detail page
+            // For demo, we'll use the first article ID
+            context.push('/news/1');
+          },
+          borderRadius: BorderRadius.circular(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
           // News image placeholder
           Container(
             height: isTablet ? 100 : 80,
@@ -499,7 +508,9 @@ class HomePage extends StatelessWidget {
               ),
             ),
           ),
-        ],
+            ],
+          ),
+        ),
       ),
     );
   }

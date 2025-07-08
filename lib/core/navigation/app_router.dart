@@ -10,6 +10,8 @@ import '../../features/survey/presentation/pages/survey_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/face_scan/presentation/pages/face_scan_page.dart';
 import '../../features/face_scan/presentation/pages/camera_screen.dart';
+import '../../features/news/presentation/pages/news_detail_page.dart';
+import '../../features/news/presentation/pages/news_list_page.dart';
 import '../../features/face_scan/presentation/pages/user_guide_page.dart';
 import '../../features/ai_conversation/presentation/pages/ai_conversation_page.dart';
 
@@ -119,6 +121,23 @@ class AppRouter {
         builder: (context, state) {
           final conversationId = state.uri.queryParameters['id'];
           return AIConversationPage(conversationId: conversationId);
+        },
+      ),
+
+      // News List Route
+      GoRoute(
+        path: '/news',
+        name: 'news-list',
+        builder: (context, state) => const NewsListPage(),
+      ),
+
+      // News Detail Route
+      GoRoute(
+        path: '/news/:articleId',
+        name: 'news-detail',
+        builder: (context, state) {
+          final articleId = state.pathParameters['articleId'] ?? '1';
+          return NewsDetailPage(articleId: articleId);
         },
       ),
 

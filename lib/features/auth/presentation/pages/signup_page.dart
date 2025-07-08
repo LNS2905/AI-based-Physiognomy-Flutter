@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/validators.dart';
+import '../../../../core/widgets/bagua_logo.dart';
 
 /// Sign Up page that matches the Figma design
 class SignUpPage extends StatefulWidget {
@@ -156,36 +157,9 @@ class _SignUpPageState extends State<SignUpPage> {
   }
 
   Widget _buildLogoSection() {
-    return Column(
-      children: [
-        // Logo icon
-        Container(
-          width: 56,
-          height: 56,
-          decoration: BoxDecoration(
-            border: Border.all(color: const Color(0xFF999999), width: 2),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: const Icon(
-            Icons.face,
-            color: Color(0xFF999999),
-            size: 32,
-          ),
-        ),
-        const SizedBox(height: 8),
-        
-        // LOGO text
-        const Text(
-          'LOGO',
-          style: TextStyle(
-            fontFamily: 'Arial',
-            fontWeight: FontWeight.w400,
-            fontSize: 14,
-            color: Color(0xFF999999),
-            height: 1.15,
-          ),
-        ),
-      ],
+    return const BaguaLogo(
+      size: 56,
+      showText: true,
     );
   }
 

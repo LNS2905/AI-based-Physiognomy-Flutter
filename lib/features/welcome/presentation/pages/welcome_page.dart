@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/bagua_logo.dart';
 
 /// Welcome page that matches the Figma design
 class WelcomePage extends StatelessWidget {
@@ -42,19 +43,9 @@ class WelcomePage extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(32, 24, 32, 0),
       child: Row(
         children: [
-          // Logo icon
-          Container(
-            width: 38,
-            height: 38,
-            decoration: BoxDecoration(
-              border: Border.all(color: const Color(0xFF999999), width: 2),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: const Icon(
-              Icons.face,
-              color: Color(0xFF999999),
-              size: 24,
-            ),
+          // Bagua Logo icon
+          const BaguaIcon(
+            size: 38,
           ),
           const SizedBox(width: 12),
           
