@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -44,29 +43,29 @@ class AnalysisResultsPage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Analysis Data Section (moved to top)
+              _buildAnalysisDataCard(),
+
+              const SizedBox(height: 24),
+
+              // Images Section
+              if (annotatedImagePath != null || reportImagePath != null) ...[
+                _buildSectionTitle('Analysis Images'),
+                const SizedBox(height: 16),
+              ],
+
               // Annotated Image Section
               if (annotatedImagePath != null) ...[
-                _buildSectionTitle('Annotated Image'),
-                const SizedBox(height: 12),
-                _buildImageCard(annotatedImagePath!),
-                const SizedBox(height: 24),
+                _buildImageSection('Annotated Analysis', annotatedImagePath!, Icons.auto_fix_high),
+                const SizedBox(height: 16),
               ],
 
               // Report Image Section
               if (reportImagePath != null) ...[
-                _buildSectionTitle('Analysis Report'),
-                const SizedBox(height: 12),
-                _buildImageCard(reportImagePath!),
+                _buildImageSection('Detailed Report', reportImagePath!, Icons.assessment),
                 const SizedBox(height: 24),
               ],
 
-              // Analysis Data Section
-              _buildSectionTitle('Analysis Data'),
-              const SizedBox(height: 12),
-              _buildAnalysisDataCard(),
-              
-              const SizedBox(height: 32),
-              
               // Action Buttons
               _buildActionButtons(context),
             ],
@@ -87,7 +86,35 @@ class AnalysisResultsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildImageCard(String imagePath) {
+  Widget _buildImageSection(String title, String imageUrl, IconData icon) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(
+              icon,
+              size: 20,
+              color: AppColors.primary,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimary,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        _buildImageCard(imageUrl),
+      ],
+    );
+  }
+
+  Widget _buildImageCard(String imageUrl) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -103,45 +130,167 @@ class AnalysisResultsPage extends StatelessWidget {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16),
-        child: Image.file(
-          File(imagePath),
-          fit: BoxFit.contain,
-          errorBuilder: (context, error, stackTrace) {
-            AppLogger.error('Failed to load image: $imagePath', error);
-            return Container(
-              height: 200,
-              color: AppColors.surfaceVariant,
-              child: const Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.error_outline,
-                      size: 48,
+        child: _buildImageWidget(imageUrl),
+      ),
+    );
+  }
+
+  Widget _buildImageWidget(String imageUrl) {
+    return Container(
+      constraints: const BoxConstraints(
+        minHeight: 200,
+        maxHeight: 400,
+      ),
+      child: Image.network(
+        imageUrl,
+        fit: BoxFit.contain,
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return Container(
+            height: 200,
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(
+                    value: loadingProgress.expectedTotalBytes != null
+                        ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                        : null,
+                    color: AppColors.primary,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Loading image...',
+                    style: TextStyle(
                       color: AppColors.textSecondary,
+                      fontSize: 14,
                     ),
-                    SizedBox(height: 8),
-                    Text(
-                      'Failed to load image',
-                      style: TextStyle(
-                        color: AppColors.textSecondary,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            );
-          },
-        ),
+            ),
+          );
+        },
+        errorBuilder: (context, error, stackTrace) {
+          AppLogger.error('Failed to load image from URL: $imageUrl', error);
+          return Container(
+            height: 200,
+            color: AppColors.surfaceVariant,
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.cloud_off_outlined,
+                    size: 48,
+                    color: AppColors.textSecondary,
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Unable to load image',
+                    style: TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Please check your internet connection',
+                    style: TextStyle(
+                      color: AppColors.textSecondary.withOpacity(0.7),
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
       ),
     );
   }
 
   Widget _buildAnalysisDataCard() {
+    return Column(
+      children: [
+        // Harmony Score Card
+        if (analysisData['total_harmony_score'] != null) ...[
+          _buildHarmonyScoreCard(),
+          const SizedBox(height: 16),
+        ],
+
+        // Analysis Result Card
+        if (analysisData['result'] != null) ...[
+          _buildAnalysisResultCard(),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildHarmonyScoreCard() {
+    final score = analysisData['total_harmony_score'] as double? ?? 0.0;
+    final scoreColor = score >= 70 ? Colors.green : score >= 50 ? Colors.orange : Colors.red;
+
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [scoreColor.withOpacity(0.1), scoreColor.withOpacity(0.05)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: scoreColor.withOpacity(0.3)),
+      ),
+      child: Column(
+        children: [
+          Icon(
+            Icons.analytics_outlined,
+            size: 32,
+            color: scoreColor,
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'Harmony Score',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '${score.toStringAsFixed(1)}%',
+            style: TextStyle(
+              fontSize: 32,
+              fontWeight: FontWeight.bold,
+              color: scoreColor,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            _getScoreDescription(score),
+            style: TextStyle(
+              fontSize: 14,
+              color: AppColors.textSecondary,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+
+
+  Widget _buildAnalysisResultCard() {
+    final result = analysisData['result'] as String? ?? 'No analysis available';
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -156,19 +305,44 @@ class AnalysisResultsPage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Analysis Summary',
+          Row(
+            children: [
+              Icon(
+                Icons.psychology_outlined,
+                size: 24,
+                color: AppColors.primary,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'Physiognomy Analysis',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Text(
+            result,
             style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
+              fontSize: 14,
+              height: 1.6,
               color: AppColors.textPrimary,
             ),
           ),
-          const SizedBox(height: 12),
-          ...analysisData.entries.map((entry) => _buildDataRow(entry.key, entry.value)),
         ],
       ),
     );
+  }
+
+  String _getScoreDescription(double score) {
+    if (score >= 80) return 'Excellent facial harmony';
+    if (score >= 70) return 'Very good facial proportions';
+    if (score >= 60) return 'Good facial balance';
+    if (score >= 50) return 'Average facial harmony';
+    return 'Room for improvement in facial proportions';
   }
 
   Widget _buildDataRow(String key, dynamic value) {

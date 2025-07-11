@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:camera/camera.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
@@ -6,6 +7,8 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/services/camera_service.dart';
 import '../../../../core/utils/error_handler.dart';
 import '../../../../core/utils/logger.dart';
+import '../../../../core/network/api_result.dart';
+import '../../data/models/cloudinary_analysis_response_model.dart';
 import '../providers/face_scan_provider.dart';
 import 'analysis_results_page.dart';
 
@@ -20,6 +23,7 @@ class CameraScreen extends StatefulWidget {
 class _CameraScreenState extends State<CameraScreen>
     with WidgetsBindingObserver {
   final CameraService _cameraService = CameraService.instance;
+  bool _isProcessing = false; // Prevent multiple operations
   bool _isInitializing = true;
   bool _isCapturing = false;
   String? _errorMessage;
@@ -28,6 +32,12 @@ class _CameraScreenState extends State<CameraScreen>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+
+    // Lock orientation to portrait to prevent orientation tracking
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+    ]);
+
     _initializeCamera();
   }
 
@@ -35,6 +45,15 @@ class _CameraScreenState extends State<CameraScreen>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _cameraService.stopCamera();
+
+    // Restore orientation settings
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
+
     super.dispose();
   }
 
@@ -77,66 +96,72 @@ class _CameraScreenState extends State<CameraScreen>
     }
   }
 
+  /// SIMPLE: Chụp ảnh và gửi API
   Future<void> _captureImage() async {
     if (_isCapturing) return;
 
+    setState(() {
+      _isCapturing = true;
+    });
+
     try {
-      setState(() {
-        _isCapturing = true;
-      });
-
+      // 1. Chụp ảnh
       final imagePath = await _cameraService.captureImage();
-      
-      if (mounted) {
-        // Get the face scan provider
-        final faceScanProvider = context.read<FaceScanProvider>();
+      AppLogger.info('✅ Image captured: $imagePath');
 
-        // Set the captured image path
-        faceScanProvider.setSelectedImagePath(imagePath);
+      if (!mounted) return;
 
-        // Start face analysis using the same method as gallery upload
-        final result = await faceScanProvider.executeApiOperation(
-          () => faceScanProvider.repository.analyzeFaceDirectly(imagePath),
-          operationName: 'analyzeFaceDirectly',
-        );
+      // 2. Gọi API
+      final provider = context.read<FaceScanProvider>();
+      final result = await provider.repository.analyzeFaceFromCloudinary(imagePath);
 
-        final success = result != null;
+      if (!mounted) return;
 
-        if (mounted) {
-          if (success) {
-            // Store analysis result (same as gallery upload)
-            faceScanProvider.setCurrentAnalysisResult(result!);
+      // 3. Xử lý kết quả
+      switch (result) {
+        case Success<CloudinaryAnalysisResponseModel>():
+          AppLogger.info('✅ Analysis success, returning result to face-scanning page');
 
-            // Navigate back to face scan page
-            context.pop();
+          // QUAN TRỌNG: Chỉ trả kết quả về, KHÔNG update provider state ở đây
+          // để tránh conflict với navigation
+          context.pop(result.data);
+          break;
 
-            // Show success message and navigate to results
+        case Error<CloudinaryAnalysisResponseModel>():
+          AppLogger.error('❌ Analysis failed: ${result.failure.message}');
+          if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Image captured and analyzed successfully!'),
-                backgroundColor: AppColors.success,
-                duration: Duration(seconds: 2),
-              ),
-            );
-
-            // Navigate to results page (same as gallery upload)
-            _showAnalysisResults(context, faceScanProvider);
-          } else {
-            // Show error message
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Failed to start face analysis. Please try again.'),
+              SnackBar(
+                content: Text('Analysis failed: ${result.failure.message}'),
                 backgroundColor: AppColors.error,
-                duration: Duration(seconds: 3),
               ),
             );
           }
-        }
+          // Không pop ngay lập tức, để user có thể thấy thông báo lỗi và thử lại
+          break;
+
+        default:
+          AppLogger.error('❌ Unknown result type');
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Unknown error occurred'),
+                backgroundColor: AppColors.error,
+              ),
+            );
+          }
+          // Không pop ngay lập tức, để user có thể thấy thông báo lỗi và thử lại
       }
     } catch (e) {
-      AppLogger.error('Failed to capture image', e);
+      AppLogger.error('❌ Capture error: $e');
       if (mounted) {
-        ErrorHandler.handleError(context, e, showSnackBar: true);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: ${e.toString()}'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+        // Không pop ngay lập tức, để user có thể thấy thông báo lỗi và thử lại
       }
     } finally {
       if (mounted) {
@@ -277,10 +302,10 @@ class _CameraScreenState extends State<CameraScreen>
               borderRadius: BorderRadius.circular(20),
             ),
             child: IconButton(
-              onPressed: () => context.pop(),
-              icon: const Icon(
+              onPressed: _isCapturing ? null : () => context.pop(),
+              icon: Icon(
                 Icons.arrow_back,
-                color: Colors.white,
+                color: _isCapturing ? Colors.grey : Colors.white,
               ),
             ),
           ),
@@ -350,7 +375,7 @@ class _CameraScreenState extends State<CameraScreen>
           
           // Capture Button
           GestureDetector(
-            onTap: _captureImage,
+            onTap: _isCapturing ? null : _captureImage,
             child: Container(
               width: 80,
               height: 80,
@@ -405,38 +430,5 @@ class _CameraScreenState extends State<CameraScreen>
     );
   }
 
-  /// Show analysis results (same as face_scan_page.dart)
-  void _showAnalysisResults(BuildContext context, FaceScanProvider provider) {
-    final analysisData = provider.analysisData;
-    final annotatedImagePath = provider.annotatedImagePath;
-    final reportImagePath = provider.reportImagePath;
 
-    if (analysisData != null) {
-      // Navigate to dedicated results page
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) => AnalysisResultsPage(
-            analysisData: analysisData,
-            annotatedImagePath: annotatedImagePath,
-            reportImagePath: reportImagePath,
-          ),
-        ),
-      );
-    } else {
-      // Show error dialog if no analysis data
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Analysis Error'),
-          content: const Text('No analysis data available. Please try again.'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('OK'),
-            ),
-          ],
-        ),
-      );
-    }
-  }
 }

@@ -237,9 +237,13 @@ class HttpService {
 
   /// Build URI with query parameters
   Uri _buildUri(String endpoint, Map<String, dynamic>? queryParameters) {
-    final path = '${AppConstants.apiVersion}/$endpoint';
+    // Don't add API version for full endpoints that already include version or are external
+    final path = endpoint.startsWith('http') || endpoint.contains('analyze-face-from-cloudinary')
+        ? endpoint.replaceFirst(_baseUrl, '') // Remove base URL if it's included
+        : '${AppConstants.apiVersion}/$endpoint';
+
     return Uri.parse(_baseUrl).replace(
-      path: path,
+      path: path.startsWith('/') ? path : '/$path',
       queryParameters: queryParameters?.map(
         (key, value) => MapEntry(key, value.toString()),
       ),

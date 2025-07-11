@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/error_handler.dart';
 import '../../../../core/utils/logger.dart';
+import '../../data/models/cloudinary_analysis_response_model.dart';
 import '../providers/face_scan_provider.dart';
 import '../widgets/face_analysis_demo.dart';
 import '../widgets/face_scan_tab_navigation.dart';
@@ -235,12 +236,14 @@ class _FaceScanPageState extends State<FaceScanPage> {
                 size: 20,
               ),
               const SizedBox(width: 8),
-              const Text(
-                'Discover your personality',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
+              Flexible(
+                child: Text(
+                  'Discover your personality',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimary,
+                  ),
                 ),
               ),
             ],
@@ -583,10 +586,32 @@ class _FaceScanPageState extends State<FaceScanPage> {
         }
       }
 
-      // Navigate to camera screen
-      // The camera plugin will handle permissions automatically
+      // Navigate to camera screen and wait for result
       if (mounted) {
-        context.push('/camera');
+        final result = await context.push<CloudinaryAnalysisResponseModel>('/camera');
+
+        // Check if we got a successful result
+        if (result != null && mounted) {
+          // Update provider state with the result
+          provider.setCurrentCloudinaryResult(result);
+          provider.setSelectedImagePath(''); // Clear selected path since we're using Cloudinary result
+
+          // Show success message
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Photo captured and analyzed successfully!'),
+              backgroundColor: AppColors.success,
+              duration: Duration(seconds: 2),
+            ),
+          );
+
+          // Show analysis results
+          _showAnalysisResults(provider);
+        } else if (mounted) {
+          // Only show error if result is explicitly null (not just user backing out)
+          // We can check if there was actually an error by checking provider state
+          AppLogger.info('Camera returned without result - user may have cancelled');
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -640,36 +665,62 @@ class _FaceScanPageState extends State<FaceScanPage> {
 
   /// Show analysis results
   void _showAnalysisResults(FaceScanProvider provider) {
-    final analysisData = provider.analysisData;
-    final annotatedImagePath = provider.annotatedImagePath;
-    final reportImagePath = provider.reportImagePath;
+    // Check for Cloudinary results first (new format)
+    final cloudinaryResult = provider.currentCloudinaryResult;
 
-    if (analysisData != null) {
-      // Navigate to dedicated results page
+    if (cloudinaryResult != null) {
+      // Use Cloudinary analysis result
+      final analysisData = {
+        'total_harmony_score': cloudinaryResult.totalHarmonyScore,
+        'result': cloudinaryResult.analysis?.result ?? 'No analysis available',
+        'features': cloudinaryResult.analysis?.features ?? {},
+        'annotated_image_url': cloudinaryResult.annotatedImageUrl,
+        'report_image_url': cloudinaryResult.reportImageUrl,
+      };
+
+      // Navigate to dedicated results page with Cloudinary data
       Navigator.of(context).push(
         MaterialPageRoute(
           builder: (context) => AnalysisResultsPage(
             analysisData: analysisData,
-            annotatedImagePath: annotatedImagePath,
-            reportImagePath: reportImagePath,
+            annotatedImagePath: cloudinaryResult.annotatedImageUrl, // Use URL instead of path
+            reportImagePath: cloudinaryResult.reportImageUrl, // Use URL instead of path
           ),
         ),
       );
     } else {
-      // Show error dialog if no analysis data
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Analysis Error'),
-          content: const Text('No analysis data available. Please try again.'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('OK'),
+      // Fallback to legacy analysis data
+      final analysisData = provider.analysisData;
+      final annotatedImagePath = provider.annotatedImagePath;
+      final reportImagePath = provider.reportImagePath;
+
+      if (analysisData != null) {
+        // Navigate to dedicated results page
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => AnalysisResultsPage(
+              analysisData: analysisData,
+              annotatedImagePath: annotatedImagePath,
+              reportImagePath: reportImagePath,
             ),
-          ],
-        ),
-      );
+          ),
+        );
+      } else {
+        // Show error dialog if no analysis data
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Analysis Error'),
+            content: const Text('No analysis data available. Please try again.'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('OK'),
+              ),
+            ],
+          ),
+        );
+      }
     }
   }
 }

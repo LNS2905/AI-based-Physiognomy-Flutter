@@ -5,6 +5,7 @@ import '../../../../core/services/camera_service.dart';
 import '../../../../core/services/image_picker_service.dart';
 import '../../data/models/face_scan_request_model.dart';
 import '../../data/models/face_scan_response_model.dart';
+import '../../data/models/cloudinary_analysis_response_model.dart';
 import '../../data/repositories/face_scan_repository.dart';
 
 /// Provider for face scanning functionality
@@ -63,10 +64,17 @@ class FaceScanProvider extends BaseProvider {
     }
   }
 
-  /// Set current analysis result
+  /// Set current analysis result (legacy)
   void setCurrentAnalysisResult(Map<String, dynamic> result) {
     _currentAnalysisResult = result;
     AppLogger.logStateChange(runtimeType.toString(), 'setCurrentAnalysisResult', 'Analysis result set');
+    notifyListeners();
+  }
+
+  /// Set current Cloudinary analysis result
+  void setCurrentCloudinaryResult(CloudinaryAnalysisResponseModel result) {
+    _currentCloudinaryResult = result;
+    AppLogger.logStateChange(runtimeType.toString(), 'setCurrentCloudinaryResult', 'Cloudinary analysis result set');
     notifyListeners();
   }
 
@@ -281,19 +289,19 @@ class FaceScanProvider extends BaseProvider {
       AppLogger.info('Image selected: $imagePath');
       setSelectedImagePath(imagePath);
 
-      // Start face analysis directly
+      // Start face analysis using Cloudinary endpoint
       final result = await executeApiOperation(
-        () => _repository.analyzeFaceDirectly(imagePath),
-        operationName: 'analyzeFaceDirectly',
+        () => _repository.analyzeFaceFromCloudinary(imagePath),
+        operationName: 'analyzeFaceFromCloudinary',
       );
 
       if (result != null) {
-        // Store analysis result
-        _currentAnalysisResult = result;
-        AppLogger.info('Face analysis completed successfully');
+        // Store Cloudinary analysis result
+        _currentCloudinaryResult = result;
+        AppLogger.info('Cloudinary face analysis completed successfully');
         return true;
       } else {
-        AppLogger.error('Face analysis failed');
+        AppLogger.error('Cloudinary face analysis failed');
         return false;
       }
     } catch (e) {
@@ -304,19 +312,38 @@ class FaceScanProvider extends BaseProvider {
     }
   }
 
-  // Store analysis result
+  // Store analysis results
   Map<String, dynamic>? _currentAnalysisResult;
+  CloudinaryAnalysisResponseModel? _currentCloudinaryResult;
 
-  /// Get current analysis result
+  /// Get current analysis result (legacy)
   Map<String, dynamic>? get currentAnalysisResult => _currentAnalysisResult;
 
-  /// Get annotated image path from current analysis
+  /// Get current Cloudinary analysis result
+  CloudinaryAnalysisResponseModel? get currentCloudinaryResult => _currentCloudinaryResult;
+
+  /// Get annotated image URL from Cloudinary analysis
+  String? get annotatedImageUrl => _currentCloudinaryResult?.annotatedImageUrl;
+
+  /// Get report image URL from Cloudinary analysis
+  String? get reportImageUrl => _currentCloudinaryResult?.reportImageUrl;
+
+  /// Get total harmony score from Cloudinary analysis
+  double? get totalHarmonyScore => _currentCloudinaryResult?.totalHarmonyScore;
+
+  /// Get analysis data from Cloudinary analysis
+  CloudinaryAnalysisDataModel? get cloudinaryAnalysisData => _currentCloudinaryResult?.analysis;
+
+  /// Get physiognomy result text
+  String? get physiognomyResult => _currentCloudinaryResult?.analysis?.result;
+
+  /// Get legacy annotated image path (for backward compatibility)
   String? get annotatedImagePath => _currentAnalysisResult?['annotated_image_path'];
 
-  /// Get report image path from current analysis
+  /// Get legacy report image path (for backward compatibility)
   String? get reportImagePath => _currentAnalysisResult?['report_image_path'];
 
-  /// Get analysis data from current analysis
+  /// Get legacy analysis data (for backward compatibility)
   Map<String, dynamic>? get analysisData => _currentAnalysisResult?['analysis_data'];
 
   /// Clear current analysis result

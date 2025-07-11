@@ -5,13 +5,19 @@ class AppConstants {
   static const String appVersion = '1.0.0';
   
   // API Configuration
-  static const String baseUrl = 'https://api.example.com'; // Replace with actual API URL
+  static const String baseUrl = 'https://inspired-bear-emerging.ngrok-free.app';
   static const String apiVersion = 'v1';
 
   // Face Analysis API Configuration
-  static const String faceAnalysisApiUrl = 'https://202f-34-16-157-125.ngrok-free.app/analyze-face/'; // Update this with your current ngrok URL
-  static const Duration requestTimeout = Duration(seconds: 30);
+  static const String faceAnalysisApiUrl = 'analyze-face-from-cloudinary/';
+  static const Duration requestTimeout = Duration(seconds: 120); // Increased for Cloudinary processing
   static const Duration connectTimeout = Duration(seconds: 15);
+
+  // Cloudinary Configuration
+  static const String cloudinaryCloudName = 'dd0wymyqj';
+  static const String cloudinaryApiKey = '389718786139835';
+  static const String cloudinaryApiSecret = 'aS_7wWncQjOLpKRKnHEd0_dr07M';
+  static const String cloudinaryUploadFolder = 'physiognomy_analysis';
   
   // Storage Keys
   static const String accessTokenKey = 'access_token';

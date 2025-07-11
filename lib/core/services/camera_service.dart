@@ -1,9 +1,11 @@
 import 'dart:io';
 import 'package:camera/camera.dart';
+import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import '../errors/exceptions.dart';
 import '../utils/logger.dart';
+import 'image_processing_service.dart';
 
 /// Service for handling camera operations following the app's architecture patterns
 class CameraService {
@@ -15,6 +17,7 @@ class CameraService {
   List<CameraDescription>? _cameras;
   CameraController? _controller;
   bool _isInitialized = false;
+  final ImageProcessingService _imageProcessingService = ImageProcessingService();
 
   /// Get available cameras
   List<CameraDescription>? get cameras => _cameras;
@@ -107,7 +110,7 @@ class CameraService {
       // Dispose existing controller if any
       await stopCamera();
 
-      // Create new controller
+      // Create new controller with minimal configuration
       _controller = CameraController(
         selectedCamera,
         resolution,
@@ -117,8 +120,11 @@ class CameraService {
 
       // Initialize controller
       await _controller!.initialize();
-      
-      AppLogger.info('Camera started successfully');
+
+      // Lock capture orientation to portrait to prevent orientation tracking
+      await _controller!.lockCaptureOrientation(DeviceOrientation.portraitUp);
+
+      AppLogger.info('Camera started successfully with locked orientation');
     } catch (e) {
       AppLogger.error('Failed to start camera', e);
       await stopCamera();
@@ -167,11 +173,11 @@ class CameraService {
 
       // Capture image
       final XFile image = await _controller!.takePicture();
-      
+
       // Copy to our desired location
       final File capturedFile = File(image.path);
       final File savedFile = await capturedFile.copy(filePath);
-      
+
       // Clean up temporary file
       try {
         await capturedFile.delete();
@@ -180,14 +186,29 @@ class CameraService {
       }
 
       AppLogger.info('Image captured successfully: $filePath');
-      return savedFile.path;
+
+      // Process image to fix orientation and optimize
+      final String processedPath = await _imageProcessingService.processImage(savedFile.path);
+
+      // If processing created a new file, clean up the original
+      if (processedPath != savedFile.path) {
+        try {
+          await savedFile.delete();
+          AppLogger.info('Cleaned up original unprocessed image');
+        } catch (e) {
+          AppLogger.warning('Failed to delete original image', e);
+        }
+      }
+
+      AppLogger.info('Image processed and ready: $processedPath');
+      return processedPath;
     } catch (e) {
       AppLogger.error('Failed to capture image', e);
-      
+
       if (e is ValidationException) {
         rethrow;
       }
-      
+
       throw ValidationException(
         message: 'Failed to capture image: ${e.toString()}',
         code: 'CAPTURE_ERROR',

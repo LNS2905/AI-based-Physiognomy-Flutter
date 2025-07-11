@@ -13,15 +13,22 @@ import '../../../../core/utils/logger.dart';
 import '../../../../core/errors/exceptions.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/config/api_config.dart';
+import '../../../../core/services/cloudinary_service.dart';
 import '../models/face_scan_request_model.dart';
 import '../models/face_scan_response_model.dart';
+import '../models/cloudinary_analysis_request_model.dart';
+import '../models/cloudinary_analysis_response_model.dart';
 
 /// Repository for face scanning operations
 class FaceScanRepository {
   final HttpService _httpService;
+  final CloudinaryService _cloudinaryService;
 
-  FaceScanRepository({HttpService? httpService})
-      : _httpService = httpService ?? HttpService();
+  FaceScanRepository({
+    HttpService? httpService,
+    CloudinaryService? cloudinaryService,
+  })  : _httpService = httpService ?? HttpService(),
+        _cloudinaryService = cloudinaryService ?? CloudinaryService();
 
   /// Start face analysis
   Future<ApiResult<FaceScanResponseModel>> startFaceAnalysis(
@@ -310,6 +317,73 @@ class FaceScanRepository {
       default:
         // Default to JPEG for unknown image types
         return MediaType('image', 'jpeg');
+    }
+  }
+
+  /// Analyze face using Cloudinary endpoint
+  Future<ApiResult<CloudinaryAnalysisResponseModel>> analyzeFaceFromCloudinary(
+    String imagePath, {
+    String? userId,
+  }) async {
+    try {
+      AppLogger.info('Starting face analysis via Cloudinary endpoint');
+
+      // Step 1: Upload image to Cloudinary and get signed URL
+      final uploadResult = await _cloudinaryService.uploadImageAndGetSignedUrl(
+        imagePath,
+        userId: userId ?? 'anonymous_user',
+      );
+
+      if (!uploadResult.success) {
+        throw CloudinaryException(
+          message: uploadResult.error ?? 'Failed to upload image',
+          code: 'UPLOAD_FAILED',
+        );
+      }
+
+      AppLogger.info('Image uploaded to Cloudinary: ${uploadResult.publicId}');
+
+      // Step 2: Prepare request for analysis API
+      final request = CloudinaryAnalysisRequestModel(
+        signedUrl: uploadResult.signedUrl,
+        userId: userId ?? 'anonymous_user',
+        timestamp: DateTime.now().toIso8601String(),
+        originalFolderPath: uploadResult.folderPath,
+      );
+
+      AppLogger.info('Sending analysis request to API');
+
+      // Step 3: Call the analysis API
+      final response = await _httpService.post(
+        AppConstants.faceAnalysisApiUrl,
+        body: request.toJson(),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      );
+
+      // Step 4: Parse response
+      final analysisResponse = CloudinaryAnalysisResponseModel.fromJson(response);
+      AppLogger.info('Face analysis completed successfully');
+
+      return Success(analysisResponse);
+    } on CloudinaryException catch (e) {
+      AppLogger.error('Cloudinary error in analyzeFaceFromCloudinary', e);
+      return Error(
+        NetworkFailure(
+          message: e.message,
+          code: e.code,
+        ),
+      );
+    } catch (e) {
+      AppLogger.error('Exception in analyzeFaceFromCloudinary', e);
+      return Error(
+        UnknownFailure(
+          message: 'Failed to analyze face: ${e.toString()}',
+          code: 'CLOUDINARY_ANALYSIS_ERROR',
+        ),
+      );
     }
   }
 }
