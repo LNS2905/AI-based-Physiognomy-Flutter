@@ -1,7 +1,7 @@
 /// Application-wide constants
 class AppConstants {
   // App Information
-  static const String appName = 'AI Physiognomy App';
+  static const String appName = 'Ứng dụng Tướng học AI';
   static const String appVersion = '1.0.0';
   
   // API Configuration
@@ -43,10 +43,10 @@ class AppConstants {
   static const String profileRoute = '/profile';
   
   // Error Messages
-  static const String networkErrorMessage = 'Network connection error. Please check your internet connection.';
-  static const String serverErrorMessage = 'Server error. Please try again later.';
-  static const String unknownErrorMessage = 'An unexpected error occurred. Please try again.';
-  static const String timeoutErrorMessage = 'Request timeout. Please try again.';
+  static const String networkErrorMessage = 'Lỗi kết nối mạng. Vui lòng kiểm tra kết nối internet của bạn.';
+  static const String serverErrorMessage = 'Lỗi máy chủ. Vui lòng thử lại sau.';
+  static const String unknownErrorMessage = 'Đã xảy ra lỗi không mong muốn. Vui lòng thử lại.';
+  static const String timeoutErrorMessage = 'Hết thời gian chờ. Vui lòng thử lại.';
   
   // Validation
   static const int minPasswordLength = 8;

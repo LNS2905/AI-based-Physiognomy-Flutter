@@ -5,53 +5,53 @@ class Validators {
   /// Validate email address
   static String? validateEmail(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Email is required';
+      return 'Email là bắt buộc';
     }
-    
+
     final emailRegex = RegExp(AppConstants.emailPattern);
     if (!emailRegex.hasMatch(value)) {
-      return 'Please enter a valid email address';
+      return 'Vui lòng nhập địa chỉ email hợp lệ';
     }
-    
+
     return null;
   }
 
   /// Validate password
   static String? validatePassword(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Password is required';
+      return 'Mật khẩu là bắt buộc';
     }
-    
+
     if (value.length < AppConstants.minPasswordLength) {
-      return 'Password must be at least ${AppConstants.minPasswordLength} characters';
+      return 'Mật khẩu phải có ít nhất ${AppConstants.minPasswordLength} ký tự';
     }
-    
+
     if (value.length > AppConstants.maxPasswordLength) {
-      return 'Password must be less than ${AppConstants.maxPasswordLength} characters';
+      return 'Mật khẩu phải có ít hơn ${AppConstants.maxPasswordLength} ký tự';
     }
-    
+
     // Check for at least one uppercase letter
     if (!value.contains(RegExp(r'[A-Z]'))) {
-      return 'Password must contain at least one uppercase letter';
+      return 'Mật khẩu phải chứa ít nhất một chữ cái viết hoa';
     }
-    
+
     // Check for at least one lowercase letter
     if (!value.contains(RegExp(r'[a-z]'))) {
-      return 'Password must contain at least one lowercase letter';
+      return 'Mật khẩu phải chứa ít nhất một chữ cái viết thường';
     }
-    
+
     // Check for at least one digit
     if (!value.contains(RegExp(r'[0-9]'))) {
-      return 'Password must contain at least one number';
+      return 'Mật khẩu phải chứa ít nhất một số';
     }
-    
+
     return null;
   }
 
   /// Validate required field
   static String? validateRequired(String? value, String fieldName) {
     if (value == null || value.trim().isEmpty) {
-      return '$fieldName is required';
+      return '$fieldName là bắt buộc';
     }
     return null;
   }
@@ -101,35 +101,35 @@ class Validators {
   /// Validate age
   static String? validateAge(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Age is required';
+      return 'Tuổi là bắt buộc';
     }
-    
+
     final age = int.tryParse(value);
     if (age == null) {
-      return 'Please enter a valid age';
+      return 'Vui lòng nhập tuổi hợp lệ';
     }
-    
+
     if (age < 13) {
-      return 'Age must be at least 13';
+      return 'Tuổi phải ít nhất 13';
     }
-    
+
     if (age > 120) {
-      return 'Please enter a valid age';
+      return 'Vui lòng nhập tuổi hợp lệ';
     }
-    
+
     return null;
   }
 
   /// Validate confirm password
   static String? validateConfirmPassword(String? value, String? password) {
     if (value == null || value.isEmpty) {
-      return 'Please confirm your password';
+      return 'Vui lòng xác nhận mật khẩu của bạn';
     }
-    
+
     if (value != password) {
-      return 'Passwords do not match';
+      return 'Mật khẩu không khớp';
     }
-    
+
     return null;
   }
 }

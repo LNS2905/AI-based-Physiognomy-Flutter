@@ -79,7 +79,7 @@ class MyApp extends StatelessWidget {
         // Add other providers here as needed
       ],
       child: MaterialApp.router(
-        title: 'AI Physiognomy App',
+        title: 'Ứng dụng Tướng học AI',
         debugShowCheckedModeBanner: false,
         
         // Theme configuration

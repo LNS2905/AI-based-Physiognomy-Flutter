@@ -139,7 +139,7 @@ class _TypingIndicatorState extends State<TypingIndicator>
           ),
           const SizedBox(height: 4),
           Text(
-            widget.customText ?? 'AI is typing...',
+            widget.customText ?? 'AI đang trả lời...',
             style: const TextStyle(
               fontSize: 10,
               fontWeight: FontWeight.w400,

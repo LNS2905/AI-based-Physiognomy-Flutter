@@ -52,7 +52,7 @@ class AuthRepository {
     } catch (e) {
       AppLogger.error('Login failed: Unknown error', e);
       return Error(UnknownFailure(
-        message: 'An unexpected error occurred during login',
+        message: 'Đã xảy ra lỗi không mong muốn trong quá trình đăng nhập',
         code: 'UNKNOWN_ERROR',
       ));
     }
@@ -101,7 +101,7 @@ class AuthRepository {
     } catch (e) {
       AppLogger.error('Registration failed: Unknown error', e);
       return Error(UnknownFailure(
-        message: 'An unexpected error occurred during registration',
+        message: 'Đã xảy ra lỗi không mong muốn trong quá trình đăng ký',
         code: 'UNKNOWN_ERROR',
       ));
     }
@@ -123,7 +123,7 @@ class AuthRepository {
       // Even if logout fails, clear local tokens
       await _clearAuthTokens();
       return Error(UnknownFailure(
-        message: 'Logout completed with errors',
+        message: 'Đăng xuất hoàn tất với lỗi',
         code: 'LOGOUT_ERROR',
       ));
     }

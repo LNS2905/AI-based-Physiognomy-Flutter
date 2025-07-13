@@ -132,7 +132,7 @@ class _CameraScreenState extends State<CameraScreen>
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('Analysis failed: ${result.failure.message}'),
+                content: Text('Phân tích thất bại: ${result.failure.message}'),
                 backgroundColor: AppColors.error,
               ),
             );
@@ -256,7 +256,7 @@ class _CameraScreenState extends State<CameraScreen>
             ),
             const SizedBox(height: 16),
             Text(
-              'Camera Error',
+              'Lỗi camera',
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 20,
@@ -265,7 +265,7 @@ class _CameraScreenState extends State<CameraScreen>
             ),
             const SizedBox(height: 8),
             Text(
-              _errorMessage ?? 'Unknown error occurred',
+              _errorMessage ?? 'Đã xảy ra lỗi không xác định',
               style: const TextStyle(
                 color: Colors.white70,
                 fontSize: 14,
@@ -279,7 +279,7 @@ class _CameraScreenState extends State<CameraScreen>
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
               ),
-              child: const Text('Retry'),
+              child: const Text('Thử lại'),
             ),
           ],
         ),
@@ -418,7 +418,7 @@ class _CameraScreenState extends State<CameraScreen>
             ),
             const SizedBox(height: 16),
             Text(
-              _isInitializing ? 'Initializing camera...' : 'Capturing image...',
+              _isInitializing ? 'Đang khởi tạo camera...' : 'Đang chụp ảnh...',
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 16,

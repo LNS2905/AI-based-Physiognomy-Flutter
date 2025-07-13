@@ -57,7 +57,7 @@ class ErrorHandler {
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(title ?? 'Error'),
+          title: Text(title ?? 'Lỗi'),
           content: Text(errorMessage),
           actions: [
             if (onRetry != null)
@@ -66,11 +66,11 @@ class ErrorHandler {
                   Navigator.of(context).pop();
                   onRetry();
                 },
-                child: const Text('Retry'),
+                child: const Text('Thử lại'),
               ),
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('OK'),
+              child: const Text('Đồng ý'),
             ),
           ],
         );
@@ -86,7 +86,7 @@ class ErrorHandler {
     await showErrorDialog(
       context,
       const NetworkException(message: AppConstants.networkErrorMessage),
-      title: 'Connection Error',
+      title: 'Lỗi kết nối',
       onRetry: onRetry,
     );
   }
@@ -99,7 +99,7 @@ class ErrorHandler {
     await showErrorDialog(
       context,
       ValidationException(message: message),
-      title: 'Validation Error',
+      title: 'Lỗi xác thực',
     );
   }
 
@@ -117,19 +117,19 @@ class ErrorHandler {
 
     // Handle common Flutter/Dart exceptions
     if (error is FormatException) {
-      return 'Invalid data format';
+      return 'Định dạng dữ liệu không hợp lệ';
     }
 
     if (error is TypeError) {
-      return 'Data type error occurred';
+      return 'Đã xảy ra lỗi kiểu dữ liệu';
     }
 
     if (error is ArgumentError) {
-      return 'Invalid argument provided';
+      return 'Tham số không hợp lệ';
     }
 
     if (error is StateError) {
-      return 'Application state error';
+      return 'Lỗi trạng thái ứng dụng';
     }
 
     // Default message for unknown errors
@@ -151,7 +151,7 @@ class ErrorHandler {
         behavior: SnackBarBehavior.floating,
         action: onRetry != null
             ? SnackBarAction(
-                label: 'Retry',
+                label: 'Thử lại',
                 textColor: Colors.white,
                 onPressed: onRetry,
               )

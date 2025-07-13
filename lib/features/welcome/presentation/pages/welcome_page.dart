@@ -54,7 +54,7 @@ class WelcomePage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
-                'AI Physiognomy',
+                'Tướng học AI',
                 style: TextStyle(
                   fontFamily: 'Arial',
                   fontWeight: FontWeight.w700,
@@ -64,7 +64,7 @@ class WelcomePage extends StatelessWidget {
                 ),
               ),
               const Text(
-                'Face Analysis',
+                'Phân tích khuôn mặt',
                 style: TextStyle(
                   fontFamily: 'Arial',
                   fontWeight: FontWeight.w400,
@@ -87,64 +87,39 @@ class WelcomePage extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Background decorative elements
-          Stack(
+          // Main heading and description
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Dashed border decoration
-              Container(
-                margin: const EdgeInsets.only(top: 40),
-                height: 200,
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: const Color(0xFFD0D0D0),
-                    width: 1,
-                  ),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: CustomPaint(
-                  painter: DashedBorderPainter(),
-                  child: Container(),
+              const Text(
+                'Khám phá những gì',
+                style: TextStyle(
+                  fontFamily: 'Arial',
+                  fontWeight: FontWeight.w700,
+                  fontSize: 36,
+                  color: Color(0xFF333333),
+                  height: 1.15,
                 ),
               ),
-              
-              // Main heading and description
-              Container(
-                margin: const EdgeInsets.only(top: 120),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Discover What',
-                      style: TextStyle(
-                        fontFamily: 'Arial',
-                        fontWeight: FontWeight.w700,
-                        fontSize: 36,
-                        color: Color(0xFF333333),
-                        height: 1.15,
-                      ),
-                    ),
-                    const Text(
-                      'Your Face Reveals',
-                      style: TextStyle(
-                        fontFamily: 'Arial',
-                        fontWeight: FontWeight.w700,
-                        fontSize: 36,
-                        color: Color(0xFF333333),
-                        height: 1.15,
-                      ),
-                    ),
-                    const SizedBox(height: 32),
-                    const Text(
-                      'Advanced AI analysis reveals personality traits through your facial features and palm lines.',
-                      style: TextStyle(
-                        fontFamily: 'Arial',
-                        fontWeight: FontWeight.w400,
-                        fontSize: 17,
-                        color: Color(0xFF666666),
-                        height: 1.4,
-                      ),
-                    ),
-                  ],
+              const Text(
+                'Khuôn mặt bạn tiết lộ',
+                style: TextStyle(
+                  fontFamily: 'Arial',
+                  fontWeight: FontWeight.w700,
+                  fontSize: 36,
+                  color: Color(0xFF333333),
+                  height: 1.15,
+                ),
+              ),
+              const SizedBox(height: 32),
+              const Text(
+                'Phân tích AI tiên tiến tiết lộ các đặc điểm tính cách thông qua các nét mặt và đường chỉ tay của bạn.',
+                style: TextStyle(
+                  fontFamily: 'Arial',
+                  fontWeight: FontWeight.w400,
+                  fontSize: 17,
+                  color: Color(0xFF666666),
+                  height: 1.4,
                 ),
               ),
             ],
@@ -163,32 +138,32 @@ class WelcomePage extends StatelessWidget {
           _buildSocialButton(
             context,
             icon: 'G',
-            text: 'Continue with Google',
+            text: 'Tiếp tục với Google',
             backgroundColor: const Color(0xFF333333),
             textColor: Colors.white,
             borderColor: const Color(0xFF333333),
             onTap: () => _handleGoogleLogin(context),
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           // Apple login button
           _buildSocialButton(
             context,
             icon: '',
-            text: 'Continue with Apple',
+            text: 'Tiếp tục với Apple',
             backgroundColor: Colors.white,
             textColor: const Color(0xFF333333),
             borderColor: const Color(0xFF999999),
             isApple: true,
             onTap: () => _handleAppleLogin(context),
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Or continue text
           const Text(
-            'or continue to',
+            'hoặc tiếp tục đến',
             style: TextStyle(
               fontFamily: 'Arial',
               fontWeight: FontWeight.w400,
@@ -275,7 +250,7 @@ class WelcomePage extends StatelessWidget {
 
   Widget _buildLoginButton(BuildContext context) {
     return GestureDetector(
-      onTap: () => context.go('/login'),
+      onTap: () => context.push('/login'),
       child: Container(
         width: double.infinity,
         height: 53,
@@ -285,7 +260,7 @@ class WelcomePage extends StatelessWidget {
         ),
         child: const Center(
           child: Text(
-            'Login to your account',
+            'Đăng nhập vào tài khoản',
             style: TextStyle(
               fontFamily: 'Arial',
               fontWeight: FontWeight.w400,
@@ -317,7 +292,7 @@ class WelcomePage extends StatelessWidget {
     // TODO: Implement Google login
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Google login will be implemented'),
+        content: Text('Đăng nhập Google sẽ được triển khai'),
         backgroundColor: AppColors.info,
       ),
     );
@@ -327,70 +302,9 @@ class WelcomePage extends StatelessWidget {
     // TODO: Implement Apple login
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Apple login will be implemented'),
+        content: Text('Đăng nhập Apple sẽ được triển khai'),
         backgroundColor: AppColors.info,
       ),
     );
   }
-}
-
-/// Custom painter for dashed border decoration
-class DashedBorderPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = const Color(0xFFD0D0D0)
-      ..strokeWidth = 1
-      ..style = PaintingStyle.stroke;
-
-    const dashWidth = 4.0;
-    const dashSpace = 4.0;
-    double startX = 0;
-
-    // Top border
-    while (startX < size.width) {
-      canvas.drawLine(
-        Offset(startX, 0),
-        Offset(startX + dashWidth, 0),
-        paint,
-      );
-      startX += dashWidth + dashSpace;
-    }
-
-    // Right border
-    double startY = 0;
-    while (startY < size.height) {
-      canvas.drawLine(
-        Offset(size.width, startY),
-        Offset(size.width, startY + dashWidth),
-        paint,
-      );
-      startY += dashWidth + dashSpace;
-    }
-
-    // Bottom border
-    startX = size.width;
-    while (startX > 0) {
-      canvas.drawLine(
-        Offset(startX, size.height),
-        Offset(startX - dashWidth, size.height),
-        paint,
-      );
-      startX -= dashWidth + dashSpace;
-    }
-
-    // Left border
-    startY = size.height;
-    while (startY > 0) {
-      canvas.drawLine(
-        Offset(0, startY),
-        Offset(0, startY - dashWidth),
-        paint,
-      );
-      startY -= dashWidth + dashSpace;
-    }
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) => false;
 }

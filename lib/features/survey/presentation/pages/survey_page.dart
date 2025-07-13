@@ -220,7 +220,7 @@ class _SurveyPageState extends State<SurveyPage> {
         
         // Instruction text
         const Text(
-          'Select the option that best describes',
+          'Chọn tùy chọn mô tả tốt nhất',
           style: TextStyle(
             fontSize: 16,
             color: Color(0xFF666666),
@@ -231,7 +231,7 @@ class _SurveyPageState extends State<SurveyPage> {
         const SizedBox(height: 2),
 
         const Text(
-          'your personality and preferences.',
+          'tính cách và sở thích của bạn.',
           style: TextStyle(
             fontSize: 16,
             color: Color(0xFF666666),
@@ -279,7 +279,7 @@ class _SurveyPageState extends State<SurveyPage> {
                 ),
                 child: Center(
                   child: Text(
-                    'Previous',
+                    'Trước',
                     style: TextStyle(
                       fontSize: 16,
                       color: surveyProvider.isFirstQuestion ? const Color(0xFFCCCCCC) : const Color(0xFF666666),
@@ -305,7 +305,7 @@ class _SurveyPageState extends State<SurveyPage> {
                 ),
                 child: Center(
                   child: Text(
-                    surveyProvider.isLastQuestion ? 'Complete' : 'Next',
+                    surveyProvider.isLastQuestion ? 'Hoàn thành' : 'Tiếp theo',
                     style: TextStyle(
                       fontSize: 16,
                       color: surveyProvider.isCurrentQuestionAnswered ? Colors.white : const Color(0xFF999999),
@@ -368,7 +368,7 @@ class _SurveyPageState extends State<SurveyPage> {
     // TODO: Submit survey data to API
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Survey completed successfully!'),
+        content: Text('Khảo sát đã hoàn thành thành công!'),
         backgroundColor: AppColors.success,
       ),
     );

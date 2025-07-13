@@ -137,7 +137,7 @@ class _SignUpPageState extends State<SignUpPage> {
           
           // Sign Up title
           const Text(
-            'Sign Up',
+            'Đăng ký',
             style: TextStyle(
               fontFamily: 'Arial',
               fontWeight: FontWeight.w700,
@@ -167,7 +167,7 @@ class _SignUpPageState extends State<SignUpPage> {
     return Column(
       children: [
         const Text(
-          'Create Account',
+          'Tạo tài khoản',
           style: TextStyle(
             fontFamily: 'Arial',
             fontWeight: FontWeight.w700,
@@ -179,7 +179,7 @@ class _SignUpPageState extends State<SignUpPage> {
         ),
         const SizedBox(height: 16),
         const Text(
-          'Join us to get started',
+          'Tham gia với chúng tôi để bắt đầu',
           style: TextStyle(
             fontFamily: 'Arial',
             fontWeight: FontWeight.w400,
@@ -199,7 +199,7 @@ class _SignUpPageState extends State<SignUpPage> {
       children: [
         // Full Name field
         const Text(
-          'Full Name',
+          'Họ và tên',
           style: TextStyle(
             fontFamily: 'Arial',
             fontWeight: FontWeight.w400,
@@ -211,8 +211,8 @@ class _SignUpPageState extends State<SignUpPage> {
         const SizedBox(height: 8),
         _buildInputField(
           controller: _fullNameController,
-          hintText: 'Enter your full name',
-          validator: (value) => Validators.validateRequired(value, 'Full name'),
+          hintText: 'Nhập họ và tên của bạn',
+          validator: (value) => Validators.validateRequired(value, 'Họ và tên'),
         ),
 
         const SizedBox(height: 20),
@@ -231,7 +231,7 @@ class _SignUpPageState extends State<SignUpPage> {
         const SizedBox(height: 8),
         _buildInputField(
           controller: _emailController,
-          hintText: 'Enter your email',
+          hintText: 'Nhập email của bạn',
           keyboardType: TextInputType.emailAddress,
           validator: Validators.validateEmail,
         ),
@@ -240,7 +240,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
         // Password field
         const Text(
-          'Password',
+          'Mật khẩu',
           style: TextStyle(
             fontFamily: 'Arial',
             fontWeight: FontWeight.w400,
@@ -252,7 +252,7 @@ class _SignUpPageState extends State<SignUpPage> {
         const SizedBox(height: 8),
         _buildInputField(
           controller: _passwordController,
-          hintText: 'Create a password',
+          hintText: 'Tạo mật khẩu',
           obscureText: !_isPasswordVisible,
           validator: Validators.validatePassword,
           suffixIcon: _buildPasswordToggle(
@@ -265,7 +265,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
         // Confirm Password field
         const Text(
-          'Confirm Password',
+          'Xác nhận mật khẩu',
           style: TextStyle(
             fontFamily: 'Arial',
             fontWeight: FontWeight.w400,
@@ -277,7 +277,7 @@ class _SignUpPageState extends State<SignUpPage> {
         const SizedBox(height: 8),
         _buildInputField(
           controller: _confirmPasswordController,
-          hintText: 'Confirm your password',
+          hintText: 'Xác nhận mật khẩu của bạn',
           obscureText: !_isConfirmPasswordVisible,
           validator: (value) => Validators.validateConfirmPassword(value, _passwordController.text),
           suffixIcon: _buildPasswordToggle(
@@ -399,17 +399,17 @@ class _SignUpPageState extends State<SignUpPage> {
                 height: 1.15,
               ),
               children: [
-                TextSpan(text: 'I agree to the '),
+                TextSpan(text: 'Tôi đồng ý với '),
                 TextSpan(
-                  text: 'Terms & Conditions',
+                  text: 'Điều khoản & Điều kiện',
                   style: TextStyle(
                     color: Color(0xFF333333),
                     fontWeight: FontWeight.w400,
                   ),
                 ),
-                TextSpan(text: ' and '),
+                TextSpan(text: ' và '),
                 TextSpan(
-                  text: 'Privacy Policy',
+                  text: 'Chính sách bảo mật',
                   style: TextStyle(
                     color: Color(0xFF333333),
                     fontWeight: FontWeight.w400,
@@ -435,7 +435,7 @@ class _SignUpPageState extends State<SignUpPage> {
         ),
         child: const Center(
           child: Text(
-            'Create Account',
+            'Tạo tài khoản',
             style: TextStyle(
               fontFamily: 'Arial',
               fontWeight: FontWeight.w700,
@@ -576,7 +576,7 @@ class _SignUpPageState extends State<SignUpPage> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         const Text(
-          'Already have an account? ',
+          'Đã có tài khoản? ',
           style: TextStyle(
             fontFamily: 'Arial',
             fontWeight: FontWeight.w400,
@@ -586,9 +586,9 @@ class _SignUpPageState extends State<SignUpPage> {
           ),
         ),
         GestureDetector(
-          onTap: () => context.go('/login'),
+          onTap: () => context.push('/login'),
           child: const Text(
-            'Sign In',
+            'Đăng nhập',
             style: TextStyle(
               fontFamily: 'Arial',
               fontWeight: FontWeight.w700,
@@ -620,7 +620,7 @@ class _SignUpPageState extends State<SignUpPage> {
     if (!_agreeToTerms) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Please agree to the Terms & Conditions and Privacy Policy'),
+          content: Text('Vui lòng đồng ý với Điều khoản & Điều kiện và Chính sách bảo mật'),
           backgroundColor: AppColors.warning,
         ),
       );
@@ -631,13 +631,13 @@ class _SignUpPageState extends State<SignUpPage> {
       // TODO: Implement actual signup logic with AuthProvider
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Account creation functionality will be implemented'),
+          content: Text('Chức năng tạo tài khoản sẽ được triển khai'),
           backgroundColor: AppColors.info,
         ),
       );
 
       // Navigate to survey after successful signup
-      context.go('/survey');
+      context.push('/survey');
     }
   }
 
@@ -645,7 +645,7 @@ class _SignUpPageState extends State<SignUpPage> {
     // TODO: Implement Google signup
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Google signup will be implemented'),
+        content: Text('Đăng ký Google sẽ được triển khai'),
         backgroundColor: AppColors.info,
       ),
     );
@@ -655,7 +655,7 @@ class _SignUpPageState extends State<SignUpPage> {
     // TODO: Implement Apple signup
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Apple signup will be implemented'),
+        content: Text('Đăng ký Apple sẽ được triển khai'),
         backgroundColor: AppColors.info,
       ),
     );

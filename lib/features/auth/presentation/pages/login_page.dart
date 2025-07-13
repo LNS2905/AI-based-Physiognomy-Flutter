@@ -131,7 +131,7 @@ class _LoginPageState extends State<LoginPage> {
 
           // Sign In title
           const Text(
-            'Sign In',
+            'Đăng nhập',
             style: TextStyle(
               fontFamily: 'Arial',
               fontWeight: FontWeight.w700,
@@ -161,7 +161,7 @@ class _LoginPageState extends State<LoginPage> {
     return Column(
       children: [
         const Text(
-          'Welcome Back',
+          'Chào mừng trở lại',
           style: TextStyle(
             fontFamily: 'Arial',
             fontWeight: FontWeight.w700,
@@ -173,7 +173,7 @@ class _LoginPageState extends State<LoginPage> {
         ),
         const SizedBox(height: 16),
         const Text(
-          'Sign in to your account',
+          'Đăng nhập vào tài khoản của bạn',
           style: TextStyle(
             fontFamily: 'Arial',
             fontWeight: FontWeight.w400,
@@ -220,7 +220,7 @@ class _LoginPageState extends State<LoginPage> {
               color: Color(0xFF333333),
             ),
             decoration: const InputDecoration(
-              hintText: 'Enter your email',
+              hintText: 'Nhập email của bạn',
               hintStyle: TextStyle(
                 fontFamily: 'Arial',
                 fontWeight: FontWeight.w400,
@@ -232,10 +232,10 @@ class _LoginPageState extends State<LoginPage> {
             ),
             validator: (value) {
               if (value == null || value.isEmpty) {
-                return 'Please enter your email';
+                return 'Vui lòng nhập email của bạn';
               }
               if (!RegExp(AppConstants.emailPattern).hasMatch(value)) {
-                return 'Please enter a valid email';
+                return 'Vui lòng nhập email hợp lệ';
               }
               return null;
             },
@@ -246,7 +246,7 @@ class _LoginPageState extends State<LoginPage> {
 
         // Password field
         const Text(
-          'Password',
+          'Mật khẩu',
           style: TextStyle(
             fontFamily: 'Arial',
             fontWeight: FontWeight.w400,
@@ -273,7 +273,7 @@ class _LoginPageState extends State<LoginPage> {
               color: Color(0xFF333333),
             ),
             decoration: InputDecoration(
-              hintText: 'Enter your password',
+              hintText: 'Nhập mật khẩu của bạn',
               hintStyle: const TextStyle(
                 fontFamily: 'Arial',
                 fontWeight: FontWeight.w400,
@@ -306,10 +306,10 @@ class _LoginPageState extends State<LoginPage> {
             ),
             validator: (value) {
               if (value == null || value.isEmpty) {
-                return 'Please enter your password';
+                return 'Vui lòng nhập mật khẩu của bạn';
               }
               if (value.length < AppConstants.minPasswordLength) {
-                return 'Password must be at least ${AppConstants.minPasswordLength} characters';
+                return 'Mật khẩu phải có ít nhất ${AppConstants.minPasswordLength} ký tự';
               }
               return null;
             },
@@ -325,12 +325,12 @@ class _LoginPageState extends State<LoginPage> {
             onTap: () {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
-                  content: Text('Forgot password feature coming soon'),
+                  content: Text('Tính năng quên mật khẩu sẽ sớm ra mắt'),
                 ),
               );
             },
             child: const Text(
-              'Forgot Password?',
+              'Quên mật khẩu?',
               style: TextStyle(
                 fontFamily: 'Arial',
                 fontWeight: FontWeight.w400,
@@ -357,7 +357,7 @@ class _LoginPageState extends State<LoginPage> {
         ),
         child: const Center(
           child: Text(
-            'Sign In',
+            'Đăng nhập',
             style: TextStyle(
               fontFamily: 'Arial',
               fontWeight: FontWeight.w700,
@@ -403,7 +403,7 @@ class _LoginPageState extends State<LoginPage> {
         // Google login button
         _buildSocialButton(
           icon: 'G',
-          text: 'Continue with Google',
+          text: 'Tiếp tục với Google',
           onTap: () => _handleGoogleLogin(context),
         ),
 
@@ -412,7 +412,7 @@ class _LoginPageState extends State<LoginPage> {
         // Apple login button
         _buildSocialButton(
           icon: '',
-          text: 'Continue with Apple',
+          text: 'Tiếp tục với Apple',
           isApple: true,
           onTap: () => _handleAppleLogin(context),
         ),
@@ -495,7 +495,7 @@ class _LoginPageState extends State<LoginPage> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         const Text(
-          "Don't have an account? ",
+          "Chưa có tài khoản? ",
           style: TextStyle(
             fontFamily: 'Arial',
             fontWeight: FontWeight.w400,
@@ -505,9 +505,9 @@ class _LoginPageState extends State<LoginPage> {
           ),
         ),
         GestureDetector(
-          onTap: () => context.go('/signup'),
+          onTap: () => context.push('/signup'),
           child: const Text(
-            'Sign Up',
+            'Đăng ký',
             style: TextStyle(
               fontFamily: 'Arial',
               fontWeight: FontWeight.w700,
@@ -539,7 +539,7 @@ class _LoginPageState extends State<LoginPage> {
     // TODO: Implement Google login
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Google login will be implemented'),
+        content: Text('Đăng nhập Google sẽ được triển khai'),
         backgroundColor: AppColors.info,
       ),
     );
@@ -549,7 +549,7 @@ class _LoginPageState extends State<LoginPage> {
     // TODO: Implement Apple login
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Apple login will be implemented'),
+        content: Text('Đăng nhập Apple sẽ được triển khai'),
         backgroundColor: AppColors.info,
       ),
     );
@@ -560,14 +560,14 @@ class _LoginPageState extends State<LoginPage> {
       // TODO: Implement actual login logic with AuthProvider
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Login functionality will be implemented'),
+          content: Text('Chức năng đăng nhập sẽ được triển khai'),
           backgroundColor: AppColors.info,
         ),
       );
 
       // Navigate to survey after successful login (for new users) or home (for returning users)
       // For demo, navigate to survey
-      context.go('/survey');
+      context.push('/survey');
     }
   }
 }

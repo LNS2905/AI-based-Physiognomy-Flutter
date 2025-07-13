@@ -126,7 +126,7 @@ class _FaceScanPageState extends State<FaceScanPage> {
                 const SizedBox(width: 16),
                 const Expanded(
                   child: Text(
-                    'Face Scan',
+                    'Quét khuôn mặt',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
@@ -172,7 +172,7 @@ class _FaceScanPageState extends State<FaceScanPage> {
               colors: [AppColors.primary, AppColors.primaryDark],
             ).createShader(bounds),
             child: const Text(
-              'FACE SCAN',
+              'QUÉT KHUÔN MẶT',
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.w800,
@@ -192,7 +192,7 @@ class _FaceScanPageState extends State<FaceScanPage> {
       child: Column(
         children: [
           const Text(
-            'AI PHYSIOGNOMY ANALYSIS',
+            'PHÂN TÍCH TƯỚNG HỌC AI',
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w700,
@@ -238,7 +238,7 @@ class _FaceScanPageState extends State<FaceScanPage> {
               const SizedBox(width: 8),
               Flexible(
                 child: Text(
-                  'Discover your personality',
+                  'Khám phá tính cách của bạn',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
@@ -250,7 +250,7 @@ class _FaceScanPageState extends State<FaceScanPage> {
           ),
           const SizedBox(height: 4),
           const Text(
-            'through facial analysis!',
+            'thông qua phân tích khuôn mặt!',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
@@ -354,7 +354,7 @@ class _FaceScanPageState extends State<FaceScanPage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     const Text(
-                      'Upload Photo',
+                      'Tải ảnh lên',
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
@@ -363,7 +363,7 @@ class _FaceScanPageState extends State<FaceScanPage> {
                     ),
                     const SizedBox(height: 2),
                     const Text(
-                      'Choose a photo from your gallery for analysis',
+                      'Chọn một ảnh từ thư viện của bạn để phân tích',
                       style: TextStyle(
                         fontSize: 11,
                         color: AppColors.textSecondary,
@@ -444,7 +444,7 @@ class _FaceScanPageState extends State<FaceScanPage> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         const Text(
-                          'User Guide',
+                          'Hướng dẫn sử dụng',
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
@@ -453,7 +453,7 @@ class _FaceScanPageState extends State<FaceScanPage> {
                         ),
                         const SizedBox(height: 2),
                         const Text(
-                          'Step-by-step instructions for face scanning',
+                          'Hướng dẫn từng bước để quét khuôn mặt',
                           style: TextStyle(
                             fontSize: 11,
                             color: AppColors.textSecondary,
@@ -484,7 +484,7 @@ class _FaceScanPageState extends State<FaceScanPage> {
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: const Text(
-                  'Tap to view',
+                  'Nhấn để xem',
                   style: TextStyle(
                     fontSize: 9,
                     fontWeight: FontWeight.w500,
@@ -576,7 +576,7 @@ class _FaceScanPageState extends State<FaceScanPage> {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
-                content: Text('Failed to initialize camera. Please try again.'),
+                content: Text('Không thể khởi tạo camera. Vui lòng thử lại.'),
                 backgroundColor: AppColors.error,
                 duration: Duration(seconds: 3),
               ),
@@ -599,7 +599,7 @@ class _FaceScanPageState extends State<FaceScanPage> {
           // Show success message
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Photo captured and analyzed successfully!'),
+              content: Text('Ảnh đã được chụp và phân tích thành công!'),
               backgroundColor: AppColors.success,
               duration: Duration(seconds: 2),
             ),
@@ -636,7 +636,7 @@ class _FaceScanPageState extends State<FaceScanPage> {
           // Show success message
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Image uploaded and analyzed successfully!'),
+              content: Text('Ảnh đã được tải lên và phân tích thành công!'),
               backgroundColor: AppColors.success,
               duration: Duration(seconds: 2),
             ),
@@ -648,7 +648,7 @@ class _FaceScanPageState extends State<FaceScanPage> {
           // Show error message
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Failed to upload and analyze image. Please try again.'),
+              content: Text('Không thể tải lên và phân tích ảnh. Vui lòng thử lại.'),
               backgroundColor: AppColors.error,
               duration: Duration(seconds: 3),
             ),
@@ -670,7 +670,10 @@ class _FaceScanPageState extends State<FaceScanPage> {
 
     if (cloudinaryResult != null) {
       // Use Cloudinary analysis result
+      final faceShape = cloudinaryResult.analysis?.analysisResult?.face?.shape?.primary ?? 'Unknown';
+
       final analysisData = {
+        'face_shape': faceShape,
         'total_harmony_score': cloudinaryResult.totalHarmonyScore,
         'result': cloudinaryResult.analysis?.result ?? 'No analysis available',
         'features': cloudinaryResult.analysis?.features ?? {},
@@ -710,8 +713,8 @@ class _FaceScanPageState extends State<FaceScanPage> {
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
-            title: const Text('Analysis Error'),
-            content: const Text('No analysis data available. Please try again.'),
+            title: const Text('Lỗi phân tích'),
+            content: const Text('Không có dữ liệu phân tích. Vui lòng thử lại.'),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),

@@ -46,7 +46,7 @@ class NewsActionBar extends StatelessWidget {
         children: [
           _buildActionButton(
             icon: isLiked ? Icons.favorite : Icons.favorite_outline,
-            label: 'Like',
+            label: 'Thích',
             isActive: isLiked,
             onTap: onLike,
             activeColor: AppColors.accent,
@@ -54,7 +54,7 @@ class NewsActionBar extends StatelessWidget {
           _buildDivider(),
           _buildActionButton(
             icon: isBookmarked ? Icons.bookmark : Icons.bookmark_outline,
-            label: 'Save',
+            label: 'Lưu',
             isActive: isBookmarked,
             onTap: onBookmark,
             activeColor: AppColors.primary,
@@ -62,7 +62,7 @@ class NewsActionBar extends StatelessWidget {
           _buildDivider(),
           _buildActionButton(
             icon: Icons.share_outlined,
-            label: 'Share',
+            label: 'Chia sẻ',
             isActive: false,
             onTap: onShare,
             activeColor: AppColors.secondary,
@@ -70,7 +70,7 @@ class NewsActionBar extends StatelessWidget {
           _buildDivider(),
           _buildActionButton(
             icon: Icons.comment_outlined,
-            label: 'Comment',
+            label: 'Bình luận',
             isActive: false,
             onTap: onComment,
             activeColor: AppColors.info,

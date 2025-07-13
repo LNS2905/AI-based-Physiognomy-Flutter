@@ -97,7 +97,7 @@ class HomePage extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'AI Physiognomy',
+                  'Tướng học AI',
                   style: TextStyle(
                     fontSize: isTablet ? 20 : 16,
                     fontWeight: FontWeight.w600,
@@ -105,7 +105,7 @@ class HomePage extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  'Discover your insights',
+                  'Khám phá những hiểu biết của bạn',
                   style: TextStyle(
                     fontSize: isTablet ? 14 : 12,
                     color: AppColors.textSecondary,
@@ -134,7 +134,7 @@ class HomePage extends StatelessWidget {
               ),
               SizedBox(width: isTablet ? 12 : 8),
               GestureDetector(
-                onTap: () => context.go('/profile'),
+                onTap: () => context.push('/profile'),
                 child: Container(
                   width: isTablet ? 48 : 40,
                   height: isTablet ? 48 : 40,
@@ -183,7 +183,7 @@ class HomePage extends StatelessWidget {
           SizedBox(width: isTablet ? 16 : 12),
           Expanded(
             child: Text(
-              'Search features, results...',
+              'Tìm kiếm tính năng, kết quả...',
               style: TextStyle(
                 fontSize: isTablet ? 16 : 14,
                 color: AppColors.textHint,
@@ -242,7 +242,7 @@ class HomePage extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Discover Your True Self',
+                  'Khám phá con người thật của bạn',
                   style: TextStyle(
                     fontSize: isTablet ? 24 : 20,
                     fontWeight: FontWeight.bold,
@@ -251,7 +251,7 @@ class HomePage extends StatelessWidget {
                 ),
                 SizedBox(height: isTablet ? 12 : 8),
                 Text(
-                  'Advanced AI-powered physiognomy analysis to unlock insights about your personality and characteristics.',
+                  'Phân tích tướng học được hỗ trợ bởi AI tiên tiến để mở khóa những hiểu biết về tính cách và đặc điểm của bạn.',
                   style: TextStyle(
                     fontSize: isTablet ? 16 : 14,
                     color: Colors.white.withValues(alpha: 0.9),
@@ -260,7 +260,7 @@ class HomePage extends StatelessWidget {
                 ),
                 SizedBox(height: isTablet ? 20 : 16),
                 ElevatedButton(
-                  onPressed: () => context.go('/face-scanning'),
+                  onPressed: () => context.push('/face-scanning'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white,
                     foregroundColor: AppColors.primary,
@@ -273,7 +273,7 @@ class HomePage extends StatelessWidget {
                     ),
                   ),
                   child: Text(
-                    'Start Analysis',
+                    'Bắt đầu phân tích',
                     style: TextStyle(
                       fontSize: isTablet ? 16 : 14,
                       fontWeight: FontWeight.w600,
@@ -312,28 +312,28 @@ class HomePage extends StatelessWidget {
     // Sample news data
     final newsItems = [
       {
-        'title': 'Latest AI Breakthrough in Facial Analysis',
-        'description': 'Researchers develop new algorithms for more accurate personality assessment through facial features.',
-        'category': 'Technology',
-        'readTime': '3 min read',
+        'title': 'Đột phá AI mới nhất trong phân tích khuôn mặt',
+        'description': 'Các nhà nghiên cứu phát triển thuật toán mới để đánh giá tính cách chính xác hơn thông qua các nét mặt.',
+        'category': 'Công nghệ',
+        'readTime': '3 phút đọc',
       },
       {
-        'title': 'Understanding Physiognomy in Modern Context',
-        'description': 'How ancient practices meet cutting-edge technology to provide insights into human behavior.',
-        'category': 'Science',
-        'readTime': '5 min read',
+        'title': 'Hiểu về tướng học trong bối cảnh hiện đại',
+        'description': 'Cách các thực hành cổ xưa kết hợp với công nghệ tiên tiến để cung cấp hiểu biết về hành vi con người.',
+        'category': 'Khoa học',
+        'readTime': '5 phút đọc',
       },
       {
-        'title': 'Privacy and Ethics in AI Analysis',
-        'description': 'Exploring the ethical considerations and privacy measures in AI-powered personality analysis.',
-        'category': 'Ethics',
-        'readTime': '4 min read',
+        'title': 'Quyền riêng tư và đạo đức trong phân tích AI',
+        'description': 'Khám phá các cân nhắc đạo đức và biện pháp bảo mật trong phân tích tính cách được hỗ trợ bởi AI.',
+        'category': 'Đạo đức',
+        'readTime': '4 phút đọc',
       },
       {
-        'title': 'Success Stories: Real User Experiences',
-        'description': 'Discover how our users have gained valuable insights about themselves through AI analysis.',
-        'category': 'Stories',
-        'readTime': '6 min read',
+        'title': 'Câu chuyện thành công: Trải nghiệm người dùng thực tế',
+        'description': 'Khám phá cách người dùng của chúng tôi đã có được những hiểu biết có giá trị về bản thân thông qua phân tích AI.',
+        'category': 'Câu chuyện',
+        'readTime': '6 phút đọc',
       },
     ];
 
@@ -346,7 +346,7 @@ class HomePage extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Daily News',
+                'Tin tức hàng ngày',
                 style: TextStyle(
                   fontSize: isTablet ? 20 : 18,
                   fontWeight: FontWeight.bold,
@@ -358,7 +358,7 @@ class HomePage extends StatelessWidget {
                   context.push('/news');
                 },
                 child: Text(
-                  'See All',
+                  'Xem tất cả',
                   style: TextStyle(
                     fontSize: isTablet ? 16 : 14,
                     color: AppColors.primary,
@@ -533,30 +533,30 @@ class HomePage extends StatelessWidget {
           _buildFeatureCard(
             context,
             icon: Icons.face_retouching_natural,
-            title: 'Face Scanning',
-            description: 'Analyze facial features',
-            onTap: () => context.go('/face-scanning'),
+            title: 'Quét khuôn mặt',
+            description: 'Phân tích các nét mặt',
+            onTap: () => context.push('/face-scanning'),
           ),
           _buildFeatureCard(
             context,
             icon: Icons.chat_bubble_outline,
-            title: 'AI Chatbot',
-            description: 'Chat with AI assistant',
-            onTap: () => context.go('/chatbot'),
+            title: 'Chatbot AI',
+            description: 'Trò chuyện với trợ lý AI',
+            onTap: () => context.push('/chatbot'),
           ),
           _buildFeatureCard(
             context,
             icon: Icons.analytics_outlined,
-            title: 'Results',
-            description: 'View analysis results',
-            onTap: () => context.go('/result'),
+            title: 'Kết quả',
+            description: 'Xem kết quả phân tích',
+            onTap: () => context.push('/result'),
           ),
           _buildFeatureCard(
             context,
             icon: Icons.person_outline,
-            title: 'Profile',
-            description: 'Manage your profile',
-            onTap: () => context.go('/profile'),
+            title: 'Hồ sơ',
+            description: 'Quản lý hồ sơ của bạn',
+            onTap: () => context.push('/profile'),
           ),
         ],
       );
@@ -568,9 +568,9 @@ class HomePage extends StatelessWidget {
             child: _buildFeatureCard(
               context,
               icon: Icons.face_retouching_natural,
-              title: 'Face Scanning',
-              description: 'Analyze facial features',
-              onTap: () => context.go('/face-scanning'),
+              title: 'Quét khuôn mặt',
+              description: 'Phân tích các nét mặt',
+              onTap: () => context.push('/face-scanning'),
             ),
           ),
           const SizedBox(width: 16),
@@ -579,8 +579,8 @@ class HomePage extends StatelessWidget {
               context,
               icon: Icons.chat_bubble_outline,
               title: 'AI Chatbot',
-              description: 'Chat with AI assistant',
-              onTap: () => context.go('/ai-conversation'),
+              description: 'Trò chuyện với trợ lý AI',
+              onTap: () => context.push('/ai-conversation'),
             ),
           ),
         ],
@@ -669,7 +669,7 @@ class HomePage extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Get Started Today',
+            'Bắt đầu ngay hôm nay',
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w600,
@@ -678,7 +678,7 @@ class HomePage extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Begin your journey of self-discovery with our advanced AI-powered physiognomy analysis.',
+            'Bắt đầu hành trình khám phá bản thân với phân tích tướng học được hỗ trợ bởi AI tiên tiến của chúng tôi.',
             style: TextStyle(
               fontSize: 14,
               color: AppColors.textSecondary,
@@ -690,7 +690,7 @@ class HomePage extends StatelessWidget {
             children: [
               Expanded(
                 child: ElevatedButton(
-                  onPressed: () => context.go('/face-scanning'),
+                  onPressed: () => context.push('/face-scanning'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
@@ -699,13 +699,13 @@ class HomePage extends StatelessWidget {
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  child: const Text('Start Scanning'),
+                  child: const Text('Bắt đầu quét'),
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: OutlinedButton(
-                  onPressed: () => context.go('/demographics'),
+                  onPressed: () => context.push('/demographics'),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.primary,
                     side: const BorderSide(color: AppColors.border),
@@ -714,7 +714,7 @@ class HomePage extends StatelessWidget {
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  child: const Text('Learn More'),
+                  child: const Text('Tìm hiểu thêm'),
                 ),
               ),
             ],
@@ -744,22 +744,22 @@ class HomePage extends StatelessWidget {
           BottomNavigationBarItem(
             icon: Icon(Icons.home_outlined),
             activeIcon: Icon(Icons.home),
-            label: 'Home',
+            label: 'Trang chủ',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.face_outlined),
             activeIcon: Icon(Icons.face),
-            label: 'Scan',
+            label: 'Quét',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.chat_bubble_outline),
             activeIcon: Icon(Icons.chat_bubble),
-            label: 'Chat',
+            label: 'Trò chuyện',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person_outline),
             activeIcon: Icon(Icons.person),
-            label: 'Profile',
+            label: 'Hồ sơ',
           ),
         ],
         onTap: (index) {
@@ -768,13 +768,13 @@ class HomePage extends StatelessWidget {
               // Already on home
               break;
             case 1:
-              context.go('/face-scanning');
+              context.push('/face-scanning');
               break;
             case 2:
-              context.go('/ai-conversation');
+              context.push('/ai-conversation');
               break;
             case 3:
-              context.go('/profile');
+              context.push('/profile');
               break;
           }
         },

@@ -85,171 +85,171 @@ class NewsArticleModel extends Equatable {
     return [
       NewsArticleModel(
         id: '1',
-        title: 'Latest AI Breakthrough in Facial Analysis',
-        description: 'Researchers develop new algorithms for more accurate personality assessment through facial features.',
+        title: 'Đột phá AI mới nhất trong phân tích khuôn mặt',
+        description: 'Các nhà nghiên cứu phát triển thuật toán mới để đánh giá tính cách chính xác hơn thông qua các nét mặt.',
         content: '''
-# Latest AI Breakthrough in Facial Analysis
+# Đột phá AI mới nhất trong phân tích khuôn mặt
 
-Artificial Intelligence continues to revolutionize the field of facial analysis, with researchers at leading universities developing groundbreaking algorithms that can assess personality traits with unprecedented accuracy.
+Trí tuệ nhân tạo tiếp tục cách mạng hóa lĩnh vực phân tích khuôn mặt, với các nhà nghiên cứu tại các trường đại học hàng đầu phát triển các thuật toán đột phá có thể đánh giá các đặc điểm tính cách với độ chính xác chưa từng có.
 
-## The Science Behind Facial Analysis
+## Khoa học đằng sau phân tích khuôn mặt
 
-The study of physiognomy, the practice of assessing character or personality from facial features, has ancient roots but is now being transformed by modern AI technology. Recent breakthroughs in machine learning have enabled computers to identify subtle patterns in facial structure that correlate with personality traits.
+Nghiên cứu về tướng học, thực hành đánh giá tính cách hoặc nhân cách từ các nét mặt, có nguồn gốc cổ xưa nhưng hiện đang được biến đổi bởi công nghệ AI hiện đại. Những đột phá gần đây trong học máy đã cho phép máy tính xác định các mẫu tinh tế trong cấu trúc khuôn mặt có tương quan với các đặc điểm tính cách.
 
-### Key Developments
+### Những phát triển chính
 
-1. **Enhanced Pattern Recognition**: New neural networks can identify micro-expressions and facial asymmetries that were previously undetectable.
+1. **Nhận dạng mẫu nâng cao**: Các mạng nơ-ron mới có thể xác định các biểu hiện vi mô và sự bất đối xứng khuôn mặt mà trước đây không thể phát hiện được.
 
-2. **Cultural Sensitivity**: Modern algorithms account for cultural differences in facial expressions and features.
+2. **Nhạy cảm văn hóa**: Các thuật toán hiện đại tính đến sự khác biệt văn hóa trong biểu hiện và nét mặt.
 
-3. **Ethical Considerations**: Researchers are implementing strict ethical guidelines to prevent misuse of this technology.
+3. **Cân nhắc đạo đức**: Các nhà nghiên cứu đang thực hiện các hướng dẫn đạo đức nghiêm ngặt để ngăn chặn việc lạm dụng công nghệ này.
 
-## Real-World Applications
+## Ứng dụng thực tế
 
-This technology has potential applications in:
-- Mental health assessment
-- Educational psychology
-- Human resources
-- Security and safety
+Công nghệ này có các ứng dụng tiềm năng trong:
+- Đánh giá sức khỏe tâm thần
+- Tâm lý giáo dục
+- Nhân sự
+- An ninh và an toàn
 
-## Looking Forward
+## Nhìn về tương lai
 
-As this technology continues to evolve, it's crucial to balance innovation with ethical responsibility, ensuring that AI-powered facial analysis serves humanity's best interests while respecting individual privacy and dignity.
+Khi công nghệ này tiếp tục phát triển, điều quan trọng là phải cân bằng giữa đổi mới và trách nhiệm đạo đức, đảm bảo rằng phân tích khuôn mặt được hỗ trợ bởi AI phục vụ lợi ích tốt nhất của nhân loại trong khi tôn trọng quyền riêng tư và phẩm giá cá nhân.
         ''',
-        category: 'Technology',
-        author: 'Dr. Sarah Chen',
+        category: 'Công nghệ',
+        author: 'TS. Sarah Chen',
         imageUrl: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800',
         publishedAt: DateTime.now().subtract(const Duration(hours: 2)),
         readTime: 3,
-        tags: ['AI', 'Technology', 'Research', 'Facial Analysis'],
+        tags: ['AI', 'Công nghệ', 'Nghiên cứu', 'Phân tích khuôn mặt'],
         isFeatured: true,
         viewCount: 1250,
         likeCount: 89,
       ),
       NewsArticleModel(
         id: '2',
-        title: 'Understanding Physiognomy in Modern Context',
-        description: 'How ancient practices meet cutting-edge technology to provide insights into human behavior.',
+        title: 'Hiểu về tướng học trong bối cảnh hiện đại',
+        description: 'Cách các thực hành cổ xưa kết hợp với công nghệ tiên tiến để cung cấp hiểu biết về hành vi con người.',
         content: '''
-# Understanding Physiognomy in Modern Context
+# Hiểu về tướng học trong bối cảnh hiện đại
 
-The ancient art of physiognomy is experiencing a renaissance in the digital age, as modern technology breathes new life into age-old practices of reading character through facial features.
+Nghệ thuật tướng học cổ xưa đang trải qua một sự phục hưng trong thời đại kỹ thuật số, khi công nghệ hiện đại thổi hồn mới vào các thực hành lâu đời về việc đọc tính cách thông qua các nét mặt.
 
-## Historical Perspective
+## Góc nhìn lịch sử
 
-Physiognomy has been practiced for thousands of years across different cultures:
-- Ancient Greek philosophers like Aristotle wrote about facial analysis
-- Traditional Chinese medicine incorporates facial reading
-- Medieval European scholars developed systematic approaches
+Tướng học đã được thực hành hàng nghìn năm qua các nền văn hóa khác nhau:
+- Các triết gia Hy Lạp cổ đại như Aristotle đã viết về phân tích khuôn mặt
+- Y học cổ truyền Trung Quốc kết hợp việc đọc khuôn mặt
+- Các học giả châu Âu thời trung cổ đã phát triển các phương pháp có hệ thống
 
-## Modern Integration
+## Tích hợp hiện đại
 
-Today's approach combines:
-- Traditional wisdom with scientific methodology
-- Cultural sensitivity with technological precision
-- Ethical guidelines with practical applications
+Cách tiếp cận ngày nay kết hợp:
+- Trí tuệ truyền thống với phương pháp khoa học
+- Nhạy cảm văn hóa với độ chính xác công nghệ
+- Hướng dẫn đạo đức với ứng dụng thực tế
 
-## The Bagua Connection
+## Kết nối Bát Quái
 
-In Chinese philosophy, the Bagua (Eight Trigrams) provides a framework for understanding balance and harmony, which can be applied to facial analysis:
+Trong triết học Trung Quốc, Bát Quái (Tám Quẻ) cung cấp một khung để hiểu về sự cân bằng và hài hòa, có thể được áp dụng cho phân tích khuôn mặt:
 
-### The Eight Aspects
-1. **Heaven (乾)** - Leadership qualities
-2. **Earth (坤)** - Nurturing nature
-3. **Thunder (震)** - Dynamic energy
-4. **Wind (巽)** - Adaptability
-5. **Water (坎)** - Depth and wisdom
-6. **Fire (離)** - Passion and clarity
-7. **Mountain (艮)** - Stability and patience
-8. **Lake (兌)** - Joy and communication
+### Tám khía cạnh
+1. **Thiên (乾)** - Phẩm chất lãnh đạo
+2. **Địa (坤)** - Bản chất nuôi dưỡng
+3. **Lôi (震)** - Năng lượng năng động
+4. **Phong (巽)** - Khả năng thích ứng
+5. **Thủy (坎)** - Chiều sâu và trí tuệ
+6. **Hỏa (離)** - Đam mê và sự rõ ràng
+7. **Sơn (艮)** - Sự ổn định và kiên nhẫn
+8. **Trạch (兌)** - Niềm vui và giao tiếp
 
-## Ethical Considerations
+## Cân nhắc đạo đức
 
-Modern physiognomy must address:
-- Privacy concerns
-- Cultural biases
-- Consent and transparency
-- Responsible use of insights
+Tướng học hiện đại phải giải quyết:
+- Mối quan tâm về quyền riêng tư
+- Thiên kiến văn hóa
+- Sự đồng ý và minh bạch
+- Sử dụng có trách nhiệm các hiểu biết
 
-The future of physiognomy lies in respectful integration of ancient wisdom with modern technology.
+Tương lai của tướng học nằm trong việc tích hợp một cách tôn trọng trí tuệ cổ xưa với công nghệ hiện đại.
         ''',
-        category: 'Science',
-        author: 'Prof. Michael Zhang',
+        category: 'Khoa học',
+        author: 'GS. Michael Zhang',
         imageUrl: 'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800',
         publishedAt: DateTime.now().subtract(const Duration(hours: 6)),
         readTime: 5,
-        tags: ['Physiognomy', 'Culture', 'Philosophy', 'Bagua'],
+        tags: ['Tướng học', 'Văn hóa', 'Triết học', 'Bát Quái'],
         isFeatured: false,
         viewCount: 892,
         likeCount: 67,
       ),
       NewsArticleModel(
         id: '3',
-        title: 'Privacy and Ethics in AI Analysis',
-        description: 'Exploring the ethical considerations and privacy measures in AI-powered personality analysis.',
+        title: 'Quyền riêng tư và đạo đức trong phân tích AI',
+        description: 'Khám phá các cân nhắc đạo đức và biện pháp bảo mật trong phân tích tính cách được hỗ trợ bởi AI.',
         content: '''
-# Privacy and Ethics in AI Analysis
+# Quyền riêng tư và đạo đức trong phân tích AI
 
-As AI-powered personality analysis becomes more sophisticated, the importance of ethical considerations and privacy protection has never been greater.
+Khi phân tích tính cách được hỗ trợ bởi AI trở nên tinh vi hơn, tầm quan trọng của các cân nhắc đạo đức và bảo vệ quyền riêng tư chưa bao giờ lớn hơn thế.
 
-## Core Ethical Principles
+## Nguyên tắc đạo đức cốt lõi
 
-### 1. Informed Consent
-Users must fully understand:
-- What data is being collected
-- How it will be used
-- Who has access to it
-- How long it will be stored
+### 1. Sự đồng ý có thông tin
+Người dùng phải hiểu đầy đủ:
+- Dữ liệu nào đang được thu thập
+- Nó sẽ được sử dụng như thế nào
+- Ai có quyền truy cập vào nó
+- Nó sẽ được lưu trữ trong bao lâu
 
-### 2. Transparency
-AI systems should be:
-- Explainable in their decision-making
-- Open about their limitations
-- Clear about confidence levels
+### 2. Minh bạch
+Các hệ thống AI nên:
+- Có thể giải thích được trong việc ra quyết định
+- Cởi mở về những hạn chế của chúng
+- Rõ ràng về mức độ tin cậy
 
-### 3. Fairness and Non-Discrimination
-- Algorithms must be tested for bias
-- Cultural sensitivity is essential
-- Equal treatment regardless of background
+### 3. Công bằng và không phân biệt đối xử
+- Các thuật toán phải được kiểm tra về thiên kiến
+- Nhạy cảm văn hóa là điều cần thiết
+- Đối xử bình đẳng bất kể xuất thân
 
-## Privacy Protection Measures
+## Biện pháp bảo vệ quyền riêng tư
 
-### Data Security
-- End-to-end encryption
-- Secure storage protocols
-- Regular security audits
-- Minimal data collection
+### Bảo mật dữ liệu
+- Mã hóa đầu cuối
+- Giao thức lưu trữ an toàn
+- Kiểm toán bảo mật thường xuyên
+- Thu thập dữ liệu tối thiểu
 
-### User Control
-- Right to data deletion
-- Ability to correct information
-- Control over data sharing
-- Opt-out mechanisms
+### Kiểm soát người dùng
+- Quyền xóa dữ liệu
+- Khả năng sửa chữa thông tin
+- Kiểm soát việc chia sẻ dữ liệu
+- Cơ chế từ chối tham gia
 
-## Industry Standards
+## Tiêu chuẩn ngành
 
-Leading organizations are developing:
-- Ethical AI guidelines
-- Privacy-by-design principles
-- Regular compliance audits
-- User education programs
+Các tổ chức hàng đầu đang phát triển:
+- Hướng dẫn AI đạo đức
+- Nguyên tắc bảo mật theo thiết kế
+- Kiểm toán tuân thủ thường xuyên
+- Chương trình giáo dục người dùng
 
-## The Path Forward
+## Con đường phía trước
 
-The future of AI analysis depends on:
-- Continued ethical development
-- Strong regulatory frameworks
-- Industry self-regulation
-- Public awareness and education
+Tương lai của phân tích AI phụ thuộc vào:
+- Phát triển đạo đức liên tục
+- Khung pháp lý mạnh mẽ
+- Tự điều chỉnh ngành
+- Nhận thức và giáo dục công chúng
 
-By prioritizing ethics and privacy, we can harness the benefits of AI while protecting individual rights and dignity.
+Bằng cách ưu tiên đạo đức và quyền riêng tư, chúng ta có thể khai thác lợi ích của AI trong khi bảo vệ quyền và phẩm giá cá nhân.
         ''',
-        category: 'Ethics',
-        author: 'Dr. Emily Rodriguez',
+        category: 'Đạo đức',
+        author: 'TS. Emily Rodriguez',
         imageUrl: 'https://images.unsplash.com/photo-1563986768609-322da13575f3?w=800',
         publishedAt: DateTime.now().subtract(const Duration(days: 1)),
         readTime: 4,
-        tags: ['Ethics', 'Privacy', 'AI', 'Security'],
+        tags: ['Đạo đức', 'Quyền riêng tư', 'AI', 'Bảo mật'],
         isFeatured: false,
         viewCount: 654,
         likeCount: 45,

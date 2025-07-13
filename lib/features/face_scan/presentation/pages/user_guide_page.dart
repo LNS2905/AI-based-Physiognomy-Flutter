@@ -120,7 +120,7 @@ class _UserGuidePageState extends State<UserGuidePage>
               
               // Title
               const Text(
-                'Guild',
+                'Hướng dẫn',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
@@ -134,7 +134,7 @@ class _UserGuidePageState extends State<UserGuidePage>
 
           // Main title
           const Text(
-            'USER GUIDE',
+            'HƯỚNG DẪN SỬ DỤNG',
             style: TextStyle(
               fontSize: 32,
               fontWeight: FontWeight.w700,
@@ -155,9 +155,9 @@ class _UserGuidePageState extends State<UserGuidePage>
           // Step 1
           UserGuideStepCard(
             stepNumber: 1,
-            title: 'Take a selfie',
-            description: 'Person taking selfie\nwith phone camera',
-            imagePlaceholder: '[SELFIE IMAGE]',
+            title: 'Chụp ảnh selfie',
+            description: 'Người chụp ảnh selfie\nvới camera điện thoại',
+            imagePlaceholder: '[HÌNH ẢNH SELFIE]',
             onViewDetails: () => _showStepDetails(context, 1),
           ),
 
@@ -166,9 +166,9 @@ class _UserGuidePageState extends State<UserGuidePage>
           // Step 2
           UserGuideStepCard(
             stepNumber: 2,
-            title: 'Facial Area Selection',
-            description: 'Facial area selection\nand detection interface',
-            imagePlaceholder: '[FACE ANALYSIS]',
+            title: 'Chọn vùng khuôn mặt',
+            description: 'Giao diện chọn và\nphát hiện vùng khuôn mặt',
+            imagePlaceholder: '[PHÂN TÍCH KHUÔN MẶT]',
             onViewDetails: () => _showStepDetails(context, 2),
           ),
 
@@ -177,9 +177,9 @@ class _UserGuidePageState extends State<UserGuidePage>
           // Step 3
           UserGuideStepCard(
             stepNumber: 3,
-            title: 'AI Analysis Results',
-            description: 'Physiognomy analysis\nresults and insights',
-            imagePlaceholder: '[AI ANALYSIS]',
+            title: 'Kết quả phân tích AI',
+            description: 'Kết quả và thông tin\nphân tích tướng học',
+            imagePlaceholder: '[PHÂN TÍCH AI]',
             onViewDetails: () => _showStepDetails(context, 3),
           ),
 
@@ -188,9 +188,9 @@ class _UserGuidePageState extends State<UserGuidePage>
           // Step 4
           UserGuideStepCard(
             stepNumber: 4,
-            title: 'Expert Consultation',
-            description: 'Professional physiognomy\nexpert consultation',
-            imagePlaceholder: '[EXPERT CONSULTATION]',
+            title: 'Tư vấn chuyên gia',
+            description: 'Tư vấn chuyên gia\ntướng học chuyên nghiệp',
+            imagePlaceholder: '[TƯ VẤN CHUYÊN GIA]',
             onViewDetails: () => _showStepDetails(context, 4),
           ),
         ],
@@ -214,10 +214,10 @@ class _UserGuidePageState extends State<UserGuidePage>
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          _buildBottomNavItem(Icons.home_outlined, 'Home'),
-          _buildBottomNavItem(Icons.search_outlined, 'Search'),
-          _buildBottomNavItem(Icons.face_retouching_natural, 'Scan', isActive: true),
-          _buildBottomNavItem(Icons.person_outline, 'Profile'),
+          _buildBottomNavItem(Icons.home_outlined, 'Trang chủ'),
+          _buildBottomNavItem(Icons.search_outlined, 'Tìm kiếm'),
+          _buildBottomNavItem(Icons.face_retouching_natural, 'Quét', isActive: true),
+          _buildBottomNavItem(Icons.person_outline, 'Hồ sơ'),
         ],
       ),
     );
@@ -316,7 +316,7 @@ class _UserGuidePageState extends State<UserGuidePage>
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text('Got it'),
+                  child: const Text('Đã hiểu'),
                 ),
               ),
             ],
@@ -330,50 +330,50 @@ class _UserGuidePageState extends State<UserGuidePage>
     switch (stepNumber) {
       case 1:
         return {
-          'title': 'Take a selfie',
-          'details': '''• Position your face in the center of the camera frame
-• Ensure good lighting - natural light works best
-• Keep your face straight and look directly at the camera
-• Remove glasses, hats, or anything covering your face
-• Make sure your entire face is visible in the frame
-• Hold the phone steady and avoid blurry photos
-• Take the photo in a neutral expression for best results''',
+          'title': 'Chụp ảnh selfie',
+          'details': '''• Đặt khuôn mặt ở giữa khung hình camera
+• Đảm bảo ánh sáng tốt - ánh sáng tự nhiên là tốt nhất
+• Giữ khuôn mặt thẳng và nhìn thẳng vào camera
+• Tháo kính, mũ hoặc bất cứ thứ gì che khuôn mặt
+• Đảm bảo toàn bộ khuôn mặt hiển thị trong khung hình
+• Giữ điện thoại ổn định và tránh ảnh bị mờ
+• Chụp ảnh với biểu cảm tự nhiên để có kết quả tốt nhất''',
         };
       case 2:
         return {
-          'title': 'Facial Area Selection',
-          'details': '''• The AI will automatically detect your face in the image
-• Key facial features will be highlighted and analyzed
-• Ensure all important facial areas are clearly visible
-• The system will identify eyes, nose, mouth, and facial contours
-• If detection fails, retake the photo with better lighting
-• The analysis focuses on facial proportions and symmetry
-• This step ensures accurate physiognomy analysis''',
+          'title': 'Chọn vùng khuôn mặt',
+          'details': '''• AI sẽ tự động phát hiện khuôn mặt trong ảnh
+• Các đặc điểm khuôn mặt chính sẽ được làm nổi bật và phân tích
+• Đảm bảo tất cả vùng khuôn mặt quan trọng đều hiển thị rõ ràng
+• Hệ thống sẽ xác định mắt, mũi, miệng và đường viền khuôn mặt
+• Nếu phát hiện thất bại, hãy chụp lại ảnh với ánh sáng tốt hơn
+• Phân tích tập trung vào tỷ lệ và sự đối xứng của khuôn mặt
+• Bước này đảm bảo phân tích tướng học chính xác''',
         };
       case 3:
         return {
-          'title': 'AI Analysis Results',
-          'details': '''• Advanced AI algorithms analyze your facial features
-• The system examines facial proportions, symmetry, and characteristics
-• Results include personality insights based on physiognomy principles
-• Analysis covers traits like confidence, creativity, and social tendencies
-• Results are presented in an easy-to-understand format
-• Each trait comes with detailed explanations
-• The analysis is based on established physiognomy research''',
+          'title': 'Kết quả phân tích AI',
+          'details': '''• Thuật toán AI tiên tiến phân tích các đặc điểm khuôn mặt của bạn
+• Hệ thống kiểm tra tỷ lệ, sự đối xứng và đặc điểm khuôn mặt
+• Kết quả bao gồm hiểu biết về tính cách dựa trên nguyên lý tướng học
+• Phân tích bao gồm các đặc điểm như sự tự tin, sáng tạo và xu hướng xã hội
+• Kết quả được trình bày theo định dạng dễ hiểu
+• Mỗi đặc điểm đều có giải thích chi tiết
+• Phân tích dựa trên nghiên cứu tướng học đã được thiết lập''',
         };
       case 4:
         return {
-          'title': 'Expert Consultation',
-          'details': '''• Connect with certified physiognomy experts
-• Get professional interpretation of your analysis results
-• Ask questions about specific traits or characteristics
-• Receive personalized advice and insights
-• Schedule one-on-one consultation sessions
-• Expert guidance helps you understand results better
-• Professional validation of AI analysis findings''',
+          'title': 'Tư vấn chuyên gia',
+          'details': '''• Kết nối với các chuyên gia tướng học được chứng nhận
+• Nhận giải thích chuyên nghiệp về kết quả phân tích của bạn
+• Đặt câu hỏi về các đặc điểm hoặc đặc tính cụ thể
+• Nhận lời khuyên và hiểu biết được cá nhân hóa
+• Lên lịch các buổi tư vấn một-đối-một
+• Hướng dẫn của chuyên gia giúp bạn hiểu kết quả tốt hơn
+• Xác nhận chuyên nghiệp về các phát hiện phân tích AI''',
         };
       default:
-        return {'title': 'Unknown Step', 'details': 'Step details not available.'};
+        return {'title': 'Bước không xác định', 'details': 'Chi tiết bước không có sẵn.'};
     }
   }
 }

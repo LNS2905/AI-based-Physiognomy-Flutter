@@ -16,7 +16,7 @@ class ChatInputField extends StatefulWidget {
   const ChatInputField({
     super.key,
     required this.controller,
-    this.hintText = 'Type a message...',
+    this.hintText = 'Nhập tin nhắn...',
     this.enabled = true,
     this.isLoading = false,
     this.onSend,
@@ -152,7 +152,7 @@ class _ChatInputFieldState extends State<ChatInputField>
           color: Color(0xFF333333),
         ),
         decoration: InputDecoration(
-          hintText: widget.hintText.isEmpty ? 'Ask me about your analysis...' : widget.hintText,
+          hintText: widget.hintText.isEmpty ? 'Hỏi tôi về phân tích của bạn...' : widget.hintText,
           hintStyle: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w400,
@@ -297,7 +297,7 @@ class _ChatInputFieldState extends State<ChatInputField>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'Suggested questions:',
+          'Câu hỏi gợi ý:',
           style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w400,
@@ -308,11 +308,11 @@ class _ChatInputFieldState extends State<ChatInputField>
         Row(
           children: [
             Expanded(
-              child: _buildSuggestionChip('What about my nose shape?'),
+              child: _buildSuggestionChip('Hình dạng mũi của tôi thế nào?'),
             ),
             const SizedBox(width: 8),
             Expanded(
-              child: _buildSuggestionChip('Explain facial harmony'),
+              child: _buildSuggestionChip('Giải thích sự hài hòa khuôn mặt'),
             ),
           ],
         ),

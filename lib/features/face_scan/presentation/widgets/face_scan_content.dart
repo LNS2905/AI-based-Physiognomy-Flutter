@@ -98,7 +98,7 @@ class _FaceScanContentState extends State<FaceScanContent>
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Text(
-                    'Face Scan',
+                    'Quét khuôn mặt',
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
@@ -107,7 +107,7 @@ class _FaceScanContentState extends State<FaceScanContent>
                   ),
                   const SizedBox(height: 2),
                   const Text(
-                    'AI-powered physiognomy analysis',
+                    'Phân tích tướng học được hỗ trợ bởi AI',
                     style: TextStyle(
                       fontSize: 11,
                       color: AppColors.textSecondary,
@@ -134,7 +134,7 @@ class _FaceScanContentState extends State<FaceScanContent>
                   ],
                 ),
                 child: Text(
-                  widget.isLoading ? 'Loading...' : 'Begin',
+                  widget.isLoading ? 'Đang tải...' : 'Bắt đầu',
                   style: const TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,

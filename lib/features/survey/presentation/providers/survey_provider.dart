@@ -63,28 +63,28 @@ class SurveyProvider extends BaseProvider {
     final demoQuestions = [
       SurveyQuestionModel(
         id: 'personality_type',
-        title: 'Which personality type',
-        subtitle: 'describes you best?',
+        title: 'Loại tính cách nào',
+        subtitle: 'mô tả bạn tốt nhất?',
         type: SurveyQuestionType.singleChoice,
         options: [
           const SurveyOptionModel(
             id: 'extrovert',
-            text: 'Extrovert - Outgoing and social',
+            text: 'Hướng ngoại - Cởi mở và xã hội',
             value: 'extrovert',
           ),
           const SurveyOptionModel(
             id: 'introvert',
-            text: 'Introvert - Quiet and reflective',
+            text: 'Hướng nội - Yên tĩnh và suy tư',
             value: 'introvert',
           ),
           const SurveyOptionModel(
             id: 'ambivert',
-            text: 'Ambivert - Mix of both',
+            text: 'Lưỡng hướng - Kết hợp cả hai',
             value: 'ambivert',
           ),
           const SurveyOptionModel(
             id: 'depends',
-            text: 'Depends on the situation',
+            text: 'Tùy thuộc vào tình huống',
             value: 'depends',
           ),
         ],
@@ -92,33 +92,33 @@ class SurveyProvider extends BaseProvider {
 
       SurveyQuestionModel(
         id: 'lifestyle_preference',
-        title: 'What describes your',
-        subtitle: 'lifestyle preference?',
+        title: 'Điều gì mô tả',
+        subtitle: 'sở thích lối sống của bạn?',
         type: SurveyQuestionType.singleChoice,
         options: [
           const SurveyOptionModel(
             id: 'active_adventurous',
-            text: 'Active and adventurous',
+            text: 'Năng động và thích phiêu lưu',
             value: 'active_adventurous',
           ),
           const SurveyOptionModel(
             id: 'calm_peaceful',
-            text: 'Calm and peaceful',
+            text: 'Bình tĩnh và yên bình',
             value: 'calm_peaceful',
           ),
           const SurveyOptionModel(
             id: 'creative_artistic',
-            text: 'Creative and artistic',
+            text: 'Sáng tạo và nghệ thuật',
             value: 'creative_artistic',
           ),
           const SurveyOptionModel(
             id: 'intellectual_analytical',
-            text: 'Intellectual and analytical',
+            text: 'Trí tuệ và phân tích',
             value: 'intellectual_analytical',
           ),
           const SurveyOptionModel(
             id: 'social_collaborative',
-            text: 'Social and collaborative',
+            text: 'Xã hội và hợp tác',
             value: 'social_collaborative',
           ),
         ],
@@ -126,28 +126,28 @@ class SurveyProvider extends BaseProvider {
 
       SurveyQuestionModel(
         id: 'decision_making',
-        title: 'How do you typically',
-        subtitle: 'make important decisions?',
+        title: 'Bạn thường',
+        subtitle: 'đưa ra quyết định quan trọng như thế nào?',
         type: SurveyQuestionType.singleChoice,
         options: [
           const SurveyOptionModel(
             id: 'logical_analysis',
-            text: 'Through logical analysis',
+            text: 'Thông qua phân tích logic',
             value: 'logical_analysis',
           ),
           const SurveyOptionModel(
             id: 'gut_feeling',
-            text: 'Based on gut feeling',
+            text: 'Dựa trên cảm giác trực giác',
             value: 'gut_feeling',
           ),
           const SurveyOptionModel(
             id: 'seek_advice',
-            text: 'Seek advice from others',
+            text: 'Tìm kiếm lời khuyên từ người khác',
             value: 'seek_advice',
           ),
           const SurveyOptionModel(
             id: 'research_thoroughly',
-            text: 'Research thoroughly first',
+            text: 'Nghiên cứu kỹ lưỡng trước',
             value: 'research_thoroughly',
           ),
         ],
@@ -155,28 +155,28 @@ class SurveyProvider extends BaseProvider {
 
       SurveyQuestionModel(
         id: 'stress_response',
-        title: 'How do you handle',
-        subtitle: 'stressful situations?',
+        title: 'Bạn xử lý',
+        subtitle: 'các tình huống căng thẳng như thế nào?',
         type: SurveyQuestionType.singleChoice,
         options: [
           const SurveyOptionModel(
             id: 'stay_calm',
-            text: 'Stay calm and composed',
+            text: 'Giữ bình tĩnh và điềm đạm',
             value: 'stay_calm',
           ),
           const SurveyOptionModel(
             id: 'take_action',
-            text: 'Take immediate action',
+            text: 'Hành động ngay lập tức',
             value: 'take_action',
           ),
           const SurveyOptionModel(
             id: 'seek_support',
-            text: 'Seek support from others',
+            text: 'Tìm kiếm sự hỗ trợ từ người khác',
             value: 'seek_support',
           ),
           const SurveyOptionModel(
             id: 'need_time',
-            text: 'Need time to process',
+            text: 'Cần thời gian để xử lý',
             value: 'need_time',
           ),
         ],
@@ -184,28 +184,28 @@ class SurveyProvider extends BaseProvider {
 
       SurveyQuestionModel(
         id: 'communication_style',
-        title: 'What is your preferred',
-        subtitle: 'communication style?',
+        title: 'Phong cách giao tiếp',
+        subtitle: 'ưa thích của bạn là gì?',
         type: SurveyQuestionType.singleChoice,
         options: [
           const SurveyOptionModel(
             id: 'direct_honest',
-            text: 'Direct and honest',
+            text: 'Trực tiếp và thành thật',
             value: 'direct_honest',
           ),
           const SurveyOptionModel(
             id: 'diplomatic_tactful',
-            text: 'Diplomatic and tactful',
+            text: 'Ngoại giao và khéo léo',
             value: 'diplomatic_tactful',
           ),
           const SurveyOptionModel(
             id: 'expressive_emotional',
-            text: 'Expressive and emotional',
+            text: 'Biểu cảm và cảm xúc',
             value: 'expressive_emotional',
           ),
           const SurveyOptionModel(
             id: 'thoughtful_measured',
-            text: 'Thoughtful and measured',
+            text: 'Suy nghĩ và cân nhắc',
             value: 'thoughtful_measured',
           ),
         ],
@@ -341,6 +341,6 @@ class SurveyProvider extends BaseProvider {
   /// Get progress text for display
   String get progressText {
     if (!hasQuestions) return '';
-    return 'Question ${_currentQuestionIndex + 1} of $totalQuestions';
+    return 'Câu hỏi ${_currentQuestionIndex + 1} / $totalQuestions';
   }
 }

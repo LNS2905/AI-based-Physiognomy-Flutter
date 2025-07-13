@@ -334,6 +334,9 @@ class FaceScanProvider extends BaseProvider {
   /// Get analysis data from Cloudinary analysis
   CloudinaryAnalysisDataModel? get cloudinaryAnalysisData => _currentCloudinaryResult?.analysis;
 
+  /// Get face shape from analysis
+  String? get faceShape => _currentCloudinaryResult?.analysis?.analysisResult?.face?.shape?.primary;
+
   /// Get physiognomy result text
   String? get physiognomyResult => _currentCloudinaryResult?.analysis?.result;
 

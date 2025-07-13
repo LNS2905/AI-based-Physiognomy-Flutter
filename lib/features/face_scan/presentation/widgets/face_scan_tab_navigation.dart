@@ -61,19 +61,19 @@ class _FaceScanTabNavigationState extends State<FaceScanTabNavigation>
           children: [
             _buildTab(
               'face_scan',
-              'Face Scan',
+              'Quét mặt',
               Icons.face_retouching_natural,
               isSelected: widget.selectedTab == 'face_scan',
             ),
             _buildTab(
               'upload_photo',
-              'Upload Photo',
+              'Tải ảnh',
               Icons.cloud_upload_outlined,
               isSelected: widget.selectedTab == 'upload_photo',
             ),
             _buildTab(
               'user_guide',
-              'User Guide',
+              'Hướng dẫn',
               Icons.help_outline,
               isSelected: widget.selectedTab == 'user_guide',
             ),

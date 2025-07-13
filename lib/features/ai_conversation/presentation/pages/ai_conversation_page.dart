@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/error_handler.dart';
@@ -166,7 +167,7 @@ class _AIConversationPageState extends State<AIConversationPage>
             fontWeight: FontWeight.w400,
           ),
         ),
-        onPressed: () => Navigator.of(context).pop(),
+        onPressed: () => context.pop(),
       ),
       title: Row(
         children: [
@@ -203,7 +204,7 @@ class _AIConversationPageState extends State<AIConversationPage>
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     const Text(
-                      'AI Chat Assistant',
+                      'Trợ lý AI Trò chuyện',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
@@ -212,8 +213,8 @@ class _AIConversationPageState extends State<AIConversationPage>
                     ),
                     Text(
                       chatProvider.isAiTyping
-                          ? 'AI is typing...'
-                          : 'Online • Ready to help',
+                          ? 'AI đang nhập...'
+                          : 'Trực tuyến • Sẵn sàng giúp đỡ',
                       style: const TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w400,
@@ -239,7 +240,7 @@ class _AIConversationPageState extends State<AIConversationPage>
                     children: [
                       Icon(Icons.add_comment_outlined),
                       SizedBox(width: 8),
-                      Text('New Chat'),
+                      Text('Cuộc trò chuyện mới'),
                     ],
                   ),
                 ),
@@ -250,7 +251,7 @@ class _AIConversationPageState extends State<AIConversationPage>
                       children: [
                         Icon(Icons.clear_all_outlined),
                         SizedBox(width: 8),
-                        Text('Clear Chat'),
+                        Text('Xóa cuộc trò chuyện'),
                       ],
                     ),
                   ),
@@ -260,7 +261,7 @@ class _AIConversationPageState extends State<AIConversationPage>
                       children: [
                         Icon(Icons.delete_outline, color: AppColors.error),
                         SizedBox(width: 8),
-                        Text('Delete Chat', style: TextStyle(color: AppColors.error)),
+                        Text('Xóa cuộc trò chuyện', style: TextStyle(color: AppColors.error)),
                       ],
                     ),
                   ),
@@ -320,7 +321,7 @@ class _AIConversationPageState extends State<AIConversationPage>
             ),
             const SizedBox(height: 24),
             Text(
-              'Start a conversation',
+              'Bắt đầu cuộc trò chuyện',
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 color: AppColors.textPrimary,
                 fontWeight: FontWeight.w600,
@@ -328,7 +329,7 @@ class _AIConversationPageState extends State<AIConversationPage>
             ),
             const SizedBox(height: 8),
             Text(
-              'Ask me anything! I\'m here to help with your questions and provide insights.',
+              'Hỏi tôi bất cứ điều gì! Tôi ở đây để giúp bạn trả lời câu hỏi và cung cấp thông tin chi tiết.',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: AppColors.textSecondary,
               ),
@@ -344,9 +345,9 @@ class _AIConversationPageState extends State<AIConversationPage>
 
   Widget _buildSuggestedQuestions() {
     final suggestions = [
-      'What can you help me with?',
-      'Tell me about physiognomy',
-      'How does face analysis work?',
+      'Bạn có thể giúp tôi điều gì?',
+      'Hãy kể cho tôi về tướng học',
+      'Phân tích khuôn mặt hoạt động như thế nào?',
     ];
 
     return Column(
@@ -438,7 +439,7 @@ class _AIConversationPageState extends State<AIConversationPage>
       if (i == 0 && chatProvider.messages[i].sender == MessageSender.ai) {
         if (currentIndex == index) {
           return QuickSuggestionButtons(
-            suggestions: ['Explain my results', 'Ask about features'],
+            suggestions: ['Giải thích kết quả của tôi', 'Hỏi về các tính năng'],
             onSuggestionTap: (suggestion) {
               _messageController.text = suggestion;
               _onSendMessage();
@@ -452,9 +453,9 @@ class _AIConversationPageState extends State<AIConversationPage>
       if (i == 1 && chatProvider.messages.length > 1) {
         if (currentIndex == index) {
           return AnalysisReportCard(
-            title: 'Your Face Analysis Report',
-            subtitle: 'Overall Score: 87% • 6 features analyzed',
-            description: 'Tap to view detailed breakdown',
+            title: 'Báo cáo phân tích khuôn mặt của bạn',
+            subtitle: 'Điểm tổng thể: 87% • 6 tính năng đã phân tích',
+            description: 'Nhấn để xem phân tích chi tiết',
             onTap: () {
               // TODO: Navigate to detailed analysis
             },
@@ -469,13 +470,13 @@ class _AIConversationPageState extends State<AIConversationPage>
           return QuickActionButtons(
             actions: [
               QuickAction(
-                title: 'Share Analysis',
+                title: 'Chia sẻ phân tích',
                 onTap: () {
                   // TODO: Implement share functionality
                 },
               ),
               QuickAction(
-                title: 'Compare Features',
+                title: 'So sánh tính năng',
                 onTap: () {
                   // TODO: Implement compare functionality
                 },
@@ -491,7 +492,7 @@ class _AIConversationPageState extends State<AIConversationPage>
     if (chatProvider.isAiTyping && currentIndex == index) {
       return TypingIndicator(
         isVisible: chatProvider.isAiTyping,
-        customText: 'AI is thinking',
+        customText: 'AI đang suy nghĩ',
       );
     }
 
@@ -501,7 +502,7 @@ class _AIConversationPageState extends State<AIConversationPage>
   Widget _buildInitialAIGreeting() {
     final greetingMessage = ChatMessageModel.ai(
       id: 'greeting',
-      content: "Hello! I'm your AI physiognomy assistant. I can help you understand your face analysis results.",
+      content: "Xin chào! Tôi là trợ lý tướng học AI của bạn. Tôi có thể giúp bạn hiểu kết quả phân tích khuôn mặt của mình.",
     );
 
     return MessageBubble(
@@ -512,7 +513,7 @@ class _AIConversationPageState extends State<AIConversationPage>
 
   Widget _buildInitialQuickSuggestions() {
     return QuickSuggestionButtons(
-      suggestions: ['Explain my results', 'Ask about features'],
+      suggestions: ['Giải thích kết quả của tôi', 'Hỏi về các tính năng'],
       onSuggestionTap: (suggestion) {
         _messageController.text = suggestion;
         _onSendMessage();

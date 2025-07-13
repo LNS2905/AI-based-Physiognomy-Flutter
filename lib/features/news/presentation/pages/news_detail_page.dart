@@ -91,10 +91,10 @@ class _NewsDetailPageState extends State<NewsDetailPage> {
       return Scaffold(
         backgroundColor: AppColors.background,
         appBar: AppBar(
-          title: const Text('Article Not Found'),
+          title: const Text('Không tìm thấy bài viết'),
         ),
         body: const Center(
-          child: Text('Article not found'),
+          child: Text('Không tìm thấy bài viết'),
         ),
       );
     }
@@ -302,7 +302,7 @@ class _NewsDetailPageState extends State<NewsDetailPage> {
                       ),
                     ),
                     Text(
-                      '${DateFormat('MMM dd, yyyy').format(_article!.publishedAt)} • ${_article!.readTime} min read',
+                      '${DateFormat('MMM dd, yyyy').format(_article!.publishedAt)} • ${_article!.readTime} phút đọc',
                       style: const TextStyle(
                         fontSize: 12,
                         color: AppColors.textSecondary,

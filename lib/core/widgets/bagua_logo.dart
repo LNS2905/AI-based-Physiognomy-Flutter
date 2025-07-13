@@ -36,7 +36,7 @@ class BaguaLogo extends StatelessWidget {
           const SizedBox(height: 8),
           // App Name
           Text(
-            'AI Physiognomy',
+            'Tướng học AI',
             style: TextStyle(
               fontWeight: FontWeight.w600,
               fontSize: size * 0.25,

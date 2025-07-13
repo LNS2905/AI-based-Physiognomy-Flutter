@@ -19,11 +19,11 @@ class _NewsListPageState extends State<NewsListPage> {
   String _selectedCategory = 'All';
 
   final List<String> _categories = [
-    'All',
-    'Technology',
-    'Science',
-    'Ethics',
-    'Research',
+    'Tất cả',
+    'Công nghệ',
+    'Khoa học',
+    'Đạo đức',
+    'Nghiên cứu',
   ];
 
   @override
@@ -43,7 +43,7 @@ class _NewsListPageState extends State<NewsListPage> {
   }
 
   List<NewsArticleModel> get _filteredArticles {
-    if (_selectedCategory == 'All') {
+    if (_selectedCategory == 'Tất cả') {
       return _articles;
     }
     return _articles.where((article) => article.category == _selectedCategory).toList();
@@ -117,7 +117,7 @@ class _NewsListPageState extends State<NewsListPage> {
       ),
       flexibleSpace: FlexibleSpaceBar(
         title: const Text(
-          'News & Articles',
+          'Tin tức & Bài viết',
           style: TextStyle(
             color: AppColors.textOnPrimary,
             fontWeight: FontWeight.bold,
@@ -267,7 +267,7 @@ class _NewsListPageState extends State<NewsListPage> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: const Text(
-                            'FEATURED',
+                            'NỔI BẬT',
                             style: TextStyle(
                               color: AppColors.textOnPrimary,
                               fontSize: 10,
@@ -369,7 +369,7 @@ class _NewsListPageState extends State<NewsListPage> {
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
                             Text(
-                              '${article.readTime} min read',
+                              '${article.readTime} phút đọc',
                               style: const TextStyle(
                                 fontSize: 12,
                                 color: AppColors.textSecondary,

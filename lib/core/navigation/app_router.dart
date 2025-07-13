@@ -61,9 +61,16 @@ class AppRouter {
       GoRoute(
         path: AppConstants.demographicsRoute,
         name: 'demographics',
-        builder: (context, state) => const Scaffold(
-          body: Center(
-            child: Text('Demographics Screen - To be implemented'),
+        builder: (context, state) => Scaffold(
+          appBar: AppBar(
+            title: const Text('Thông tin cá nhân'),
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () => context.pop(),
+            ),
+          ),
+          body: const Center(
+            child: Text('Màn hình thông tin cá nhân - Sẽ được triển khai'),
           ),
         ),
       ),
@@ -100,9 +107,16 @@ class AppRouter {
       GoRoute(
         path: AppConstants.resultRoute,
         name: 'result',
-        builder: (context, state) => const Scaffold(
-          body: Center(
-            child: Text('Result Screen - To be implemented'),
+        builder: (context, state) => Scaffold(
+          appBar: AppBar(
+            title: const Text('Kết quả'),
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () => context.pop(),
+            ),
+          ),
+          body: const Center(
+            child: Text('Màn hình kết quả - Sẽ được triển khai'),
           ),
         ),
       ),
@@ -145,9 +159,16 @@ class AppRouter {
       GoRoute(
         path: AppConstants.profileRoute,
         name: 'profile',
-        builder: (context, state) => const Scaffold(
-          body: Center(
-            child: Text('Profile Screen - To be implemented'),
+        builder: (context, state) => Scaffold(
+          appBar: AppBar(
+            title: const Text('Hồ sơ'),
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () => context.pop(),
+            ),
+          ),
+          body: const Center(
+            child: Text('Màn hình hồ sơ - Sẽ được triển khai'),
           ),
         ),
       ),
@@ -164,18 +185,18 @@ class AppRouter {
             ),
             const SizedBox(height: 16),
             Text(
-              'Page not found',
+              'Không tìm thấy trang',
               style: Theme.of(context).textTheme.headlineSmall,
             ),
             const SizedBox(height: 8),
             Text(
-              'The page "${state.uri}" could not be found.',
+              'Không thể tìm thấy trang "${state.uri}".',
               style: Theme.of(context).textTheme.bodyMedium,
             ),
             const SizedBox(height: 24),
             ElevatedButton(
               onPressed: () => context.go(AppConstants.homeRoute),
-              child: const Text('Go to Home'),
+              child: const Text('Về trang chủ'),
             ),
           ],
         ),
