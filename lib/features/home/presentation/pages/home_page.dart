@@ -521,7 +521,7 @@ class HomePage extends StatelessWidget {
     final isTablet = screenWidth > 600;
 
     if (isTablet) {
-      // For tablets, show 4 cards in a 2x2 grid
+      // For tablets, show 6 cards in a 2x3 grid
       return GridView.count(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
@@ -536,6 +536,13 @@ class HomePage extends StatelessWidget {
             title: 'Quét khuôn mặt',
             description: 'Phân tích các nét mặt',
             onTap: () => context.push('/face-scanning'),
+          ),
+          _buildFeatureCard(
+            context,
+            icon: Icons.back_hand,
+            title: 'Quét vân tay',
+            description: 'Phân tích đường chỉ tay',
+            onTap: () => context.push('/palm-scanning'),
           ),
           _buildFeatureCard(
             context,
@@ -558,30 +565,65 @@ class HomePage extends StatelessWidget {
             description: 'Quản lý hồ sơ của bạn',
             onTap: () => context.push('/profile'),
           ),
+          _buildFeatureCard(
+            context,
+            icon: Icons.help_outline,
+            title: 'Hướng dẫn',
+            description: 'Hướng dẫn sử dụng',
+            onTap: () => context.push('/user-guide'),
+          ),
         ],
       );
     } else {
-      // For mobile, show 2 cards in a row
-      return Row(
+      // For mobile, show cards in a 2x2 grid
+      return Column(
         children: [
-          Expanded(
-            child: _buildFeatureCard(
-              context,
-              icon: Icons.face_retouching_natural,
-              title: 'Quét khuôn mặt',
-              description: 'Phân tích các nét mặt',
-              onTap: () => context.push('/face-scanning'),
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: _buildFeatureCard(
+                  context,
+                  icon: Icons.face_retouching_natural,
+                  title: 'Quét khuôn mặt',
+                  description: 'Phân tích các nét mặt',
+                  onTap: () => context.push('/face-scanning'),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildFeatureCard(
+                  context,
+                  icon: Icons.back_hand,
+                  title: 'Quét vân tay',
+                  description: 'Phân tích đường chỉ tay',
+                  onTap: () => context.push('/palm-scanning'),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: _buildFeatureCard(
-              context,
-              icon: Icons.chat_bubble_outline,
-              title: 'AI Chatbot',
-              description: 'Trò chuyện với trợ lý AI',
-              onTap: () => context.push('/ai-conversation'),
-            ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: _buildFeatureCard(
+                  context,
+                  icon: Icons.chat_bubble_outline,
+                  title: 'AI Chatbot',
+                  description: 'Trò chuyện với trợ lý AI',
+                  onTap: () => context.push('/ai-conversation'),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildFeatureCard(
+                  context,
+                  icon: Icons.analytics_outlined,
+                  title: 'Kết quả',
+                  description: 'Xem kết quả phân tích',
+                  onTap: () => context.push('/result'),
+                ),
+              ),
+            ],
           ),
         ],
       );

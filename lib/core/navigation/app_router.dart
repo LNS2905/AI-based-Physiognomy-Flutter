@@ -10,6 +10,8 @@ import '../../features/survey/presentation/pages/survey_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/face_scan/presentation/pages/face_scan_page.dart';
 import '../../features/face_scan/presentation/pages/camera_screen.dart';
+import '../../features/palm_scan/presentation/pages/palm_scan_page.dart';
+import '../../features/palm_scan/presentation/pages/palm_camera_screen.dart';
 import '../../features/news/presentation/pages/news_detail_page.dart';
 import '../../features/news/presentation/pages/news_list_page.dart';
 import '../../features/face_scan/presentation/pages/user_guide_page.dart';
@@ -89,6 +91,13 @@ class AppRouter {
         builder: (context, state) => const FaceScanPage(),
       ),
 
+      // Palm Scanning Route
+      GoRoute(
+        path: AppConstants.palmScanningRoute,
+        name: 'palm-scanning',
+        builder: (context, state) => const PalmScanPage(),
+      ),
+
       // User Guide Route
       GoRoute(
         path: AppConstants.userGuideRoute,
@@ -101,6 +110,13 @@ class AppRouter {
         path: AppConstants.cameraRoute,
         name: 'camera',
         builder: (context, state) => const CameraScreen(),
+      ),
+
+      // Palm Camera Route
+      GoRoute(
+        path: AppConstants.palmCameraRoute,
+        name: 'palm-camera',
+        builder: (context, state) => const PalmCameraScreen(),
       ),
 
       // Result Route
@@ -215,8 +231,10 @@ class AppRouter {
   static void goToDemographics() => _router.go(AppConstants.demographicsRoute);
   static void goToHome() => _router.go(AppConstants.homeRoute);
   static void goToFaceScanning() => _router.go(AppConstants.faceScanningRoute);
+  static void goToPalmScanning() => _router.go(AppConstants.palmScanningRoute);
   static void goToUserGuide() => _router.go(AppConstants.userGuideRoute);
   static void goToCamera() => _router.go(AppConstants.cameraRoute);
+  static void goToPalmCamera() => _router.go(AppConstants.palmCameraRoute);
   static void goToResult() => _router.go(AppConstants.resultRoute);
   static void goToChatbot() => _router.go(AppConstants.chatbotRoute);
   static void goToAiConversation({String? conversationId}) {
@@ -235,8 +253,10 @@ class AppRouter {
   static void pushDemographics() => _router.push(AppConstants.demographicsRoute);
   static void pushHome() => _router.push(AppConstants.homeRoute);
   static void pushFaceScanning() => _router.push(AppConstants.faceScanningRoute);
+  static void pushPalmScanning() => _router.push(AppConstants.palmScanningRoute);
   static void pushUserGuide() => _router.push(AppConstants.userGuideRoute);
   static void pushCamera() => _router.push(AppConstants.cameraRoute);
+  static void pushPalmCamera() => _router.push(AppConstants.palmCameraRoute);
   static void pushResult() => _router.push(AppConstants.resultRoute);
   static void pushChatbot() => _router.push(AppConstants.chatbotRoute);
   static void pushAiConversation({String? conversationId}) {

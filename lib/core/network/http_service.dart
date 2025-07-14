@@ -238,7 +238,9 @@ class HttpService {
   /// Build URI with query parameters
   Uri _buildUri(String endpoint, Map<String, dynamic>? queryParameters) {
     // Don't add API version for full endpoints that already include version or are external
-    final path = endpoint.startsWith('http') || endpoint.contains('analyze-face-from-cloudinary')
+    final path = endpoint.startsWith('http') ||
+                 endpoint.contains('analyze-face-from-cloudinary') ||
+                 endpoint.contains('analyze-palm-cloudinary')
         ? endpoint.replaceFirst(_baseUrl, '') // Remove base URL if it's included
         : '${AppConstants.apiVersion}/$endpoint';
 
@@ -276,7 +278,14 @@ class HttpService {
       if (response.body.isEmpty) {
         return <String, dynamic>{};
       }
-      return jsonDecode(response.body) as Map<String, dynamic>;
+
+      final decoded = jsonDecode(response.body);
+      if (decoded is Map<String, dynamic>) {
+        return decoded;
+      } else {
+        // If API returns a List or other type, wrap it in a Map
+        return {'data': decoded};
+      }
     }
 
     // Handle error responses

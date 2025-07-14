@@ -18,6 +18,7 @@ import '../models/face_scan_request_model.dart';
 import '../models/face_scan_response_model.dart';
 import '../models/cloudinary_analysis_request_model.dart';
 import '../models/cloudinary_analysis_response_model.dart';
+import '../../../palm_scan/data/models/palm_analysis_response_model.dart';
 
 /// Repository for face scanning operations
 class FaceScanRepository {
@@ -382,6 +383,73 @@ class FaceScanRepository {
         UnknownFailure(
           message: 'Failed to analyze face: ${e.toString()}',
           code: 'CLOUDINARY_ANALYSIS_ERROR',
+        ),
+      );
+    }
+  }
+
+  /// Analyze palm using Cloudinary endpoint
+  Future<ApiResult<PalmAnalysisResponseModel>> analyzePalmFromCloudinary(
+    String imagePath, {
+    String? userId,
+  }) async {
+    try {
+      AppLogger.info('Starting palm analysis via Cloudinary endpoint');
+
+      // Step 1: Upload image to Cloudinary and get signed URL
+      final uploadResult = await _cloudinaryService.uploadImageAndGetSignedUrl(
+        imagePath,
+        userId: userId ?? 'anonymous_user',
+      );
+
+      if (!uploadResult.success) {
+        throw CloudinaryException(
+          message: uploadResult.error ?? 'Failed to upload image',
+          code: 'UPLOAD_FAILED',
+        );
+      }
+
+      AppLogger.info('Image uploaded to Cloudinary: ${uploadResult.publicId}');
+
+      // Step 2: Prepare request for analysis API
+      final request = CloudinaryAnalysisRequestModel(
+        signedUrl: uploadResult.signedUrl,
+        userId: userId ?? 'anonymous_user',
+        timestamp: DateTime.now().toIso8601String(),
+        originalFolderPath: uploadResult.folderPath,
+      );
+
+      AppLogger.info('Sending palm analysis request to API');
+
+      // Step 3: Call the palm analysis API
+      final response = await _httpService.post(
+        AppConstants.palmAnalysisApiUrl,
+        body: request.toJson(),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      );
+
+      // Step 4: Parse response
+      final analysisResponse = PalmAnalysisResponseModel.fromJson(response);
+      AppLogger.info('Palm analysis completed successfully');
+
+      return Success(analysisResponse);
+    } on CloudinaryException catch (e) {
+      AppLogger.error('Cloudinary error in analyzePalmFromCloudinary', e);
+      return Error(
+        NetworkFailure(
+          message: e.message,
+          code: e.code,
+        ),
+      );
+    } catch (e) {
+      AppLogger.error('Exception in analyzePalmFromCloudinary', e);
+      return Error(
+        UnknownFailure(
+          message: 'Failed to analyze palm: ${e.toString()}',
+          code: 'CLOUDINARY_PALM_ANALYSIS_ERROR',
         ),
       );
     }

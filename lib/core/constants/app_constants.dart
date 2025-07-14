@@ -10,6 +10,10 @@ class AppConstants {
 
   // Face Analysis API Configuration
   static const String faceAnalysisApiUrl = 'analyze-face-from-cloudinary/';
+
+  // Palm Analysis API Configuration
+  static const String palmAnalysisApiUrl = 'analyze-palm-cloudinary/';
+
   static const Duration requestTimeout = Duration(seconds: 120); // Increased for Cloudinary processing
   static const Duration connectTimeout = Duration(seconds: 15);
 
@@ -35,8 +39,10 @@ class AppConstants {
   static const String demographicsRoute = '/demographics';
   static const String homeRoute = '/home';
   static const String faceScanningRoute = '/face-scanning';
+  static const String palmScanningRoute = '/palm-scanning';
   static const String userGuideRoute = '/user-guide';
   static const String cameraRoute = '/camera';
+  static const String palmCameraRoute = '/palm-camera';
   static const String resultRoute = '/result';
   static const String chatbotRoute = '/chatbot';
   static const String aiConversationRoute = '/ai-conversation';

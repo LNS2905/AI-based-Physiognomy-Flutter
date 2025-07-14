@@ -7,6 +7,7 @@ import '../../data/models/face_scan_request_model.dart';
 import '../../data/models/face_scan_response_model.dart';
 import '../../data/models/cloudinary_analysis_response_model.dart';
 import '../../data/repositories/face_scan_repository.dart';
+import '../../../palm_scan/data/models/palm_analysis_response_model.dart';
 
 /// Provider for face scanning functionality
 class FaceScanProvider extends BaseProvider {
@@ -27,6 +28,10 @@ class FaceScanProvider extends BaseProvider {
   bool _isCameraActive = false;
   bool _isCameraInitialized = false;
   String _selectedTab = 'face_scan'; // face_scan, upload_photo, user_guide
+
+  // Palm analysis state
+  PalmAnalysisResponseModel? _currentPalmResult;
+  List<PalmAnalysisResponseModel> _palmHistory = [];
 
   // Getters
   FaceScanResponseModel? get currentScan => _currentScan;
@@ -77,6 +82,18 @@ class FaceScanProvider extends BaseProvider {
     AppLogger.logStateChange(runtimeType.toString(), 'setCurrentCloudinaryResult', 'Cloudinary analysis result set');
     notifyListeners();
   }
+
+  /// Set current palm analysis result
+  void setCurrentPalmResult(PalmAnalysisResponseModel result) {
+    _currentPalmResult = result;
+    _palmHistory.add(result);
+    AppLogger.logStateChange(runtimeType.toString(), 'setCurrentPalmResult', 'Palm analysis result set');
+    notifyListeners();
+  }
+
+  // Palm analysis getters
+  PalmAnalysisResponseModel? get currentPalmResult => _currentPalmResult;
+  List<PalmAnalysisResponseModel> get palmHistory => List.unmodifiable(_palmHistory);
 
   /// Initialize camera service
   Future<bool> initializeCamera() async {
@@ -355,12 +372,55 @@ class FaceScanProvider extends BaseProvider {
     notifyListeners();
   }
 
+  /// Pick image from gallery and analyze palm
+  Future<bool> pickImageAndAnalyzePalm() async {
+    try {
+      setLoading(true);
+      AppLogger.info('Starting palm image selection from gallery');
+
+      // Pick image from gallery
+      final imagePath = await _imagePickerService.pickImageFromGallery();
+
+      if (imagePath == null) {
+        AppLogger.info('No image selected from gallery for palm analysis');
+        setLoading(false);
+        return false;
+      }
+
+      AppLogger.info('Palm image selected: $imagePath');
+      setSelectedImagePath(imagePath);
+
+      // Start palm analysis using Cloudinary endpoint
+      final result = await executeApiOperation(
+        () => _repository.analyzePalmFromCloudinary(imagePath),
+        operationName: 'analyzePalmFromCloudinary',
+      );
+
+      if (result != null) {
+        setCurrentPalmResult(result);
+        AppLogger.info('Palm analysis completed successfully');
+        setLoading(false);
+        return true;
+      } else {
+        AppLogger.error('Palm analysis failed');
+        setLoading(false);
+        return false;
+      }
+    } catch (e) {
+      AppLogger.error('Exception in pickImageAndAnalyzePalm', e);
+      setLoading(false);
+      return false;
+    }
+  }
+
   @override
   void dispose() {
     _currentScan = null;
     _scanHistory.clear();
     _selectedImagePath = null;
     _isCameraActive = false;
+    _currentPalmResult = null;
+    _palmHistory.clear();
     super.dispose();
   }
 }
