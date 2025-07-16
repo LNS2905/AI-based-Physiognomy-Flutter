@@ -20,7 +20,7 @@ import '../../features/ai_conversation/presentation/pages/ai_conversation_page.d
 /// Application router configuration using GoRouter
 class AppRouter {
   static final GoRouter _router = GoRouter(
-    initialLocation: AppConstants.splashRoute,
+    initialLocation: AppConstants.homeRoute,
     debugLogDiagnostics: true,
     observers: [NavigationObserver()],
     routes: [

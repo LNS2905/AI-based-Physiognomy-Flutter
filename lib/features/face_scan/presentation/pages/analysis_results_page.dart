@@ -2,16 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/logger.dart';
+import '../../data/models/chart_data_models.dart';
+import '../../data/models/cloudinary_analysis_response_model.dart';
+import '../widgets/face_shape_probability_chart.dart';
+import '../widgets/harmony_scores_widget.dart';
+import '../widgets/proportionality_metrics_chart.dart';
 
 /// Page to display face analysis results
 class AnalysisResultsPage extends StatelessWidget {
-  final Map<String, dynamic> analysisData;
+  final CloudinaryAnalysisResponseModel? analysisResponse;
+  final Map<String, dynamic>? legacyAnalysisData; // For backward compatibility
   final String? annotatedImagePath;
   final String? reportImagePath;
 
   const AnalysisResultsPage({
     super.key,
-    required this.analysisData,
+    this.analysisResponse,
+    this.legacyAnalysisData,
     this.annotatedImagePath,
     this.reportImagePath,
   });
@@ -43,6 +50,30 @@ class AnalysisResultsPage extends StatelessWidget {
                     _buildAnalysisDetails(),
 
                     const SizedBox(height: 20),
+
+                    // Face Shape Probability Chart
+                    if (_getFaceShapeProbabilities().isNotEmpty) ...[
+                      FaceShapeProbabilityChart(
+                        data: _getFaceShapeProbabilities(),
+                      ),
+                      const SizedBox(height: 20),
+                    ],
+
+                    // Harmony Scores Widget
+                    if (_getHarmonyScores().isNotEmpty) ...[
+                      HarmonyScoresWidget(
+                        data: _getHarmonyScores(),
+                      ),
+                      const SizedBox(height: 20),
+                    ],
+
+                    // Proportionality Metrics Chart
+                    if (_getProportionalityMetrics().isNotEmpty) ...[
+                      ProportionalityMetricsChart(
+                        data: _getProportionalityMetrics(),
+                      ),
+                      const SizedBox(height: 20),
+                    ],
 
                     // Images Section
                     if (annotatedImagePath != null || reportImagePath != null)
@@ -148,8 +179,8 @@ class AnalysisResultsPage extends StatelessWidget {
   }
 
   Widget _buildMainResultsCard() {
-    final harmonyScore = analysisData['total_harmony_score'] as double? ?? 0.0;
-    final faceShape = analysisData['face_shape'] as String?;
+    final harmonyScore = _getOverallHarmonyScore();
+    final faceShape = _getPrimaryFaceShape();
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
@@ -367,7 +398,7 @@ class AnalysisResultsPage extends StatelessWidget {
   }
 
   Widget _buildAnalysisDetails() {
-    final result = analysisData['result'] as String? ?? 'No analysis available';
+    final result = _getAnalysisResult();
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
@@ -906,5 +937,53 @@ class AnalysisResultsPage extends StatelessWidget {
         backgroundColor: AppColors.primary,
       ),
     );
+  }
+
+  // Helper methods for data processing
+  double _getOverallHarmonyScore() {
+    if (analysisResponse?.analysis?.analysisResult?.face?.proportionality?.overallHarmonyScore != null) {
+      return analysisResponse!.analysis!.analysisResult!.face!.proportionality!.overallHarmonyScore!;
+    }
+    return legacyAnalysisData?['total_harmony_score'] as double? ?? 0.0;
+  }
+
+  String? _getPrimaryFaceShape() {
+    if (analysisResponse?.analysis?.analysisResult?.face?.shape?.primary != null) {
+      return analysisResponse!.analysis!.analysisResult!.face!.shape!.primary;
+    }
+    return legacyAnalysisData?['face_shape'] as String?;
+  }
+
+  List<FaceShapeProbabilityData> _getFaceShapeProbabilities() {
+    final probabilities = analysisResponse?.analysis?.analysisResult?.face?.shape?.probabilities;
+    if (probabilities != null) {
+      return ChartDataProcessor.processFaceShapeProbabilities(probabilities);
+    }
+    return [];
+  }
+
+  List<HarmonyScoreData> _getHarmonyScores() {
+    final harmonyScores = analysisResponse?.analysis?.analysisResult?.face?.proportionality?.harmonyScores;
+    if (harmonyScores != null) {
+      return ChartDataProcessor.processHarmonyScores(harmonyScores);
+    }
+    return [];
+  }
+
+  List<ProportionalityMetricData> _getProportionalityMetrics() {
+    final metrics = analysisResponse?.analysis?.analysisResult?.face?.proportionality?.metrics;
+    if (metrics != null) {
+      return ChartDataProcessor.processProportionalityMetrics(
+        metrics.map((m) => m.toJson()).toList(),
+      );
+    }
+    return [];
+  }
+
+  String _getAnalysisResult() {
+    if (analysisResponse?.analysis?.result != null) {
+      return analysisResponse!.analysis!.result!;
+    }
+    return legacyAnalysisData?['result'] as String? ?? 'Không có kết quả phân tích';
   }
 }

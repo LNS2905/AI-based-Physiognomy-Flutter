@@ -26,8 +26,8 @@ void main() {
     });
 
     test('Test API endpoint configuration', () {
-      expect(AppConstants.faceAnalysisApiUrl, 
-          equals('https://inspired-bear-emerging.ngrok-free.app/analyze-face-from-cloudinary/'));
+      expect(AppConstants.faceAnalysisApiUrl,
+          equals('analyze-face-from-cloudinary/'));
       expect(AppConstants.cloudinaryCloudName, equals('dd0wymyqj'));
       expect(AppConstants.cloudinaryApiKey, equals('389718786139835'));
     });

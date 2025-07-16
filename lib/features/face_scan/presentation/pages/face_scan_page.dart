@@ -669,25 +669,13 @@ class _FaceScanPageState extends State<FaceScanPage> {
     final cloudinaryResult = provider.currentCloudinaryResult;
 
     if (cloudinaryResult != null) {
-      // Use Cloudinary analysis result
-      final faceShape = cloudinaryResult.analysis?.analysisResult?.face?.shape?.primary ?? 'Unknown';
-
-      final analysisData = {
-        'face_shape': faceShape,
-        'total_harmony_score': cloudinaryResult.totalHarmonyScore,
-        'result': cloudinaryResult.analysis?.result ?? 'No analysis available',
-        'features': cloudinaryResult.analysis?.features ?? {},
-        'annotated_image_url': cloudinaryResult.annotatedImageUrl,
-        'report_image_url': cloudinaryResult.reportImageUrl,
-      };
-
       // Navigate to dedicated results page with Cloudinary data
       Navigator.of(context).push(
         MaterialPageRoute(
           builder: (context) => AnalysisResultsPage(
-            analysisData: analysisData,
-            annotatedImagePath: cloudinaryResult.annotatedImageUrl, // Use URL instead of path
-            reportImagePath: cloudinaryResult.reportImageUrl, // Use URL instead of path
+            analysisResponse: cloudinaryResult,
+            annotatedImagePath: cloudinaryResult.annotatedImageUrl,
+            reportImagePath: cloudinaryResult.annotatedImageUrl, // Use annotated image URL for both
           ),
         ),
       );
@@ -702,7 +690,7 @@ class _FaceScanPageState extends State<FaceScanPage> {
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (context) => AnalysisResultsPage(
-              analysisData: analysisData,
+              legacyAnalysisData: analysisData,
               annotatedImagePath: annotatedImagePath,
               reportImagePath: reportImagePath,
             ),

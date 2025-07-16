@@ -342,11 +342,11 @@ class FaceScanProvider extends BaseProvider {
   /// Get annotated image URL from Cloudinary analysis
   String? get annotatedImageUrl => _currentCloudinaryResult?.annotatedImageUrl;
 
-  /// Get report image URL from Cloudinary analysis
-  String? get reportImageUrl => _currentCloudinaryResult?.reportImageUrl;
+  /// Get report image URL from Cloudinary analysis (using annotated image URL)
+  String? get reportImageUrl => _currentCloudinaryResult?.annotatedImageUrl;
 
   /// Get total harmony score from Cloudinary analysis
-  double? get totalHarmonyScore => _currentCloudinaryResult?.totalHarmonyScore;
+  double? get totalHarmonyScore => _currentCloudinaryResult?.analysis?.analysisResult?.face?.proportionality?.overallHarmonyScore;
 
   /// Get analysis data from Cloudinary analysis
   CloudinaryAnalysisDataModel? get cloudinaryAnalysisData => _currentCloudinaryResult?.analysis;

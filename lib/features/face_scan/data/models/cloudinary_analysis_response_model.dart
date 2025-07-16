@@ -6,9 +6,7 @@ class CloudinaryAnalysisResponseModel extends Equatable {
   final String message;
   final String userId;
   final String processedAt;
-  final double totalHarmonyScore;
   final String? annotatedImageUrl;
-  final String? reportImageUrl;
   final CloudinaryAnalysisDataModel? analysis;
 
   const CloudinaryAnalysisResponseModel({
@@ -16,9 +14,7 @@ class CloudinaryAnalysisResponseModel extends Equatable {
     required this.message,
     required this.userId,
     required this.processedAt,
-    required this.totalHarmonyScore,
     this.annotatedImageUrl,
-    this.reportImageUrl,
     this.analysis,
   });
 
@@ -28,9 +24,7 @@ class CloudinaryAnalysisResponseModel extends Equatable {
       message: json['message'] as String,
       userId: json['user_id'] as String,
       processedAt: json['processed_at'] as String,
-      totalHarmonyScore: (json['total_harmony_score'] as num).toDouble(),
       annotatedImageUrl: json['annotated_image_url'] as String?,
-      reportImageUrl: json['report_image_url'] as String?,
       analysis: json['analysis'] != null
           ? CloudinaryAnalysisDataModel.fromJson(json['analysis'] as Map<String, dynamic>)
           : null,
@@ -43,9 +37,7 @@ class CloudinaryAnalysisResponseModel extends Equatable {
       'message': message,
       'user_id': userId,
       'processed_at': processedAt,
-      'total_harmony_score': totalHarmonyScore,
       'annotated_image_url': annotatedImageUrl,
-      'report_image_url': reportImageUrl,
       'analysis': analysis?.toJson(),
     };
   }
@@ -56,49 +48,77 @@ class CloudinaryAnalysisResponseModel extends Equatable {
         message,
         userId,
         processedAt,
-        totalHarmonyScore,
         annotatedImageUrl,
-        reportImageUrl,
         analysis,
       ];
 }
 
 /// Model for analysis data within Cloudinary response
 class CloudinaryAnalysisDataModel extends Equatable {
-  final String? faceShape;
-  final Map<String, dynamic>? features;
-  final String? result;
+  final CloudinaryMetadataModel? metadata;
   final CloudinaryAnalysisResultModel? analysisResult;
+  final String? result;
 
   const CloudinaryAnalysisDataModel({
-    this.faceShape,
-    this.features,
-    this.result,
+    this.metadata,
     this.analysisResult,
+    this.result,
   });
 
   factory CloudinaryAnalysisDataModel.fromJson(Map<String, dynamic> json) {
     return CloudinaryAnalysisDataModel(
-      faceShape: json['face_shape'] as String?,
-      features: json['features'] as Map<String, dynamic>?,
-      result: json['result'] as String?,
+      metadata: json['metadata'] != null
+          ? CloudinaryMetadataModel.fromJson(json['metadata'] as Map<String, dynamic>)
+          : null,
       analysisResult: json['analysisResult'] != null
           ? CloudinaryAnalysisResultModel.fromJson(json['analysisResult'] as Map<String, dynamic>)
           : null,
+      result: json['result'] as String?,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'face_shape': faceShape,
-      'features': features,
-      'result': result,
+      'metadata': metadata?.toJson(),
       'analysisResult': analysisResult?.toJson(),
+      'result': result,
     };
   }
 
   @override
-  List<Object?> get props => [faceShape, features, result, analysisResult];
+  List<Object?> get props => [metadata, analysisResult, result];
+}
+
+/// Model for metadata within analysis
+class CloudinaryMetadataModel extends Equatable {
+  final String? reportTitle;
+  final String? sourceFilename;
+  final String? timestampUTC;
+
+  const CloudinaryMetadataModel({
+    this.reportTitle,
+    this.sourceFilename,
+    this.timestampUTC,
+  });
+
+  factory CloudinaryMetadataModel.fromJson(Map<String, dynamic> json) {
+    return CloudinaryMetadataModel(
+      reportTitle: json['reportTitle'] as String?,
+      sourceFilename: json['sourceFilename'] as String?,
+      timestampUTC: json['timestampUTC'] as String?,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'reportTitle': reportTitle,
+      'sourceFilename': sourceFilename,
+      'timestampUTC': timestampUTC,
+    };
+  }
+
+  @override
+  List<Object?> get props => [reportTitle, sourceFilename, timestampUTC];
 }
 
 /// Model for analysisResult within Cloudinary response
@@ -129,50 +149,40 @@ class CloudinaryAnalysisResultModel extends Equatable {
 
 /// Model for face data within analysisResult
 class CloudinaryFaceModel extends Equatable {
-  final double? confidence;
   final CloudinaryFaceShapeModel? shape;
-  final Map<String, dynamic>? boundingBoxOriginal;
-  final List<dynamic>? features;
-  final Map<String, dynamic>? proportionality;
+  final CloudinaryProportionalityModel? proportionality;
 
   const CloudinaryFaceModel({
-    this.confidence,
     this.shape,
-    this.boundingBoxOriginal,
-    this.features,
     this.proportionality,
   });
 
   factory CloudinaryFaceModel.fromJson(Map<String, dynamic> json) {
     return CloudinaryFaceModel(
-      confidence: (json['confidence'] as num?)?.toDouble(),
       shape: json['shape'] != null
           ? CloudinaryFaceShapeModel.fromJson(json['shape'] as Map<String, dynamic>)
           : null,
-      boundingBoxOriginal: json['boundingBoxOriginal'] as Map<String, dynamic>?,
-      features: json['features'] as List<dynamic>?,
-      proportionality: json['proportionality'] as Map<String, dynamic>?,
+      proportionality: json['proportionality'] != null
+          ? CloudinaryProportionalityModel.fromJson(json['proportionality'] as Map<String, dynamic>)
+          : null,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'confidence': confidence,
       'shape': shape?.toJson(),
-      'boundingBoxOriginal': boundingBoxOriginal,
-      'features': features,
-      'proportionality': proportionality,
+      'proportionality': proportionality?.toJson(),
     };
   }
 
   @override
-  List<Object?> get props => [confidence, shape, boundingBoxOriginal, features, proportionality];
+  List<Object?> get props => [shape, proportionality];
 }
 
 /// Model for face shape data
 class CloudinaryFaceShapeModel extends Equatable {
   final String? primary;
-  final Map<String, dynamic>? probabilities;
+  final Map<String, double>? probabilities;
 
   const CloudinaryFaceShapeModel({
     this.primary,
@@ -180,9 +190,15 @@ class CloudinaryFaceShapeModel extends Equatable {
   });
 
   factory CloudinaryFaceShapeModel.fromJson(Map<String, dynamic> json) {
+    Map<String, double>? parsedProbabilities;
+    if (json['probabilities'] != null) {
+      final probData = json['probabilities'] as Map<String, dynamic>;
+      parsedProbabilities = probData.map((key, value) => MapEntry(key, (value as num).toDouble()));
+    }
+
     return CloudinaryFaceShapeModel(
       primary: json['primary'] as String?,
-      probabilities: json['probabilities'] as Map<String, dynamic>?,
+      probabilities: parsedProbabilities,
     );
   }
 
@@ -195,4 +211,84 @@ class CloudinaryFaceShapeModel extends Equatable {
 
   @override
   List<Object?> get props => [primary, probabilities];
+}
+
+/// Model for proportionality data
+class CloudinaryProportionalityModel extends Equatable {
+  final double? overallHarmonyScore;
+  final Map<String, double>? harmonyScores;
+  final List<CloudinaryMetricModel>? metrics;
+
+  const CloudinaryProportionalityModel({
+    this.overallHarmonyScore,
+    this.harmonyScores,
+    this.metrics,
+  });
+
+  factory CloudinaryProportionalityModel.fromJson(Map<String, dynamic> json) {
+    Map<String, double>? parsedHarmonyScores;
+    if (json['harmonyScores'] != null) {
+      final harmonyData = json['harmonyScores'] as Map<String, dynamic>;
+      parsedHarmonyScores = harmonyData.map((key, value) => MapEntry(key, (value as num).toDouble()));
+    }
+
+    List<CloudinaryMetricModel>? parsedMetrics;
+    if (json['metrics'] != null) {
+      final metricsData = json['metrics'] as List<dynamic>;
+      parsedMetrics = metricsData.map((metric) => CloudinaryMetricModel.fromJson(metric as Map<String, dynamic>)).toList();
+    }
+
+    return CloudinaryProportionalityModel(
+      overallHarmonyScore: (json['overallHarmonyScore'] as num?)?.toDouble(),
+      harmonyScores: parsedHarmonyScores,
+      metrics: parsedMetrics,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'overallHarmonyScore': overallHarmonyScore,
+      'harmonyScores': harmonyScores,
+      'metrics': metrics?.map((metric) => metric.toJson()).toList(),
+    };
+  }
+
+  @override
+  List<Object?> get props => [overallHarmonyScore, harmonyScores, metrics];
+}
+
+/// Model for individual metric data
+class CloudinaryMetricModel extends Equatable {
+  final String? label;
+  final double? pixels;
+  final double? percentage;
+  final String? orientation;
+
+  const CloudinaryMetricModel({
+    this.label,
+    this.pixels,
+    this.percentage,
+    this.orientation,
+  });
+
+  factory CloudinaryMetricModel.fromJson(Map<String, dynamic> json) {
+    return CloudinaryMetricModel(
+      label: json['label'] as String?,
+      pixels: (json['pixels'] as num?)?.toDouble(),
+      percentage: (json['percentage'] as num?)?.toDouble(),
+      orientation: json['orientation'] as String?,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'label': label,
+      'pixels': pixels,
+      'percentage': percentage,
+      'orientation': orientation,
+    };
+  }
+
+  @override
+  List<Object?> get props => [label, pixels, percentage, orientation];
 }
