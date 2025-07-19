@@ -122,7 +122,7 @@ class _PalmAnalysisResultsPageState extends State<PalmAnalysisResultsPage>
     }
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 100), // Thêm padding bottom lớn hơn
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24), // Giảm padding bottom
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -136,7 +136,6 @@ class _PalmAnalysisResultsPageState extends State<PalmAnalysisResultsPage>
           const SizedBox(height: 16),
           if (interpretationData.containsKey('life_aspects'))
             _buildLifeAspectsSection(interpretationData['life_aspects'] as Map<String, dynamic>),
-          const SizedBox(height: 32), // Thêm space cuối
         ],
       ),
     );
@@ -492,7 +491,7 @@ class _PalmAnalysisResultsPageState extends State<PalmAnalysisResultsPage>
 
   Widget _buildImagesTab() {
     return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 100), // Thêm padding bottom lớn hơn
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24), // Giảm padding bottom
       child: Column(
         children: [
           if (widget.annotatedImagePath != null)
@@ -503,7 +502,6 @@ class _PalmAnalysisResultsPageState extends State<PalmAnalysisResultsPage>
             _buildImageCard('Ảnh So Sánh', widget.comparisonImagePath!),
           if (widget.annotatedImagePath == null && widget.comparisonImagePath == null)
             _buildEmptyCard('Không có hình ảnh kết quả'),
-          const SizedBox(height: 32), // Thêm space cuối
         ],
       ),
     );
