@@ -679,7 +679,7 @@ class _FaceScanPageState extends State<FaceScanPage> {
           builder: (context) => AnalysisResultsPage(
             analysisResponse: cloudinaryResult,
             annotatedImagePath: cloudinaryResult.annotatedImageUrl,
-            reportImagePath: cloudinaryResult.annotatedImageUrl, // Use annotated image URL for both
+            // Không truyền reportImagePath vì đã xóa phần hiển thị báo cáo chi tiết
           ),
         ),
       );
@@ -687,7 +687,6 @@ class _FaceScanPageState extends State<FaceScanPage> {
       // Fallback to legacy analysis data
       final analysisData = provider.analysisData;
       final annotatedImagePath = provider.annotatedImagePath;
-      final reportImagePath = provider.reportImagePath;
 
       if (analysisData != null) {
         // Navigate to dedicated results page
@@ -696,7 +695,7 @@ class _FaceScanPageState extends State<FaceScanPage> {
             builder: (context) => AnalysisResultsPage(
               legacyAnalysisData: analysisData,
               annotatedImagePath: annotatedImagePath,
-              reportImagePath: reportImagePath,
+              // Không truyền reportImagePath vì đã xóa phần hiển thị báo cáo chi tiết
             ),
           ),
         );

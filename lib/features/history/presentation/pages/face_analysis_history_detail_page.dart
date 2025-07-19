@@ -508,7 +508,7 @@ class _FaceAnalysisHistoryDetailPageState extends State<FaceAnalysisHistoryDetai
         builder: (context) => AnalysisResultsPage(
           analysisResponse: _historyItem!.analysisResult,
           annotatedImagePath: _historyItem!.annotatedImageUrl,
-          reportImagePath: _historyItem!.reportUrl,
+          // Không truyền reportImagePath vì đã xóa phần hiển thị báo cáo chi tiết
         ),
       ),
     );

@@ -13,14 +13,14 @@ class AnalysisResultsPage extends StatelessWidget {
   final CloudinaryAnalysisResponseModel? analysisResponse;
   final Map<String, dynamic>? legacyAnalysisData; // For backward compatibility
   final String? annotatedImagePath;
-  final String? reportImagePath;
+  final String? reportImagePath; // Deprecated: Không còn sử dụng, chỉ giữ lại để tương thích ngược
 
   const AnalysisResultsPage({
     super.key,
     this.analysisResponse,
     this.legacyAnalysisData,
     this.annotatedImagePath,
-    this.reportImagePath,
+    this.reportImagePath, // Deprecated parameter
   });
 
   @override
@@ -75,8 +75,8 @@ class AnalysisResultsPage extends StatelessWidget {
                       const SizedBox(height: 20),
                     ],
 
-                    // Images Section
-                    if (annotatedImagePath != null || reportImagePath != null)
+                    // Images Section - chỉ hiển thị khi có ảnh đánh dấu đặc điểm
+                    if (annotatedImagePath != null)
                       _buildImagesSection(),
 
                     const SizedBox(height: 20),
@@ -510,17 +510,9 @@ class AnalysisResultsPage extends StatelessWidget {
               Icons.auto_fix_high,
               Colors.blue,
             ),
-            const SizedBox(height: 16),
           ],
 
-          if (reportImagePath != null) ...[
-            _buildImageCard(
-              'Báo cáo chi tiết',
-              reportImagePath!,
-              Icons.assessment,
-              Colors.green,
-            ),
-          ],
+          // Đã xóa phần hiển thị "Báo cáo chi tiết" vì đã có ảnh đánh dấu đặc điểm
         ],
       ),
     );

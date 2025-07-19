@@ -10,6 +10,7 @@ import 'features/survey/presentation/providers/survey_provider.dart';
 import 'features/face_scan/presentation/providers/face_scan_provider.dart';
 import 'features/ai_conversation/presentation/providers/chat_provider.dart';
 import 'features/history/presentation/providers/history_provider.dart';
+import 'features/profile/presentation/providers/profile_provider.dart';
 
 void main() async {
   // Ensure Flutter binding is initialized
@@ -80,6 +81,11 @@ class MyApp extends StatelessWidget {
         // History Provider
         ChangeNotifierProvider(
           create: (context) => HistoryProvider(),
+        ),
+
+        // Profile Provider
+        ChangeNotifierProvider(
+          create: (context) => ProfileProvider(),
         ),
 
         // Add other providers here as needed

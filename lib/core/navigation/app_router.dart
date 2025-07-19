@@ -19,6 +19,7 @@ import '../../features/ai_conversation/presentation/pages/ai_conversation_page.d
 import '../../features/history/presentation/pages/history_page.dart';
 import '../../features/history/presentation/pages/face_analysis_history_detail_page.dart';
 import '../../features/history/presentation/pages/palm_analysis_history_detail_page.dart';
+import '../../features/profile/presentation/pages/profile_page.dart';
 import '../../features/history/presentation/pages/chat_history_detail_page.dart';
 
 /// Application router configuration using GoRouter
@@ -179,18 +180,7 @@ class AppRouter {
       GoRoute(
         path: AppConstants.profileRoute,
         name: 'profile',
-        builder: (context, state) => Scaffold(
-          appBar: AppBar(
-            title: const Text('Hồ sơ'),
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back),
-              onPressed: () => context.pop(),
-            ),
-          ),
-          body: const Center(
-            child: Text('Màn hình hồ sơ - Sẽ được triển khai'),
-          ),
-        ),
+        builder: (context, state) => const ProfilePage(),
       ),
 
       // History Route
