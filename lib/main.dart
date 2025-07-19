@@ -9,6 +9,7 @@ import 'features/auth/presentation/providers/auth_provider.dart';
 import 'features/survey/presentation/providers/survey_provider.dart';
 import 'features/face_scan/presentation/providers/face_scan_provider.dart';
 import 'features/ai_conversation/presentation/providers/chat_provider.dart';
+import 'features/history/presentation/providers/history_provider.dart';
 
 void main() async {
   // Ensure Flutter binding is initialized
@@ -74,6 +75,11 @@ class MyApp extends StatelessWidget {
         // AI Chat Provider
         ChangeNotifierProvider(
           create: (context) => ChatProvider()..initialize(),
+        ),
+
+        // History Provider
+        ChangeNotifierProvider(
+          create: (context) => HistoryProvider(),
         ),
 
         // Add other providers here as needed

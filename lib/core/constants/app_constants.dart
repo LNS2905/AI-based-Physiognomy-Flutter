@@ -46,6 +46,10 @@ class AppConstants {
   static const String resultRoute = '/result';
   static const String chatbotRoute = '/chatbot';
   static const String aiConversationRoute = '/ai-conversation';
+  static const String historyRoute = '/history';
+  static const String historyFaceAnalysisDetailRoute = '/history/face-analysis';
+  static const String historyPalmAnalysisDetailRoute = '/history/palm-analysis';
+  static const String historyChatDetailRoute = '/history/chat';
   static const String profileRoute = '/profile';
   
   // Error Messages

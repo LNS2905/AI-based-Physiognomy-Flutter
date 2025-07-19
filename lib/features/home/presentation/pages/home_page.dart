@@ -617,10 +617,10 @@ class HomePage extends StatelessWidget {
               Expanded(
                 child: _buildFeatureCard(
                   context,
-                  icon: Icons.analytics_outlined,
-                  title: 'Kết quả',
-                  description: 'Xem kết quả phân tích',
-                  onTap: () => context.push('/result'),
+                  icon: Icons.history,
+                  title: 'Lịch sử',
+                  description: 'Xem lịch sử phân tích',
+                  onTap: () => context.push('/history'),
                 ),
               ),
             ],

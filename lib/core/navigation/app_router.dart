@@ -16,6 +16,10 @@ import '../../features/news/presentation/pages/news_detail_page.dart';
 import '../../features/news/presentation/pages/news_list_page.dart';
 import '../../features/face_scan/presentation/pages/user_guide_page.dart';
 import '../../features/ai_conversation/presentation/pages/ai_conversation_page.dart';
+import '../../features/history/presentation/pages/history_page.dart';
+import '../../features/history/presentation/pages/face_analysis_history_detail_page.dart';
+import '../../features/history/presentation/pages/palm_analysis_history_detail_page.dart';
+import '../../features/history/presentation/pages/chat_history_detail_page.dart';
 
 /// Application router configuration using GoRouter
 class AppRouter {
@@ -188,6 +192,41 @@ class AppRouter {
           ),
         ),
       ),
+
+      // History Route
+      GoRoute(
+        path: AppConstants.historyRoute,
+        name: 'history',
+        builder: (context, state) => const HistoryPage(),
+      ),
+
+      // History Detail Routes
+      GoRoute(
+        path: '${AppConstants.historyFaceAnalysisDetailRoute}/:historyId',
+        name: 'history-face-analysis-detail',
+        builder: (context, state) {
+          final historyId = state.pathParameters['historyId'] ?? '';
+          return FaceAnalysisHistoryDetailPage(historyId: historyId);
+        },
+      ),
+
+      GoRoute(
+        path: '${AppConstants.historyPalmAnalysisDetailRoute}/:historyId',
+        name: 'history-palm-analysis-detail',
+        builder: (context, state) {
+          final historyId = state.pathParameters['historyId'] ?? '';
+          return PalmAnalysisHistoryDetailPage(historyId: historyId);
+        },
+      ),
+
+      GoRoute(
+        path: '${AppConstants.historyChatDetailRoute}/:historyId',
+        name: 'history-chat-detail',
+        builder: (context, state) {
+          final historyId = state.pathParameters['historyId'] ?? '';
+          return ChatHistoryDetailPage(historyId: historyId);
+        },
+      ),
     ],
     errorBuilder: (context, state) => Scaffold(
       body: Center(
@@ -244,6 +283,7 @@ class AppRouter {
     _router.go(uri);
   }
   static void goToProfile() => _router.go(AppConstants.profileRoute);
+  static void goToHistory() => _router.go(AppConstants.historyRoute);
 
   /// Push navigation methods
   static void pushWelcome() => _router.push(AppConstants.introRoute);
@@ -266,6 +306,7 @@ class AppRouter {
     _router.push(uri);
   }
   static void pushProfile() => _router.push(AppConstants.profileRoute);
+  static void pushHistory() => _router.push(AppConstants.historyRoute);
 
   /// Go back
   static void goBack() {
