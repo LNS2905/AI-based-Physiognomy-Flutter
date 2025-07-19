@@ -105,8 +105,10 @@ class PalmAnalysisDataModel extends Equatable {
       palmDetection: json['palm_detection'] != null
           ? PalmDetectionModel.fromJson(json['palm_detection'] as Map<String, dynamic>)
           : null,
-      handsDetected: json['hands_detected'] as int? ?? 0,
-      handsData: json['hands_data'] as List<dynamic>? ?? [],
+      handsDetected: json['palm_lines_detected'] as int? ??
+                     json['hands_detected'] as int? ?? 0,
+      handsData: json['palm_lines_data'] as List<dynamic>? ??
+                 json['hands_data'] as List<dynamic>? ?? [],
       measurements: json['measurements'] as Map<String, dynamic>? ?? {},
       palmLines: json['palm_lines'] as Map<String, dynamic>? ?? {},
       fingerAnalysis: json['finger_analysis'] as Map<String, dynamic>? ?? {},
@@ -144,12 +146,17 @@ class PalmDetectionModel extends Equatable {
 
   factory PalmDetectionModel.fromJson(Map<String, dynamic> json) {
     return PalmDetectionModel(
-      handsDetected: json['hands_detected'] as int? ?? 0,
-      handsData: json['hands_data'] != null
-          ? (json['hands_data'] as List<dynamic>)
+      handsDetected: json['palm_lines_detected'] as int? ??
+                     json['hands_detected'] as int? ?? 0,
+      handsData: json['palm_lines_data'] != null
+          ? (json['palm_lines_data'] as List<dynamic>)
               .map((item) => HandDataModel.fromJson(item as Map<String, dynamic>))
               .toList()
-          : null,
+          : json['hands_data'] != null
+              ? (json['hands_data'] as List<dynamic>)
+                  .map((item) => HandDataModel.fromJson(item as Map<String, dynamic>))
+                  .toList()
+              : null,
     );
   }
 
@@ -183,7 +190,7 @@ class HandDataModel extends Equatable {
       handId: json['hand_id'] as int?,
       handSide: json['hand_side'] as String?,
       keypoints: json['keypoints'] as Map<String, dynamic>?,
-      additionalData: json,
+      additionalData: Map<String, dynamic>.from(json),
     );
   }
 

@@ -28,7 +28,7 @@ class _PalmAnalysisResultsPageState extends State<PalmAnalysisResultsPage>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 2, vsync: this);
     AppLogger.info('Palm analysis results page initialized');
   }
 
@@ -59,297 +59,142 @@ class _PalmAnalysisResultsPageState extends State<PalmAnalysisResultsPage>
           unselectedLabelColor: AppColors.textSecondary,
           indicatorColor: AppColors.primary,
           tabs: const [
-            Tab(text: 'Tổng Quan'),
-            Tab(text: 'Đường Chỉ Tay'),
+            Tab(text: 'Giải Nghĩa'),
             Tab(text: 'Hình Ảnh'),
           ],
         ),
       ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          _buildOverviewTab(),
-          _buildPalmLinesTab(),
-          _buildImagesTab(),
-        ],
+      body: SafeArea(
+        bottom: true, // Đảm bảo có safe area ở bottom
+        child: TabBarView(
+          controller: _tabController,
+          children: [
+            _buildInterpretationTab(),
+            _buildImagesTab(),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildOverviewTab() {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  Widget _buildInterpretationTab() {
+    // Try to get interpretation data from the analysis response
+    final analysisData = widget.palmResult.analysis;
+
+    Map<String, dynamic>? interpretationData;
+
+    if (analysisData != null) {
+      // First try to get from palmDetection.palmLinesData with interpretation
+      if (analysisData.palmDetection?.handsData != null &&
+          analysisData.palmDetection!.handsData!.isNotEmpty) {
+        for (var handData in analysisData.palmDetection!.handsData!) {
+          final handJson = handData.toJson();
+          if (handJson.containsKey('palm_interpretation')) {
+            interpretationData = handJson['palm_interpretation'] as Map<String, dynamic>?;
+            break;
+          }
+        }
+      }
+    }
+
+    if (interpretationData == null) {
+      return Center(
+        child: _buildEmptyCard('Không có dữ liệu giải nghĩa'),
+      );
+    }
+
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 100), // Thêm padding bottom lớn hơn
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildSummaryCard(),
+          _buildInterpretationHeader(),
           const SizedBox(height: 16),
-          _buildMeasurementsCard(),
+          if (interpretationData.containsKey('summary_text'))
+            _buildSummarySection(interpretationData['summary_text'] as String),
           const SizedBox(height: 16),
-          _buildFingersCard(),
+          if (interpretationData.containsKey('detailed_analysis'))
+            _buildDetailedAnalysisSection(interpretationData['detailed_analysis'] as Map<String, dynamic>),
+          const SizedBox(height: 16),
+          if (interpretationData.containsKey('life_aspects'))
+            _buildLifeAspectsSection(interpretationData['life_aspects'] as Map<String, dynamic>),
+          const SizedBox(height: 32), // Thêm space cuối
         ],
       ),
     );
   }
 
-  Widget _buildSummaryCard() {
+  Widget _buildInterpretationHeader() {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [AppColors.primary.withOpacity(0.1), AppColors.secondary.withOpacity(0.1)],
+          colors: [AppColors.secondary.withOpacity(0.1), AppColors.primary.withOpacity(0.1)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.primary.withOpacity(0.2)),
+        border: Border.all(color: AppColors.secondary.withOpacity(0.2)),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.auto_stories,
+            color: AppColors.secondary,
+            size: 32,
+          ),
+          const SizedBox(width: 12),
+          const Text(
+            'Giải Nghĩa Vân Tay',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textPrimary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSummarySection(String summaryText) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(
-                Icons.back_hand,
-                color: AppColors.primary,
-                size: 32,
-              ),
-              const SizedBox(width: 12),
+              Icon(Icons.summarize, color: AppColors.primary, size: 24),
+              const SizedBox(width: 8),
               const Text(
                 'Tóm Tắt Phân Tích',
                 style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          _buildSummaryItem('Số bàn tay phát hiện', '${widget.palmResult.handsDetected}'),
-          _buildSummaryItem('Thời gian xử lý', '${widget.palmResult.processingTime.toStringAsFixed(2)}s'),
-          _buildSummaryItem('Trạng thái', widget.palmResult.status),
-          _buildSummaryItem('Thời gian hoàn thành', _formatDateTime(widget.palmResult.processedAt)),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSummaryItem(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 14,
-              color: AppColors.textSecondary,
-            ),
-          ),
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMeasurementsCard() {
-    final measurementsSummary = widget.palmResult.measurementsSummary;
-
-    if (measurementsSummary == null) {
-      return _buildEmptyCard('Không có dữ liệu đo lường');
-    }
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Đo Lường Bàn Tay',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
-            ),
-          ),
-          const SizedBox(height: 12),
-          _buildMeasurementItem('Tổng số bàn tay', '${measurementsSummary.totalHands}'),
-          _buildMeasurementItem('Bàn tay trái', '${measurementsSummary.leftHands}'),
-          _buildMeasurementItem('Bàn tay phải', '${measurementsSummary.rightHands}'),
-          if (measurementsSummary.averageHandLength > 0)
-            _buildMeasurementItem('Chiều dài trung bình', '${measurementsSummary.averageHandLength.toStringAsFixed(1)} px'),
-          if (measurementsSummary.averagePalmWidth > 0)
-            _buildMeasurementItem('Chiều rộng trung bình', '${measurementsSummary.averagePalmWidth.toStringAsFixed(1)} px'),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMeasurementItem(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Expanded(
-            child: Text(
-              label,
-              style: const TextStyle(
-                fontSize: 14,
-                color: AppColors.textSecondary,
-              ),
-            ),
-          ),
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFingersCard() {
-    final palmDetection = widget.palmResult.analysis?.palmDetection;
-
-    if (palmDetection == null || palmDetection.handsData == null || palmDetection.handsData!.isEmpty) {
-      return _buildEmptyCard('Không có dữ liệu phân tích ngón tay');
-    }
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Phân Tích Ngón Tay',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
-            ),
-          ),
-          const SizedBox(height: 12),
-          ...palmDetection.handsData!.map((hand) => _buildHandItem(hand)),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildHandItem(HandDataModel hand) {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 4),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppColors.background,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppColors.border.withOpacity(0.5)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Bàn tay ${hand.handSide ?? 'không xác định'} (ID: ${hand.handId ?? 'N/A'})',
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
-            ),
-          ),
-          if (hand.keypoints != null && hand.keypoints!.isNotEmpty)
-            Text(
-              'Số điểm đặc trưng: ${hand.keypoints!.keys.length}',
-              style: const TextStyle(
-                fontSize: 12,
-                color: AppColors.textSecondary,
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPalmLinesTab() {
-    final palmLinesData = widget.palmResult.analysis?.palmLines;
-
-    if (palmLinesData == null || palmLinesData.isEmpty) {
-      return Center(
-        child: _buildEmptyCard('Không có dữ liệu đường chỉ tay'),
-      );
-    }
-
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        children: [
-          _buildPalmLineCard('Thông tin đường chỉ tay', 'Dữ liệu có sẵn', Icons.info),
-          const SizedBox(height: 16),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppColors.border),
-            ),
-            child: Text(
-              'Dữ liệu đường chỉ tay: ${palmLinesData.toString()}',
-              style: const TextStyle(
-                fontSize: 14,
-                color: AppColors.textSecondary,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPalmLineCard(String title, String? description, IconData icon) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, color: AppColors.primary, size: 24),
-              const SizedBox(width: 8),
-              Text(
-                title,
-                style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: AppColors.textPrimary,
@@ -359,11 +204,11 @@ class _PalmAnalysisResultsPageState extends State<PalmAnalysisResultsPage>
           ),
           const SizedBox(height: 12),
           Text(
-            description ?? 'Chưa có thông tin phân tích',
+            summaryText,
             style: const TextStyle(
               fontSize: 14,
-              color: AppColors.textSecondary,
-              height: 1.5,
+              color: AppColors.textPrimary,
+              height: 1.6,
             ),
           ),
         ],
@@ -371,9 +216,283 @@ class _PalmAnalysisResultsPageState extends State<PalmAnalysisResultsPage>
     );
   }
 
+  Widget _buildDetailedAnalysisSection(Map<String, dynamic> detailedAnalysis) {
+    final palmLineNames = {
+      'life_line': {'name': 'Đường Sinh Mệnh', 'icon': Icons.favorite, 'color': Colors.red},
+      'head_line': {'name': 'Đường Trí Tuệ', 'icon': Icons.psychology, 'color': Colors.blue},
+      'heart_line': {'name': 'Đường Tình Cảm', 'icon': Icons.favorite_border, 'color': Colors.pink},
+      'fate_line': {'name': 'Đường Vận Mệnh', 'icon': Icons.star, 'color': Colors.purple},
+    };
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Phân Tích Chi Tiết',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        const SizedBox(height: 12),
+        ...palmLineNames.keys.map((lineKey) {
+          if (detailedAnalysis.containsKey(lineKey)) {
+            final lineAnalysis = detailedAnalysis[lineKey] as Map<String, dynamic>;
+            return Column(
+              children: [
+                _buildLineAnalysisCard(
+                  palmLineNames[lineKey]!['name'] as String,
+                  lineAnalysis,
+                  palmLineNames[lineKey]!['icon'] as IconData,
+                  palmLineNames[lineKey]!['color'] as Color,
+                ),
+                const SizedBox(height: 12),
+              ],
+            );
+          }
+          return const SizedBox.shrink();
+        }).toList(),
+      ],
+    );
+  }
+
+  Widget _buildLineAnalysisCard(String title, Map<String, dynamic> analysis, IconData icon, Color color) {
+    // Try to get confidence from confidence_scores first, then fall back to analysis confidence
+    double? confidence;
+
+    // Get the line key from title
+    String lineKey = '';
+    switch (title) {
+      case 'Đường Sinh Mệnh':
+        lineKey = 'life_line';
+        break;
+      case 'Đường Trí Tuệ':
+        lineKey = 'head_line';
+        break;
+      case 'Đường Tình Cảm':
+        lineKey = 'heart_line';
+        break;
+      case 'Đường Vận Mệnh':
+        lineKey = 'fate_line';
+        break;
+    }
+
+    // Try to get confidence from the parent interpretation data
+    final analysisData = widget.palmResult.analysis;
+    if (analysisData?.palmDetection?.handsData != null &&
+        analysisData!.palmDetection!.handsData!.isNotEmpty) {
+      for (var handData in analysisData.palmDetection!.handsData!) {
+        final handJson = handData.toJson();
+        if (handJson.containsKey('confidence_scores')) {
+          final confidenceScores = handJson['confidence_scores'] as Map<String, dynamic>?;
+          if (confidenceScores != null && confidenceScores.containsKey(lineKey)) {
+            confidence = (confidenceScores[lineKey] as num?)?.toDouble();
+            break;
+          }
+        }
+      }
+    }
+
+    // Fall back to analysis confidence if not found
+    confidence ??= (analysis['confidence'] as num?)?.toDouble();
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withOpacity(0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(icon, color: color, size: 20),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: color,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          if (analysis.containsKey('pattern'))
+            _buildAnalysisItem('Đặc điểm', analysis['pattern'] as String, Icons.pattern),
+          if (analysis.containsKey('meaning'))
+            _buildAnalysisItem('Ý nghĩa', analysis['meaning'] as String, Icons.lightbulb),
+          if (confidence != null)
+            _buildAnalysisItem('Độ tin cậy', '${(confidence * 100).toStringAsFixed(1)}%', Icons.verified),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAnalysisItem(String label, String value, IconData icon) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 16, color: AppColors.textSecondary),
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Padding(
+            padding: const EdgeInsets.only(left: 24),
+            child: Text(
+              value,
+              style: const TextStyle(
+                fontSize: 14,
+                color: AppColors.textPrimary,
+                height: 1.5,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLifeAspectsSection(Map<String, dynamic> lifeAspects) {
+    final aspectNames = {
+      'health': {'name': 'Sức Khỏe', 'icon': Icons.health_and_safety, 'color': Colors.green},
+      'career': {'name': 'Sự Nghiệp', 'icon': Icons.work, 'color': Colors.orange},
+      'relationships': {'name': 'Tình Cảm', 'icon': Icons.favorite, 'color': Colors.red},
+      'personality': {'name': 'Tính Cách', 'icon': Icons.psychology, 'color': Colors.blue},
+    };
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Các Khía Cạnh Cuộc Sống',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        const SizedBox(height: 12),
+        ...aspectNames.keys.map((aspectKey) {
+          if (lifeAspects.containsKey(aspectKey)) {
+            final aspectData = lifeAspects[aspectKey] as List<dynamic>;
+            if (aspectData.isNotEmpty) {
+              return Column(
+                children: [
+                  _buildLifeAspectCard(
+                    aspectNames[aspectKey]!['name'] as String,
+                    aspectData,
+                    aspectNames[aspectKey]!['icon'] as IconData,
+                    aspectNames[aspectKey]!['color'] as Color,
+                  ),
+                  const SizedBox(height: 12),
+                ],
+              );
+            }
+          }
+          return const SizedBox.shrink();
+        }).toList(),
+      ],
+    );
+  }
+
+  Widget _buildLifeAspectCard(String title, List<dynamic> aspects, IconData icon, Color color) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withOpacity(0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(icon, color: color, size: 20),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: color,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          ...aspects.map((aspect) => Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  margin: const EdgeInsets.only(top: 6),
+                  width: 4,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: color,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    aspect.toString(),
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: AppColors.textPrimary,
+                      height: 1.5,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          )).toList(),
+        ],
+      ),
+    );
+  }
+
   Widget _buildImagesTab() {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 100), // Thêm padding bottom lớn hơn
       child: Column(
         children: [
           if (widget.annotatedImagePath != null)
@@ -384,6 +503,7 @@ class _PalmAnalysisResultsPageState extends State<PalmAnalysisResultsPage>
             _buildImageCard('Ảnh So Sánh', widget.comparisonImagePath!),
           if (widget.annotatedImagePath == null && widget.comparisonImagePath == null)
             _buildEmptyCard('Không có hình ảnh kết quả'),
+          const SizedBox(height: 32), // Thêm space cuối
         ],
       ),
     );
@@ -475,12 +595,5 @@ class _PalmAnalysisResultsPageState extends State<PalmAnalysisResultsPage>
     );
   }
 
-  String _formatDateTime(String dateTimeString) {
-    try {
-      final dateTime = DateTime.parse(dateTimeString);
-      return '${dateTime.day}/${dateTime.month}/${dateTime.year} ${dateTime.hour}:${dateTime.minute.toString().padLeft(2, '0')}';
-    } catch (e) {
-      return dateTimeString;
-    }
-  }
+
 }
