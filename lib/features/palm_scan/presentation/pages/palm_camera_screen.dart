@@ -201,24 +201,25 @@ class _PalmCameraScreenState extends State<PalmCameraScreen> {
         ),
       ),
       child: Center(
-        child: Container(
-          width: 280,
-          height: 350,
-          decoration: BoxDecoration(
-            border: Border.all(
-              color: AppColors.primary,
-              width: 2,
-            ),
-            borderRadius: BorderRadius.circular(20),
-          ),
+        child: SizedBox(
+          width: 320,
+          height: 400,
           child: Stack(
             children: [
-              // Corner indicators
-              ...List.generate(4, (index) => _buildCornerIndicator(index)),
-              
-              // Center guide
+              // Palm scanner image overlay
+              Center(
+                child: Image.asset(
+                  'palm-scanner.png',
+                  width: 300,
+                  height: 380,
+                  fit: BoxFit.contain,
+                ),
+              ),
+
+              // Center guide text
               Center(
                 child: Container(
+                  margin: const EdgeInsets.only(top: 120),
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   decoration: BoxDecoration(
                     color: Colors.black.withOpacity(0.7),
@@ -241,27 +242,7 @@ class _PalmCameraScreenState extends State<PalmCameraScreen> {
     );
   }
 
-  Widget _buildCornerIndicator(int index) {
-    final positions = [
-      const Alignment(-1, -1), // Top-left
-      const Alignment(1, -1),  // Top-right
-      const Alignment(-1, 1),  // Bottom-left
-      const Alignment(1, 1),   // Bottom-right
-    ];
 
-    return Align(
-      alignment: positions[index],
-      child: Container(
-        width: 20,
-        height: 20,
-        margin: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: AppColors.primary,
-          borderRadius: BorderRadius.circular(10),
-        ),
-      ),
-    );
-  }
 
   Widget _buildTopControls() {
     return Row(

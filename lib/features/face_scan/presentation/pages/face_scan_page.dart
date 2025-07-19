@@ -23,6 +23,10 @@ class _FaceScanPageState extends State<FaceScanPage> {
   @override
   void initState() {
     super.initState();
+    // Set default tab to face_scan when entering face scan screen
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<FaceScanProvider>().setSelectedTab('face_scan');
+    });
     // Initialize provider if needed
     // Note: Commented out loadScanHistory() since we don't have a real API yet
     // WidgetsBinding.instance.addPostFrameCallback((_) {

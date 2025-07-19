@@ -7,7 +7,7 @@ class ApiConfig {
   
   // Face Analysis API Configuration
   // Updated with new ngrok URL
-  static const String faceAnalysisApiUrl = 'https://mako-fast-bobcat.ngrok-free.app/analyze-face-from-cloudinary/';
+  static const String faceAnalysisApiUrl = 'https://inspired-bear-emerging.ngrok-free.app/analyze-face-from-cloudinary/';
   
   // Alternative URLs for different environments
   static const String faceAnalysisApiUrlLocal = 'http://localhost:8000/analyze-face/';

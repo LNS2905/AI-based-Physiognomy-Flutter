@@ -19,7 +19,7 @@ CLOUDINARY_API_SECRET = 'aS_7wWncQjOLpKRKnHEd0_dr07M'
 UPLOAD_FOLDER = 'physiognomy_analysis'
 
 # API endpoint
-FACE_ANALYSIS_API_URL = 'https://mako-fast-bobcat.ngrok-free.app/analyze-face-from-cloudinary/'
+FACE_ANALYSIS_API_URL = 'https://inspired-bear-emerging.ngrok-free.app/analyze-face-from-cloudinary/'
 
 def generate_signature(params_to_sign, api_secret):
     """Tạo signature cho Cloudinary API"""

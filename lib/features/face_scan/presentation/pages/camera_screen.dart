@@ -192,13 +192,16 @@ class _CameraScreenState extends State<CameraScreen>
           children: [
             // Camera Preview
             _buildCameraPreview(),
-            
+
+            // Face Scanner Overlay Frame
+            _buildFaceScannerOverlay(),
+
             // Top Controls
             _buildTopControls(),
-            
+
             // Bottom Controls
             _buildBottomControls(),
-            
+
             // Loading Overlay
             if (_isInitializing || _isCapturing) _buildLoadingOverlay(),
           ],
@@ -239,6 +242,128 @@ class _CameraScreenState extends State<CameraScreen>
           child: CameraPreview(controller),
         ),
       ),
+    );
+  }
+
+  Widget _buildFaceScannerOverlay() {
+    return Positioned.fill(
+      child: Center(
+        child: Container(
+          width: 280,
+          height: 350,
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: AppColors.primary,
+              width: 3,
+            ),
+            borderRadius: BorderRadius.circular(140), // Oval shape for face
+          ),
+          child: Stack(
+            children: [
+              // Corner indicators (face scanner style)
+              ...List.generate(4, (index) => _buildFaceCornerIndicator(index)),
+
+              // Center guide with face icon
+              Center(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.7),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.face,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                      SizedBox(width: 8),
+                      Text(
+                        'Căn chỉnh khuôn mặt',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFaceCornerIndicator(int index) {
+    const double size = 20;
+    const double thickness = 3;
+
+    late Alignment alignment;
+    late Widget child;
+
+    switch (index) {
+      case 0: // Top-left
+        alignment = Alignment.topLeft;
+        child = Container(
+          width: size,
+          height: size,
+          decoration: const BoxDecoration(
+            border: Border(
+              top: BorderSide(color: AppColors.primary, width: thickness),
+              left: BorderSide(color: AppColors.primary, width: thickness),
+            ),
+          ),
+        );
+        break;
+      case 1: // Top-right
+        alignment = Alignment.topRight;
+        child = Container(
+          width: size,
+          height: size,
+          decoration: const BoxDecoration(
+            border: Border(
+              top: BorderSide(color: AppColors.primary, width: thickness),
+              right: BorderSide(color: AppColors.primary, width: thickness),
+            ),
+          ),
+        );
+        break;
+      case 2: // Bottom-left
+        alignment = Alignment.bottomLeft;
+        child = Container(
+          width: size,
+          height: size,
+          decoration: const BoxDecoration(
+            border: Border(
+              bottom: BorderSide(color: AppColors.primary, width: thickness),
+              left: BorderSide(color: AppColors.primary, width: thickness),
+            ),
+          ),
+        );
+        break;
+      case 3: // Bottom-right
+        alignment = Alignment.bottomRight;
+        child = Container(
+          width: size,
+          height: size,
+          decoration: const BoxDecoration(
+            border: Border(
+              bottom: BorderSide(color: AppColors.primary, width: thickness),
+              right: BorderSide(color: AppColors.primary, width: thickness),
+            ),
+          ),
+        );
+        break;
+    }
+
+    return Align(
+      alignment: alignment,
+      child: child,
     );
   }
 
@@ -362,7 +487,7 @@ class _CameraScreenState extends State<CameraScreen>
               borderRadius: BorderRadius.circular(12),
             ),
             child: const Text(
-              'Position your face in the center and tap capture',
+              'Đặt khuôn mặt vào trong khung và chụp gương mặt chính diện',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 14,

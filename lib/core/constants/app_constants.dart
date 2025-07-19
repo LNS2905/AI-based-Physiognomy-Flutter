@@ -5,7 +5,7 @@ class AppConstants {
   static const String appVersion = '1.0.0';
   
   // API Configuration
-  static const String baseUrl = 'https://mako-fast-bobcat.ngrok-free.app';
+  static const String baseUrl = 'https://inspired-bear-emerging.ngrok-free.app';
   static const String apiVersion = 'v1';
 
   // Face Analysis API Configuration

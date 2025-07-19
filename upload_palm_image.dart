@@ -173,7 +173,7 @@ Map<String, dynamic> createPalmAnalysisRequest(String signedUrl, String folderPa
 /// Test gọi API palm analysis
 Future<void> testPalmAnalysisAPI(Map<String, dynamic> requestBody) async {
   try {
-    const apiUrl = 'https://mako-fast-bobcat.ngrok-free.app/analyze-palm-cloudinary/';
+    const apiUrl = 'https://inspired-bear-emerging.ngrok-free.app/analyze-palm-cloudinary/';
     
     final response = await http.post(
       Uri.parse(apiUrl),
