@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/error_handler.dart';
 import '../../../../core/utils/logger.dart';
+import '../../../../core/widgets/loading_overlay.dart';
+import '../../../../core/enums/loading_state.dart';
 import '../../data/models/palm_analysis_response_model.dart';
 import '../../../face_scan/presentation/providers/face_scan_provider.dart';
 import '../widgets/palm_analysis_demo.dart';
@@ -32,59 +34,75 @@ class _PalmScanPageState extends State<PalmScanPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Colors.white,
-              AppColors.surfaceVariant.withOpacity(0.3),
-              Colors.white,
-            ],
-            stops: const [0.0, 0.5, 1.0],
-          ),
-        ),
-        child: SafeArea(
-          child: SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
-            child: Column(
-              children: [
-                // Header Section
-                _buildHeader(context),
+    return Consumer<FaceScanProvider>(
+      builder: (context, provider, child) {
+        return LoadingOverlay(
+          isVisible: provider.loadingInfo.state.isLoading,
+          loadingInfo: provider.loadingInfo,
+          isFaceAnalysis: false, // This is palm analysis
+          onCancel: () {
+            provider.resetLoadingState();
+          },
+          onRetry: () {
+            // Retry logic will be implemented based on the current operation
+            provider.resetLoadingState();
+          },
+          child: Scaffold(
+            body: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.white,
+                    AppColors.surfaceVariant.withOpacity(0.3),
+                    Colors.white,
+                  ],
+                  stops: const [0.0, 0.5, 1.0],
+                ),
+              ),
+              child: SafeArea(
+                child: SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  child: Column(
+                    children: [
+                      // Header Section
+                      _buildHeader(context),
 
-                const SizedBox(height: 12),
+                      const SizedBox(height: 12),
 
-                // Main Content Section
-                _buildMainContent(),
+                      // Main Content Section
+                      _buildMainContent(),
 
-                const SizedBox(height: 16),
+                      const SizedBox(height: 16),
 
-                // Call-to-Action Text
-                _buildCallToActionText(),
+                      // Call-to-Action Text
+                      _buildCallToActionText(),
 
-                const SizedBox(height: 16),
+                      const SizedBox(height: 16),
 
-                // Tab Navigation
-                _buildTabNavigation(),
+                      // Tab Navigation
+                      _buildTabNavigation(),
 
-                const SizedBox(height: 12),
+                      const SizedBox(height: 12),
 
-                // Tab Content
-                _buildTabContent(),
+                      // Tab Content
+                      _buildTabContent(),
 
-                const SizedBox(height: 20),
+                      const SizedBox(height: 20),
 
-                // Bottom Navigation Placeholder
-                _buildBottomNavigation(),
+                      // Bottom Navigation Placeholder
+                      _buildBottomNavigation(),
 
-                const SizedBox(height: 16),
-              ],
+                      const SizedBox(height: 16),
+                    ],
+                  ),
+                ),
+              ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -672,14 +690,13 @@ class _PalmScanPageState extends State<PalmScanPage> {
 
   void _showPalmAnalysisResults(FaceScanProvider provider) {
     final palmResult = provider.currentPalmResult;
-    
+
     if (palmResult != null) {
       Navigator.of(context).push(
         MaterialPageRoute(
           builder: (context) => PalmAnalysisResultsPage(
             palmResult: palmResult,
             annotatedImagePath: palmResult.annotatedImageUrl,
-            comparisonImagePath: palmResult.comparisonImageUrl,
           ),
         ),
       );

@@ -11,7 +11,7 @@
     <uses-feature android:name="android.hardware.camera.front" android:required="false" />
 
     <application
-        android:label="AI Physiognomy App"
+        android:label="AIPhysiognomy"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:allowBackup="true"

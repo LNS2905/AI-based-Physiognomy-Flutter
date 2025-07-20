@@ -8,13 +8,11 @@ import '../../data/models/palm_analysis_response_model.dart';
 class PalmAnalysisResultsPage extends StatefulWidget {
   final PalmAnalysisResponseModel palmResult;
   final String? annotatedImagePath;
-  final String? comparisonImagePath;
 
   const PalmAnalysisResultsPage({
     super.key,
     required this.palmResult,
     this.annotatedImagePath,
-    this.comparisonImagePath,
   });
 
   @override
@@ -496,11 +494,7 @@ class _PalmAnalysisResultsPageState extends State<PalmAnalysisResultsPage>
         children: [
           if (widget.annotatedImagePath != null)
             _buildImageCard('Ảnh Đã Phân Tích', widget.annotatedImagePath!),
-          if (widget.annotatedImagePath != null && widget.comparisonImagePath != null)
-            const SizedBox(height: 16),
-          if (widget.comparisonImagePath != null)
-            _buildImageCard('Ảnh So Sánh', widget.comparisonImagePath!),
-          if (widget.annotatedImagePath == null && widget.comparisonImagePath == null)
+          if (widget.annotatedImagePath == null)
             _buildEmptyCard('Không có hình ảnh kết quả'),
         ],
       ),

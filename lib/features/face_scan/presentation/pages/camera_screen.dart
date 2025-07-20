@@ -8,6 +8,8 @@ import '../../../../core/services/camera_service.dart';
 import '../../../../core/utils/error_handler.dart';
 import '../../../../core/utils/logger.dart';
 import '../../../../core/network/api_result.dart';
+import '../../../../core/widgets/analysis_loading_screen.dart';
+import '../../../../core/enums/loading_state.dart';
 import '../../data/models/cloudinary_analysis_response_model.dart';
 import '../providers/face_scan_provider.dart';
 import 'analysis_results_page.dart';
@@ -111,46 +113,36 @@ class _CameraScreenState extends State<CameraScreen>
 
       if (!mounted) return;
 
-      // 2. Gọi API
+      // 2. Show loading screen and call API
       final provider = context.read<FaceScanProvider>();
-      final result = await provider.repository.analyzeFaceFromCloudinary(imagePath);
+
+      // Navigate to loading screen
+      final result = await Navigator.of(context).push<CloudinaryAnalysisResponseModel>(
+        MaterialPageRoute(
+          builder: (context) => _CameraAnalysisLoadingScreen(
+            imagePath: imagePath,
+            provider: provider,
+          ),
+        ),
+      );
 
       if (!mounted) return;
 
       // 3. Xử lý kết quả
-      switch (result) {
-        case Success<CloudinaryAnalysisResponseModel>():
-          AppLogger.info('✅ Analysis success, returning result to face-scanning page');
-
-          // QUAN TRỌNG: Chỉ trả kết quả về, KHÔNG update provider state ở đây
-          // để tránh conflict với navigation
-          context.pop(result.data);
-          break;
-
-        case Error<CloudinaryAnalysisResponseModel>():
-          AppLogger.error('❌ Analysis failed: ${result.failure.message}');
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Phân tích thất bại: ${result.failure.message}'),
-                backgroundColor: AppColors.error,
-              ),
-            );
-          }
-          // Không pop ngay lập tức, để user có thể thấy thông báo lỗi và thử lại
-          break;
-
-        default:
-          AppLogger.error('❌ Unknown result type');
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Unknown error occurred'),
-                backgroundColor: AppColors.error,
-              ),
-            );
-          }
-          // Không pop ngay lập tức, để user có thể thấy thông báo lỗi và thử lại
+      if (result != null) {
+        AppLogger.info('✅ Analysis success, returning result to face-scanning page');
+        // Return result to face-scanning page
+        context.pop(result);
+      } else {
+        AppLogger.error('❌ Analysis failed or was cancelled');
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Phân tích thất bại hoặc bị hủy'),
+              backgroundColor: AppColors.error,
+            ),
+          );
+        }
       }
     } catch (e) {
       AppLogger.error('❌ Capture error: $e');
@@ -554,6 +546,86 @@ class _CameraScreenState extends State<CameraScreen>
       ),
     );
   }
+}
 
+/// Loading screen for camera analysis
+class _CameraAnalysisLoadingScreen extends StatefulWidget {
+  final String imagePath;
+  final FaceScanProvider provider;
 
+  const _CameraAnalysisLoadingScreen({
+    required this.imagePath,
+    required this.provider,
+  });
+
+  @override
+  State<_CameraAnalysisLoadingScreen> createState() => _CameraAnalysisLoadingScreenState();
+}
+
+class _CameraAnalysisLoadingScreenState extends State<_CameraAnalysisLoadingScreen> {
+  @override
+  void initState() {
+    super.initState();
+    _startAnalysis();
+  }
+
+  Future<void> _startAnalysis() async {
+    try {
+      final result = await widget.provider.executeMultiStepAnalysis<CloudinaryAnalysisResponseModel>(
+        initializeStep: () async {
+          // Initialize step
+          await Future.delayed(const Duration(milliseconds: 500));
+        },
+        uploadStep: () async {
+          // Upload step - simulate upload
+          await Future.delayed(const Duration(seconds: 1));
+        },
+        analyzeStep: () async {
+          // Analyze step - call actual API
+          final result = await widget.provider.repository.analyzeFaceFromCloudinary(widget.imagePath);
+          if (result is Success<CloudinaryAnalysisResponseModel>) {
+            return result.data;
+          } else {
+            throw Exception('Analysis failed: ${result.failure?.message ?? 'Unknown error'}');
+          }
+        },
+        processStep: (analysisResult) async {
+          // Process step
+          await Future.delayed(const Duration(milliseconds: 500));
+          return analysisResult;
+        },
+        operationName: 'cameraFaceAnalysis',
+        isFaceAnalysis: true,
+      );
+
+      if (mounted) {
+        Navigator.of(context).pop(result);
+      }
+    } catch (e) {
+      if (mounted) {
+        Navigator.of(context).pop(null);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<FaceScanProvider>(
+      builder: (context, provider, child) {
+        return AnalysisLoadingScreen(
+          loadingInfo: provider.loadingInfo,
+          isFaceAnalysis: true,
+          customTitle: 'Phân tích ảnh từ camera',
+          onCancel: () {
+            provider.resetLoadingState();
+            Navigator.of(context).pop(null);
+          },
+          onRetry: () {
+            provider.resetLoadingState();
+            _startAnalysis();
+          },
+        );
+      },
+    );
+  }
 }

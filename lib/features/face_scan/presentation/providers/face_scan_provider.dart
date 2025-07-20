@@ -3,6 +3,8 @@ import '../../../../core/providers/base_provider.dart';
 import '../../../../core/utils/logger.dart';
 import '../../../../core/services/camera_service.dart';
 import '../../../../core/services/image_picker_service.dart';
+import '../../../../core/enums/loading_state.dart';
+import '../../../../core/network/api_result.dart';
 import '../../data/models/face_scan_request_model.dart';
 import '../../data/models/face_scan_response_model.dart';
 import '../../data/models/cloudinary_analysis_response_model.dart';
@@ -291,41 +293,48 @@ class FaceScanProvider extends BaseProvider {
   /// Pick image from gallery and start analysis
   Future<bool> pickImageAndAnalyze() async {
     try {
-      setLoading(true);
       AppLogger.info('Starting image selection from gallery');
 
-      // Pick image from gallery
-      final imagePath = await _imagePickerService.pickImageFromGallery();
+      final result = await executeMultiStepAnalysis<CloudinaryAnalysisResponseModel>(
+        initializeStep: () async {
+          // Initialize step - prepare for image selection
+          await Future.delayed(const Duration(milliseconds: 500));
+        },
+        uploadStep: () async {
+          // Pick image from gallery
+          final imagePath = await _imagePickerService.pickImageFromGallery();
 
-      if (imagePath == null) {
-        AppLogger.info('No image selected from gallery');
-        setLoading(false);
-        return false;
-      }
+          if (imagePath == null) {
+            AppLogger.info('No image selected from gallery');
+            throw Exception('Không có ảnh nào được chọn');
+          }
 
-      AppLogger.info('Image selected: $imagePath');
-      setSelectedImagePath(imagePath);
-
-      // Start face analysis using Cloudinary endpoint
-      final result = await executeApiOperation(
-        () => _repository.analyzeFaceFromCloudinary(imagePath),
-        operationName: 'analyzeFaceFromCloudinary',
+          AppLogger.info('Image selected: $imagePath');
+          setSelectedImagePath(imagePath);
+        },
+        analyzeStep: () async {
+          // Start face analysis using Cloudinary endpoint
+          final result = await _repository.analyzeFaceFromCloudinary(_selectedImagePath!);
+          if (result is Success<CloudinaryAnalysisResponseModel>) {
+            return result.data;
+          } else {
+            throw Exception('Face analysis failed: ${result.failure?.message ?? 'Unknown error'}');
+          }
+        },
+        processStep: (analysisResult) async {
+          // Process and store the result
+          _currentCloudinaryResult = analysisResult;
+          AppLogger.info('Cloudinary face analysis completed successfully');
+          return analysisResult;
+        },
+        operationName: 'pickImageAndAnalyzeFace',
+        isFaceAnalysis: true,
       );
 
-      if (result != null) {
-        // Store Cloudinary analysis result
-        _currentCloudinaryResult = result;
-        AppLogger.info('Cloudinary face analysis completed successfully');
-        return true;
-      } else {
-        AppLogger.error('Cloudinary face analysis failed');
-        return false;
-      }
+      return result != null;
     } catch (e) {
       AppLogger.error('Failed to pick image and analyze', e);
       return false;
-    } finally {
-      setLoading(false);
     }
   }
 
@@ -375,40 +384,47 @@ class FaceScanProvider extends BaseProvider {
   /// Pick image from gallery and analyze palm
   Future<bool> pickImageAndAnalyzePalm() async {
     try {
-      setLoading(true);
       AppLogger.info('Starting palm image selection from gallery');
 
-      // Pick image from gallery
-      final imagePath = await _imagePickerService.pickImageFromGallery();
+      final result = await executeMultiStepAnalysis<PalmAnalysisResponseModel>(
+        initializeStep: () async {
+          // Initialize step - prepare for image selection
+          await Future.delayed(const Duration(milliseconds: 500));
+        },
+        uploadStep: () async {
+          // Pick image from gallery
+          final imagePath = await _imagePickerService.pickImageFromGallery();
 
-      if (imagePath == null) {
-        AppLogger.info('No image selected from gallery for palm analysis');
-        setLoading(false);
-        return false;
-      }
+          if (imagePath == null) {
+            AppLogger.info('No image selected from gallery for palm analysis');
+            throw Exception('Không có ảnh nào được chọn');
+          }
 
-      AppLogger.info('Palm image selected: $imagePath');
-      setSelectedImagePath(imagePath);
-
-      // Start palm analysis using Cloudinary endpoint
-      final result = await executeApiOperation(
-        () => _repository.analyzePalmFromCloudinary(imagePath),
-        operationName: 'analyzePalmFromCloudinary',
+          AppLogger.info('Palm image selected: $imagePath');
+          setSelectedImagePath(imagePath);
+        },
+        analyzeStep: () async {
+          // Start palm analysis using Cloudinary endpoint
+          final result = await _repository.analyzePalmFromCloudinary(_selectedImagePath!);
+          if (result is Success<PalmAnalysisResponseModel>) {
+            return result.data;
+          } else {
+            throw Exception('Palm analysis failed: ${result.failure?.message ?? 'Unknown error'}');
+          }
+        },
+        processStep: (analysisResult) async {
+          // Process and store the result
+          setCurrentPalmResult(analysisResult);
+          AppLogger.info('Palm analysis completed successfully');
+          return analysisResult;
+        },
+        operationName: 'pickImageAndAnalyzePalm',
+        isFaceAnalysis: false,
       );
 
-      if (result != null) {
-        setCurrentPalmResult(result);
-        AppLogger.info('Palm analysis completed successfully');
-        setLoading(false);
-        return true;
-      } else {
-        AppLogger.error('Palm analysis failed');
-        setLoading(false);
-        return false;
-      }
+      return result != null;
     } catch (e) {
       AppLogger.error('Exception in pickImageAndAnalyzePalm', e);
-      setLoading(false);
       return false;
     }
   }

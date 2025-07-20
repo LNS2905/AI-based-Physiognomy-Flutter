@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import '../network/api_result.dart';
 import '../errors/failures.dart';
+import '../enums/loading_state.dart';
 import '../utils/logger.dart';
 
 /// Base provider class with common functionality
@@ -8,6 +9,7 @@ abstract class BaseProvider extends ChangeNotifier {
   bool _isLoading = false;
   Failure? _failure;
   bool _isDisposed = false;
+  LoadingInfo _loadingInfo = LoadingInfo.idle;
 
   /// Current loading state
   bool get isLoading => _isLoading;
@@ -18,18 +20,68 @@ abstract class BaseProvider extends ChangeNotifier {
   /// Check if provider has error
   bool get hasError => _failure != null;
 
+  /// Current detailed loading information
+  LoadingInfo get loadingInfo => _loadingInfo;
+
   /// Set loading state
   void setLoading(bool loading) {
     if (_isDisposed) return;
-    
+
     if (_isLoading != loading) {
       _isLoading = loading;
       if (loading) {
         _failure = null; // Clear previous errors when starting new operation
+        if (_loadingInfo.state == LoadingState.idle) {
+          _loadingInfo = const LoadingInfo(state: LoadingState.analyzing);
+        }
+      } else {
+        if (_loadingInfo.state.isLoading) {
+          _loadingInfo = LoadingInfo.completed;
+        }
       }
       AppLogger.logStateChange(runtimeType.toString(), 'setLoading', loading);
       notifyListeners();
     }
+  }
+
+  /// Set detailed loading information
+  void setLoadingInfo(LoadingInfo loadingInfo) {
+    if (_isDisposed) return;
+
+    if (_loadingInfo != loadingInfo) {
+      _loadingInfo = loadingInfo;
+      _isLoading = loadingInfo.state.isLoading;
+
+      if (loadingInfo.state.isError) {
+        _failure = UnknownFailure(
+          message: loadingInfo.errorMessage ?? 'Unknown error occurred',
+          code: 'LOADING_ERROR',
+        );
+      } else if (loadingInfo.state.isLoading) {
+        _failure = null; // Clear previous errors when starting new operation
+      }
+
+      AppLogger.logStateChange(
+        runtimeType.toString(),
+        'setLoadingInfo',
+        '${loadingInfo.state.name}: ${loadingInfo.getMessage()}',
+      );
+      notifyListeners();
+    }
+  }
+
+  /// Set loading state with specific LoadingState
+  void setLoadingState(LoadingState state, {String? customMessage, String? errorMessage}) {
+    if (_isDisposed) return;
+
+    final newLoadingInfo = LoadingInfo(
+      state: state,
+      customMessage: customMessage,
+      errorMessage: errorMessage,
+      canRetry: state.isError,
+    );
+
+    setLoadingInfo(newLoadingInfo);
   }
 
   /// Set failure state
@@ -159,6 +211,107 @@ abstract class BaseProvider extends ChangeNotifier {
       
       return null;
     }
+  }
+
+  /// Execute analysis operation with step-by-step loading states
+  Future<T?> executeAnalysisOperation<T>(
+    Future<T> Function() operation, {
+    String? operationName,
+    bool isFaceAnalysis = true,
+    LoadingState initialState = LoadingState.analyzing,
+    String? customMessage,
+  }) async {
+    if (_isDisposed) return null;
+
+    try {
+      // Set initial loading state
+      setLoadingState(initialState, customMessage: customMessage);
+
+      final result = await operation();
+
+      // Set completed state
+      setLoadingState(LoadingState.completed);
+
+      AppLogger.logStateChange(
+        runtimeType.toString(),
+        operationName ?? 'analysisOperation',
+        'success',
+      );
+
+      return result;
+    } catch (e) {
+      // Set error state
+      setLoadingState(
+        LoadingState.error,
+        errorMessage: e.toString(),
+      );
+
+      AppLogger.error(
+        'Analysis operation failed: ${operationName ?? 'unknown'}',
+        e,
+      );
+
+      return null;
+    }
+  }
+
+  /// Execute multi-step analysis operation
+  Future<T?> executeMultiStepAnalysis<T>({
+    required Future<void> Function() initializeStep,
+    required Future<void> Function() uploadStep,
+    required Future<T> Function() analyzeStep,
+    required Future<T> Function(T) processStep,
+    String? operationName,
+    bool isFaceAnalysis = true,
+  }) async {
+    if (_isDisposed) return null;
+
+    try {
+      // Step 1: Initialize
+      setLoadingState(LoadingState.initializing);
+      await initializeStep();
+
+      // Step 2: Upload
+      setLoadingState(LoadingState.uploading);
+      await uploadStep();
+
+      // Step 3: Analyze
+      setLoadingState(LoadingState.analyzing);
+      final analysisResult = await analyzeStep();
+
+      // Step 4: Process
+      setLoadingState(LoadingState.processing);
+      final finalResult = await processStep(analysisResult);
+
+      // Completed
+      setLoadingState(LoadingState.completed);
+
+      AppLogger.logStateChange(
+        runtimeType.toString(),
+        operationName ?? 'multiStepAnalysis',
+        'success',
+      );
+
+      return finalResult;
+    } catch (e) {
+      setLoadingState(
+        LoadingState.error,
+        errorMessage: e.toString(),
+      );
+
+      AppLogger.error(
+        'Multi-step analysis failed: ${operationName ?? 'unknown'}',
+        e,
+      );
+
+      return null;
+    }
+  }
+
+  /// Reset loading state to idle
+  void resetLoadingState() {
+    if (_isDisposed) return;
+    setLoadingInfo(LoadingInfo.idle);
   }
 
   /// Map exceptions to failures

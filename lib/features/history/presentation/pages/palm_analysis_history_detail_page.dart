@@ -518,7 +518,6 @@ class _PalmAnalysisHistoryDetailPageState extends State<PalmAnalysisHistoryDetai
         builder: (context) => PalmAnalysisResultsPage(
           palmResult: _historyItem!.analysisResult,
           annotatedImagePath: _historyItem!.annotatedImageUrl,
-          comparisonImagePath: _historyItem!.comparisonImageUrl,
         ),
       ),
     );

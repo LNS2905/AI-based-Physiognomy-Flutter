@@ -8,6 +8,8 @@ import '../../../../core/services/camera_service.dart';
 import '../../../../core/utils/error_handler.dart';
 import '../../../../core/utils/logger.dart';
 import '../../../../core/network/api_result.dart';
+import '../../../../core/widgets/analysis_loading_screen.dart';
+import '../../../../core/enums/loading_state.dart';
 import '../../data/models/palm_analysis_response_model.dart';
 import '../../../face_scan/presentation/providers/face_scan_provider.dart';
 
@@ -375,35 +377,35 @@ class _PalmCameraScreenState extends State<PalmCameraScreen> {
 
       if (!mounted) return;
 
-      // 2. Call API
+      // 2. Show loading screen and call API
       final provider = context.read<FaceScanProvider>();
-      final result = await provider.repository.analyzePalmFromCloudinary(imagePath);
+
+      // Navigate to loading screen
+      final result = await Navigator.of(context).push<PalmAnalysisResponseModel>(
+        MaterialPageRoute(
+          builder: (context) => _PalmCameraAnalysisLoadingScreen(
+            imagePath: imagePath,
+            provider: provider,
+          ),
+        ),
+      );
 
       if (!mounted) return;
 
       // 3. Handle result
-      switch (result) {
-        case Success<PalmAnalysisResponseModel>():
-          AppLogger.info('✅ Palm analysis success, returning result');
-          context.pop(result.data);
-          break;
-
-        case Error<PalmAnalysisResponseModel>():
-          AppLogger.error('❌ Palm analysis failed: ${result.failure.message}');
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Phân tích vân tay thất bại: ${result.failure.message}'),
-                backgroundColor: AppColors.error,
-              ),
-            );
-          }
-          break;
-
-        case Loading<PalmAnalysisResponseModel>():
-          // This shouldn't happen in this context, but handle it gracefully
-          AppLogger.info('Unexpected loading state in palm analysis result');
-          break;
+      if (result != null) {
+        AppLogger.info('✅ Palm analysis success, returning result');
+        context.pop(result);
+      } else {
+        AppLogger.error('❌ Palm analysis failed or was cancelled');
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Phân tích vân tay thất bại hoặc bị hủy'),
+              backgroundColor: AppColors.error,
+            ),
+          );
+        }
       }
     } catch (e) {
       AppLogger.error('❌ Exception in palm capture and analysis', e);
@@ -422,5 +424,87 @@ class _PalmCameraScreenState extends State<PalmCameraScreen> {
         });
       }
     }
+  }
+}
+
+/// Loading screen for palm camera analysis
+class _PalmCameraAnalysisLoadingScreen extends StatefulWidget {
+  final String imagePath;
+  final FaceScanProvider provider;
+
+  const _PalmCameraAnalysisLoadingScreen({
+    required this.imagePath,
+    required this.provider,
+  });
+
+  @override
+  State<_PalmCameraAnalysisLoadingScreen> createState() => _PalmCameraAnalysisLoadingScreenState();
+}
+
+class _PalmCameraAnalysisLoadingScreenState extends State<_PalmCameraAnalysisLoadingScreen> {
+  @override
+  void initState() {
+    super.initState();
+    _startAnalysis();
+  }
+
+  Future<void> _startAnalysis() async {
+    try {
+      final result = await widget.provider.executeMultiStepAnalysis<PalmAnalysisResponseModel>(
+        initializeStep: () async {
+          // Initialize step
+          await Future.delayed(const Duration(milliseconds: 500));
+        },
+        uploadStep: () async {
+          // Upload step - simulate upload
+          await Future.delayed(const Duration(seconds: 1));
+        },
+        analyzeStep: () async {
+          // Analyze step - call actual API
+          final result = await widget.provider.repository.analyzePalmFromCloudinary(widget.imagePath);
+          if (result is Success<PalmAnalysisResponseModel>) {
+            return result.data;
+          } else {
+            throw Exception('Palm analysis failed: ${result.failure?.message ?? 'Unknown error'}');
+          }
+        },
+        processStep: (analysisResult) async {
+          // Process step
+          await Future.delayed(const Duration(milliseconds: 500));
+          return analysisResult;
+        },
+        operationName: 'cameraPalmAnalysis',
+        isFaceAnalysis: false,
+      );
+
+      if (mounted) {
+        Navigator.of(context).pop(result);
+      }
+    } catch (e) {
+      if (mounted) {
+        Navigator.of(context).pop(null);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<FaceScanProvider>(
+      builder: (context, provider, child) {
+        return AnalysisLoadingScreen(
+          loadingInfo: provider.loadingInfo,
+          isFaceAnalysis: false,
+          customTitle: 'Phân tích vân tay từ camera',
+          onCancel: () {
+            provider.resetLoadingState();
+            Navigator.of(context).pop(null);
+          },
+          onRetry: () {
+            provider.resetLoadingState();
+            _startAnalysis();
+          },
+        );
+      },
+    );
   }
 }
