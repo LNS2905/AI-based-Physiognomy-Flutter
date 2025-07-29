@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import '../network/api_result.dart';
 import '../errors/failures.dart';
+import '../errors/exceptions.dart';
 import '../enums/loading_state.dart';
 import '../utils/logger.dart';
 
@@ -293,6 +294,19 @@ abstract class BaseProvider extends ChangeNotifier {
       );
 
       return finalResult;
+    } on ValidationException catch (e) {
+      setLoadingState(
+        LoadingState.error,
+        errorMessage: e.message,
+      );
+
+      AppLogger.error(
+        'Multi-step analysis validation failed: ${operationName ?? 'unknown'}',
+        e,
+      );
+
+      // Re-throw ValidationException to preserve it
+      rethrow;
     } catch (e) {
       setLoadingState(
         LoadingState.error,

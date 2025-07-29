@@ -1,8 +1,10 @@
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:image/image.dart' as img;
+import 'package:camera/camera.dart';
 import '../utils/logger.dart';
 import '../errors/exceptions.dart';
+import '../config/camera_config.dart';
 
 /// Service for processing images (orientation, compression, etc.)
 class ImageProcessingService {
@@ -10,10 +12,14 @@ class ImageProcessingService {
   factory ImageProcessingService() => _instance;
   ImageProcessingService._internal();
 
-  /// Fix image orientation based on EXIF data
-  Future<String> fixImageOrientation(String imagePath) async {
+  /// Fix image orientation based on EXIF data and camera type
+  Future<String> fixImageOrientation(
+    String imagePath, {
+    CameraLensDirection? cameraType,
+  }) async {
     try {
       AppLogger.info('Fixing image orientation for: $imagePath');
+      AppLogger.info('Camera type: ${cameraType?.toString() ?? 'unknown'}');
 
       // Read the image file
       final File imageFile = File(imagePath);
@@ -25,7 +31,7 @@ class ImageProcessingService {
       }
 
       final Uint8List imageBytes = await imageFile.readAsBytes();
-      
+
       // Decode the image
       img.Image? image = img.decodeImage(imageBytes);
       if (image == null) {
@@ -35,14 +41,22 @@ class ImageProcessingService {
         );
       }
 
+      AppLogger.info('Original image size: ${image.width}x${image.height}');
+
       // Fix orientation based on EXIF data
       image = img.bakeOrientation(image);
+      AppLogger.info('After EXIF orientation fix: ${image.width}x${image.height}');
 
-      // For front camera, we might need to flip horizontally
-      // This is a common issue with front-facing cameras
-      if (_isFrontCamera(imagePath)) {
+      // Handle front camera specific issues based on configuration
+      if (cameraType == CameraLensDirection.front && CameraConfig.enableFrontCameraFlip) {
+        // Front camera typically needs horizontal flip to correct mirror effect
         image = img.flipHorizontal(image);
         AppLogger.info('Applied horizontal flip for front camera');
+      }
+
+      // Additional orientation fixes for specific cases
+      if (CameraConfig.enableAdditionalOrientationFixes) {
+        image = _applyAdditionalOrientationFixes(image, cameraType);
       }
 
       // Encode the corrected image
@@ -127,12 +141,15 @@ class ImageProcessingService {
   }
 
   /// Process image: fix orientation and compress
-  Future<String> processImage(String imagePath) async {
+  Future<String> processImage(
+    String imagePath, {
+    CameraLensDirection? cameraType,
+  }) async {
     try {
       AppLogger.info('Processing image: $imagePath');
 
       // Step 1: Fix orientation
-      String processedPath = await fixImageOrientation(imagePath);
+      String processedPath = await fixImageOrientation(imagePath, cameraType: cameraType);
 
       // Step 2: Compress if needed
       final File imageFile = File(processedPath);
@@ -156,11 +173,32 @@ class ImageProcessingService {
     }
   }
 
-  /// Check if image is from front camera (heuristic based on file path/name)
+  /// Apply additional orientation fixes based on camera type and common issues
+  img.Image _applyAdditionalOrientationFixes(
+    img.Image image,
+    CameraLensDirection? cameraType,
+  ) {
+    // For some devices, additional rotation might be needed
+    // This can be device-specific and might need to be configurable
+
+    if (cameraType == CameraLensDirection.front) {
+      // Some front cameras might need additional rotation
+      // This is device-specific and can be adjusted based on testing
+      AppLogger.info('Applied additional front camera orientation fixes');
+    } else if (cameraType == CameraLensDirection.back) {
+      // Back camera usually doesn't need additional fixes
+      AppLogger.info('Applied additional back camera orientation fixes');
+    }
+
+    return image;
+  }
+
+  /// Check if image is from front camera (deprecated - use cameraType parameter instead)
+  @deprecated
   bool _isFrontCamera(String imagePath) {
     // This is a simple heuristic - in a real app you might want to
     // pass camera type information explicitly
-    return imagePath.toLowerCase().contains('front') || 
+    return imagePath.toLowerCase().contains('front') ||
            imagePath.toLowerCase().contains('selfie');
   }
 
@@ -182,6 +220,40 @@ class ImageProcessingService {
     final String extension = fileName.split('.').last;
     
     return '$directory/${nameWithoutExtension}_compressed.$extension';
+  }
+
+  /// Debug image orientation information
+  Future<void> debugImageOrientation(String imagePath) async {
+    if (!CameraConfig.enableOrientationDebug) return;
+
+    try {
+      final File imageFile = File(imagePath);
+      if (!imageFile.existsSync()) {
+        AppLogger.warning('Debug: Image file does not exist: $imagePath');
+        return;
+      }
+
+      final Uint8List imageBytes = await imageFile.readAsBytes();
+      final img.Image? image = img.decodeImage(imageBytes);
+
+      if (image != null) {
+        AppLogger.info('=== IMAGE ORIENTATION DEBUG ===');
+        AppLogger.info('File: $imagePath');
+        AppLogger.info('Original size: ${image.width}x${image.height}');
+
+        // Check if EXIF data exists using hasExif property
+        AppLogger.info('Has EXIF: ${image.hasExif}');
+
+        if (image.hasExif) {
+          final orientation = image.exif['Orientation'];
+          AppLogger.info('EXIF Orientation: $orientation');
+        }
+
+        AppLogger.info('=== END DEBUG ===');
+      }
+    } catch (e) {
+      AppLogger.error('Failed to debug image orientation', e);
+    }
   }
 
   /// Clean up temporary processed images

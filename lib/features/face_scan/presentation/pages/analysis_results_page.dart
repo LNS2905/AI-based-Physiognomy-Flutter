@@ -5,7 +5,6 @@ import '../../../../core/utils/logger.dart';
 import '../../data/models/chart_data_models.dart';
 import '../../data/models/cloudinary_analysis_response_model.dart';
 import '../widgets/face_shape_probability_chart.dart';
-import '../widgets/harmony_scores_widget.dart';
 import '../widgets/proportionality_metrics_chart.dart';
 
 /// Page to display face analysis results
@@ -59,13 +58,7 @@ class AnalysisResultsPage extends StatelessWidget {
                       const SizedBox(height: 20),
                     ],
 
-                    // Harmony Scores Widget
-                    if (_getHarmonyScores().isNotEmpty) ...[
-                      HarmonyScoresWidget(
-                        data: _getHarmonyScores(),
-                      ),
-                      const SizedBox(height: 20),
-                    ],
+
 
                     // Proportionality Metrics Chart
                     if (_getProportionalityMetrics().isNotEmpty) ...[
@@ -179,8 +172,8 @@ class AnalysisResultsPage extends StatelessWidget {
   }
 
   Widget _buildMainResultsCard() {
-    final harmonyScore = _getOverallHarmonyScore();
     final faceShape = _getPrimaryFaceShape();
+    final harmonyScore = _getHarmonyScoreForDisplay();
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
@@ -198,10 +191,12 @@ class AnalysisResultsPage extends StatelessWidget {
       ),
       child: Column(
         children: [
-          // Harmony Score Circle
-          _buildHarmonyScoreCircle(harmonyScore),
+          // Quality Rating based on harmony score
+          if (harmonyScore != null)
+            _buildQualityRating(harmonyScore),
 
-          const SizedBox(height: 24),
+          if (harmonyScore != null)
+            const SizedBox(height: 20),
 
           // Face Shape if available
           if (faceShape != null && faceShape != 'Unknown')
@@ -217,67 +212,7 @@ class AnalysisResultsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildHarmonyScoreCircle(double score) {
-    final scoreColor = _getScoreColor(score);
 
-    return Container(
-      width: 140,
-      height: 140,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            scoreColor.withOpacity(0.1),
-            scoreColor.withOpacity(0.05),
-          ],
-        ),
-        border: Border.all(
-          color: scoreColor.withOpacity(0.3),
-          width: 3,
-        ),
-      ),
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          // Progress Circle
-          SizedBox(
-            width: 120,
-            height: 120,
-            child: CircularProgressIndicator(
-              value: score / 100,
-              strokeWidth: 8,
-              backgroundColor: scoreColor.withOpacity(0.1),
-              valueColor: AlwaysStoppedAnimation<Color>(scoreColor),
-            ),
-          ),
-          // Score Text
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                '${score.toStringAsFixed(0)}%',
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.w800,
-                  color: scoreColor,
-                ),
-              ),
-              Text(
-                'Điểm hài hòa',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.textSecondary,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildFaceShapeChip(String faceShape) {
     return Container(
@@ -391,11 +326,7 @@ class AnalysisResultsPage extends StatelessWidget {
     );
   }
 
-  Color _getScoreColor(double score) {
-    if (score >= 70) return Colors.green;
-    if (score >= 50) return Colors.orange;
-    return Colors.red;
-  }
+
 
   Widget _buildAnalysisDetails() {
     final result = _getAnalysisResult();
@@ -701,13 +632,7 @@ class AnalysisResultsPage extends StatelessWidget {
     }
   }
 
-  String _getScoreDescription(double score) {
-    if (score >= 80) return 'Excellent facial harmony';
-    if (score >= 70) return 'Very good facial proportions';
-    if (score >= 60) return 'Good facial balance';
-    if (score >= 50) return 'Average facial harmony';
-    return 'Room for improvement in facial proportions';
-  }
+
 
   Widget _buildDataRow(String key, dynamic value) {
     return Padding(
@@ -932,11 +857,65 @@ class AnalysisResultsPage extends StatelessWidget {
   }
 
   // Helper methods for data processing
-  double _getOverallHarmonyScore() {
+
+  /// Get harmony score for display purposes
+  double? _getHarmonyScoreForDisplay() {
     if (analysisResponse?.analysis?.analysisResult?.face?.proportionality?.overallHarmonyScore != null) {
-      return analysisResponse!.analysis!.analysisResult!.face!.proportionality!.overallHarmonyScore!;
+      final score = analysisResponse!.analysis!.analysisResult!.face!.proportionality!.overallHarmonyScore!;
+      // Convert to 0-100 scale if needed
+      return score > 1 ? score : score * 100;
     }
-    return legacyAnalysisData?['total_harmony_score'] as double? ?? 0.0;
+    return legacyAnalysisData?['total_harmony_score'] as double? ?? null;
+  }
+
+  /// Build quality rating widget
+  Widget _buildQualityRating(double score) {
+    String rating;
+    Color color;
+    IconData icon;
+
+    if (score >= 70) {
+      rating = 'Cao';
+      color = const Color(0xFF4CAF50);
+      icon = Icons.star;
+    } else if (score >= 50) {
+      rating = 'Khá';
+      color = const Color(0xFF8BC34A);
+      icon = Icons.star_half;
+    } else {
+      rating = 'Trung bình';
+      color = const Color(0xFFFF9800);
+      icon = Icons.star_border;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            color.withOpacity(0.1),
+            color.withOpacity(0.05),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color.withOpacity(0.3)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: color, size: 20),
+          const SizedBox(width: 8),
+          Text(
+            'Chất lượng phân tích: $rating',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: color,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   String? _getPrimaryFaceShape() {
@@ -954,13 +933,7 @@ class AnalysisResultsPage extends StatelessWidget {
     return [];
   }
 
-  List<HarmonyScoreData> _getHarmonyScores() {
-    final harmonyScores = analysisResponse?.analysis?.analysisResult?.face?.proportionality?.harmonyScores;
-    if (harmonyScores != null) {
-      return ChartDataProcessor.processHarmonyScores(harmonyScores);
-    }
-    return [];
-  }
+
 
   List<ProportionalityMetricData> _getProportionalityMetrics() {
     final metrics = analysisResponse?.analysis?.analysisResult?.face?.proportionality?.metrics;

@@ -8,6 +8,7 @@ import '../../../../core/services/camera_service.dart';
 import '../../../../core/utils/error_handler.dart';
 import '../../../../core/utils/logger.dart';
 import '../../../../core/network/api_result.dart';
+import '../../../../core/errors/exceptions.dart';
 import '../../../../core/widgets/analysis_loading_screen.dart';
 import '../../../../core/enums/loading_state.dart';
 import '../../data/models/cloudinary_analysis_response_model.dart';
@@ -117,7 +118,7 @@ class _CameraScreenState extends State<CameraScreen>
       final provider = context.read<FaceScanProvider>();
 
       // Navigate to loading screen
-      final result = await Navigator.of(context).push<CloudinaryAnalysisResponseModel>(
+      final result = await Navigator.of(context).push(
         MaterialPageRoute(
           builder: (context) => _CameraAnalysisLoadingScreen(
             imagePath: imagePath,
@@ -129,10 +130,15 @@ class _CameraScreenState extends State<CameraScreen>
       if (!mounted) return;
 
       // 3. Xử lý kết quả
-      if (result != null) {
+      if (result is CloudinaryAnalysisResponseModel) {
         AppLogger.info('✅ Analysis success, returning result to face-scanning page');
         // Return result to face-scanning page
         context.pop(result);
+      } else if (result == 'retry') {
+        AppLogger.info('🔄 User requested retry, staying on camera screen');
+        // Clear any error state and stay on camera screen for new photo
+        provider.resetErrorState();
+        // Don't pop, just stay on camera screen
       } else {
         AppLogger.error('❌ Analysis failed or was cancelled');
         if (mounted) {
@@ -586,6 +592,13 @@ class _CameraAnalysisLoadingScreenState extends State<_CameraAnalysisLoadingScre
           if (result is Success<CloudinaryAnalysisResponseModel>) {
             return result.data;
           } else {
+            // Check if it's a validation error (photo quality or face detection)
+            if (result.failure?.code == 'PHOTO_QUALITY_LOW' || result.failure?.code == 'FACE_DETECTION_FAILED') {
+              throw ValidationException(
+                message: result.failure!.message,
+                code: result.failure!.code,
+              );
+            }
             throw Exception('Analysis failed: ${result.failure?.message ?? 'Unknown error'}');
           }
         },
@@ -600,6 +613,38 @@ class _CameraAnalysisLoadingScreenState extends State<_CameraAnalysisLoadingScre
 
       if (mounted) {
         Navigator.of(context).pop(result);
+      }
+    } on ValidationException catch (e) {
+      AppLogger.info('🔍 ValidationException caught in camera screen: ${e.code}');
+
+      if (mounted) {
+        if (e.code == 'PHOTO_QUALITY_LOW') {
+          final shouldRetry = await ErrorHandler.showPhotoQualityErrorDialog(
+            context,
+            retryCount: 0,
+            maxRetries: 3,
+          );
+          if (shouldRetry) {
+            // Return to camera to take new photo
+            Navigator.of(context).pop('retry');
+          } else {
+            Navigator.of(context).pop(null);
+          }
+        } else if (e.code == 'FACE_DETECTION_FAILED') {
+          final shouldRetry = await ErrorHandler.showFaceDetectionErrorDialog(
+            context,
+            retryCount: 0,
+            maxRetries: 3,
+          );
+          if (shouldRetry) {
+            // Return to camera to take new photo
+            Navigator.of(context).pop('retry');
+          } else {
+            Navigator.of(context).pop(null);
+          }
+        } else {
+          Navigator.of(context).pop(null);
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -617,11 +662,11 @@ class _CameraAnalysisLoadingScreenState extends State<_CameraAnalysisLoadingScre
           isFaceAnalysis: true,
           customTitle: 'Phân tích ảnh từ camera',
           onCancel: () {
-            provider.resetLoadingState();
+            provider.resetErrorState();
             Navigator.of(context).pop(null);
           },
           onRetry: () {
-            provider.resetLoadingState();
+            provider.resetErrorState();
             _startAnalysis();
           },
         );

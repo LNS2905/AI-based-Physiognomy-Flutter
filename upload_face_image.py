@@ -2,6 +2,13 @@
 """
 Script để upload ảnh khuôn mặt lên Cloudinary và tạo body request cho face analysis API
 Sử dụng: python upload_face_image.py
+
+UPDATED VALIDATION LOGIC:
+- API now validates harmony scores < 0.45 and returns error for photo quality
+- Error message changed from "lỗi điểm hài hòa" to "Ảnh chụp chưa chuẩn, vui lòng chụp lại"
+- Client implements retry logic with user guidance for photo improvement
+- Harmony score display removed from UI while keeping internal validation
+- Score descriptions optimized to show only "Cao" and "Trung bình" levels
 """
 
 import os

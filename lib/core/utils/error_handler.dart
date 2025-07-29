@@ -103,6 +103,129 @@ class ErrorHandler {
     );
   }
 
+  /// Show photo quality error dialog with retry guidance
+  static Future<bool> showPhotoQualityErrorDialog(
+    BuildContext context, {
+    int retryCount = 0,
+    int maxRetries = 3,
+  }) async {
+    final shouldRetry = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Ảnh chụp chưa chuẩn'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('Để có kết quả phân tích tốt nhất, vui lòng:'),
+              const SizedBox(height: 12),
+              const Text('• Đảm bảo khuôn mặt rõ ràng, không bị che'),
+              const Text('• Chụp trong ánh sáng đủ sáng'),
+              const Text('• Giữ camera thẳng và ổn định'),
+              const Text('• Khuôn mặt nhìn thẳng vào camera'),
+              const SizedBox(height: 12),
+              if (retryCount >= maxRetries)
+                const Text(
+                  'Bạn đã thử nhiều lần. Có thể thử lại sau hoặc sử dụng ảnh khác.',
+                  style: TextStyle(
+                    color: Colors.orange,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+            ],
+          ),
+          actions: [
+            if (retryCount < maxRetries) ...[
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Hủy'),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text('Chụp lại'),
+              ),
+            ] else ...[
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Đóng'),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text('Thử lại'),
+              ),
+            ],
+          ],
+        );
+      },
+    );
+
+    return shouldRetry ?? false;
+  }
+
+  /// Show face detection error dialog with retry guidance
+  static Future<bool> showFaceDetectionErrorDialog(
+    BuildContext context, {
+    int retryCount = 0,
+    int maxRetries = 3,
+  }) async {
+    final shouldRetry = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Không phát hiện được khuôn mặt'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('Để phân tích chính xác, vui lòng:'),
+              const SizedBox(height: 12),
+              const Text('• Chụp chính diện gương mặt'),
+              const Text('• Tháo kính mắt, cởi nón nếu có'),
+              const Text('• Đảm bảo khuôn mặt không bị che'),
+              const Text('• Chụp trong ánh sáng đủ sáng'),
+              const Text('• Giữ camera thẳng và ổn định'),
+              const SizedBox(height: 12),
+              if (retryCount >= maxRetries)
+                const Text(
+                  'Bạn đã thử nhiều lần. Có thể thử lại sau hoặc sử dụng ảnh khác.',
+                  style: TextStyle(
+                    color: Colors.orange,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+            ],
+          ),
+          actions: [
+            if (retryCount < maxRetries) ...[
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Hủy'),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text('Chụp lại'),
+              ),
+            ] else ...[
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Đóng'),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text('Thử lại'),
+              ),
+            ],
+          ],
+        );
+      },
+    );
+
+    return shouldRetry ?? false;
+  }
+
   /// Get user-friendly error message
   static String _getErrorMessage(dynamic error, String? customMessage) {
     if (customMessage != null) return customMessage;

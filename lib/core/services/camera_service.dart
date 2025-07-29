@@ -17,6 +17,7 @@ class CameraService {
   List<CameraDescription>? _cameras;
   CameraController? _controller;
   bool _isInitialized = false;
+  CameraLensDirection? _currentCameraType;
   final ImageProcessingService _imageProcessingService = ImageProcessingService();
 
   /// Get available cameras
@@ -27,6 +28,9 @@ class CameraService {
   
   /// Check if camera is initialized
   bool get isInitialized => _isInitialized;
+
+  /// Get current camera type
+  CameraLensDirection? get currentCameraType => _currentCameraType;
 
   /// Initialize camera service
   Future<void> initialize() async {
@@ -106,6 +110,9 @@ class CameraService {
           );
 
       AppLogger.info('Starting camera: ${selectedCamera.name}');
+
+      // Store current camera type
+      _currentCameraType = selectedCamera.lensDirection;
 
       // Dispose existing controller if any
       await stopCamera();
@@ -187,8 +194,14 @@ class CameraService {
 
       AppLogger.info('Image captured successfully: $filePath');
 
+      // Debug original image orientation
+      await _imageProcessingService.debugImageOrientation(savedFile.path);
+
       // Process image to fix orientation and optimize
-      final String processedPath = await _imageProcessingService.processImage(savedFile.path);
+      final String processedPath = await _imageProcessingService.processImage(
+        savedFile.path,
+        cameraType: _currentCameraType,
+      );
 
       // If processing created a new file, clean up the original
       if (processedPath != savedFile.path) {

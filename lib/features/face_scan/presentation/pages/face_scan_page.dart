@@ -651,7 +651,7 @@ class _FaceScanPageState extends State<FaceScanPage> {
       AppLogger.info('Upload photo button tapped');
 
       // Pick image and analyze
-      final success = await provider.pickImageAndAnalyze();
+      final success = await provider.pickImageAndAnalyze(context: context);
 
       if (mounted) {
         if (success) {

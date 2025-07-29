@@ -355,36 +355,143 @@ class FaceScanRepository {
       AppLogger.info('Sending analysis request to API');
 
       // Step 3: Call the analysis API
-      final response = await _httpService.post(
-        AppConstants.faceAnalysisApiUrl,
-        body: request.toJson(),
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-      );
+      try {
+        final response = await _httpService.post(
+          AppConstants.faceAnalysisApiUrl,
+          body: request.toJson(),
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+        );
 
-      // Step 4: Parse response
+        AppLogger.info('API response received successfully');
+
+        // Continue with response processing...
+        return await _processAnalysisResponse(response);
+      } on ValidationException catch (e) {
+        AppLogger.error('API validation error: $e');
+        // API returned 4xx error - likely face detection failed
+        return Error(
+          ValidationFailure(
+            message: 'Chụp ảnh chưa chính xác, vui lòng chụp chính diện gương mặt, tháo kính mắt cởi nón ra nếu có',
+            code: 'FACE_DETECTION_FAILED',
+          ),
+        );
+      } on ServerException catch (e) {
+        AppLogger.error('API server error: $e');
+        // API returned 5xx error - server issue but could be face detection
+        return Error(
+          ValidationFailure(
+            message: 'Chụp ảnh chưa chính xác, vui lòng chụp chính diện gương mặt, tháo kính mắt cởi nón ra nếu có',
+            code: 'FACE_DETECTION_FAILED',
+          ),
+        );
+      } on NetworkException catch (e) {
+        AppLogger.error('Network error: $e');
+        return Error(
+          NetworkFailure(
+            message: e.message,
+            code: e.code,
+          ),
+        );
+      } catch (e) {
+        AppLogger.error('Unexpected API error: $e');
+
+        // Check if it's a face detection related error by message content
+        final errorMessage = e.toString().toLowerCase();
+        if (errorMessage.contains('face') ||
+            errorMessage.contains('detection') ||
+            errorMessage.contains('không phát hiện') ||
+            errorMessage.contains('phân tích thất bại')) {
+          return Error(
+            ValidationFailure(
+              message: 'Chụp ảnh chưa chính xác, vui lòng chụp chính diện gương mặt, tháo kính mắt cởi nón ra nếu có',
+              code: 'FACE_DETECTION_FAILED',
+            ),
+          );
+        }
+
+        // For other errors, rethrow
+        rethrow;
+      }
+    } catch (e) {
+      AppLogger.error('Face analysis failed', e);
+      return Error(ServerFailure(message: e.toString()));
+    }
+  }
+
+  /// Process analysis response and validate
+  Future<ApiResult<CloudinaryAnalysisResponseModel>> _processAnalysisResponse(
+    Map<String, dynamic> response,
+  ) async {
+    try {
+
+      // Parse response and check for API errors
       final analysisResponse = CloudinaryAnalysisResponseModel.fromJson(response);
+
+      // Check if API returned error status
+      if (analysisResponse.status != 'success') {
+        AppLogger.warning('API returned error status: ${analysisResponse.status}');
+        return Error(
+          ValidationFailure(
+            message: 'Chụp ảnh chưa chính xác, vui lòng chụp chính diện gương mặt, tháo kính mắt cởi nón ra nếu có',
+            code: 'FACE_DETECTION_FAILED',
+          ),
+        );
+      }
+
+      // Check if analysis result is missing or incomplete
+      if (analysisResponse.analysis?.analysisResult?.face == null) {
+        AppLogger.warning('Face analysis result is missing or incomplete');
+        return Error(
+          ValidationFailure(
+            message: 'Chụp ảnh chưa chính xác, vui lòng chụp chính diện gương mặt, tháo kính mắt cởi nón ra nếu có',
+            code: 'FACE_DETECTION_FAILED',
+          ),
+        );
+      }
+
       AppLogger.info('Face analysis completed successfully');
 
+      // Step 5: Validate harmony score for photo quality
+      try {
+        final harmonyScore = analysisResponse.analysis?.analysisResult?.face?.proportionality?.overallHarmonyScore;
+        AppLogger.info('🔍 Harmony score validation started: $harmonyScore');
+
+        if (harmonyScore == null) {
+          AppLogger.warning('⚠️ Harmony score is null, skipping validation');
+        } else {
+          AppLogger.info('📊 Validation checks:');
+          AppLogger.info('  - harmonyScore < 0.45: ${harmonyScore < 0.45}');
+          AppLogger.info('  - harmonyScore > 1: ${harmonyScore > 1}');
+          AppLogger.info('  - harmonyScore < 45: ${harmonyScore < 45}');
+
+          // Check both scale 0-1 and 0-100 for compatibility
+          final isLowScore = harmonyScore < 0.45 || (harmonyScore > 1 && harmonyScore < 45);
+          AppLogger.info('  - Final isLowScore: $isLowScore');
+
+          if (isLowScore) {
+            AppLogger.warning('🚫 Low harmony score detected: $harmonyScore, requesting retake');
+            return Error(
+              ValidationFailure(
+                message: 'Ảnh chụp chưa chuẩn, vui lòng chụp lại',
+                code: 'PHOTO_QUALITY_LOW',
+              ),
+            );
+          }
+
+          AppLogger.info('✅ Harmony score validation passed: $harmonyScore');
+        }
+      } catch (e) {
+        AppLogger.error('❌ Error in harmony score validation: $e');
+        // Continue without validation if there's an error
+      }
+
       return Success(analysisResponse);
-    } on CloudinaryException catch (e) {
-      AppLogger.error('Cloudinary error in analyzeFaceFromCloudinary', e);
-      return Error(
-        NetworkFailure(
-          message: e.message,
-          code: e.code,
-        ),
-      );
     } catch (e) {
-      AppLogger.error('Exception in analyzeFaceFromCloudinary', e);
-      return Error(
-        UnknownFailure(
-          message: 'Failed to analyze face: ${e.toString()}',
-          code: 'CLOUDINARY_ANALYSIS_ERROR',
-        ),
-      );
+      AppLogger.error('Error processing analysis response: $e');
+      return Error(ServerFailure(message: e.toString()));
     }
   }
 
