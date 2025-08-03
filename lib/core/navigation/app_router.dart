@@ -25,7 +25,7 @@ import '../../features/history/presentation/pages/chat_history_detail_page.dart'
 /// Application router configuration using GoRouter
 class AppRouter {
   static final GoRouter _router = GoRouter(
-    initialLocation: AppConstants.homeRoute,
+    initialLocation: AppConstants.introRoute,
     debugLogDiagnostics: true,
     observers: [NavigationObserver()],
     routes: [

@@ -4,9 +4,24 @@ import 'create_user_dto.dart'; // Import for Gender enum
 
 part 'user_model.g.dart';
 
+/// Helper function to convert id from JSON (can be int or String)
+String _idFromJson(dynamic value) {
+  if (value is int) {
+    return value.toString();
+  } else if (value is String) {
+    return value;
+  } else {
+    throw ArgumentError('ID must be int or String, got ${value.runtimeType}');
+  }
+}
+
+/// Helper function to convert id to JSON
+dynamic _idToJson(String id) => id;
+
 /// User data model
 @JsonSerializable()
 class UserModel extends Equatable {
+  @JsonKey(fromJson: _idFromJson, toJson: _idToJson)
   final String id;
   final String? username;
   final String email;

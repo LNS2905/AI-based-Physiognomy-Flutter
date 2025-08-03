@@ -7,18 +7,18 @@ part 'auth_response_model.g.dart';
 /// Authentication response model
 @JsonSerializable()
 class AuthResponseModel extends Equatable {
-  final String accessToken;
-  final String refreshToken;
+  final String? accessToken;
+  final String? refreshToken;
   final UserModel user;
   final String tokenType;
-  final int expiresIn;
+  final int? expiresIn;
 
   const AuthResponseModel({
-    required this.accessToken,
-    required this.refreshToken,
+    this.accessToken,
+    this.refreshToken,
     required this.user,
     this.tokenType = 'Bearer',
-    required this.expiresIn,
+    this.expiresIn,
   });
 
   /// Create AuthResponseModel from JSON
@@ -29,12 +29,13 @@ class AuthResponseModel extends Equatable {
   Map<String, dynamic> toJson() => _$AuthResponseModelToJson(this);
 
   /// Get authorization header value
-  String get authorizationHeader => '$tokenType $accessToken';
+  String? get authorizationHeader => accessToken != null ? '$tokenType $accessToken' : null;
 
   /// Check if token is expired (with 5 minute buffer)
   bool get isExpired {
+    if (expiresIn == null) return false;
     final now = DateTime.now();
-    final expiryTime = now.add(Duration(seconds: expiresIn - 300)); // 5 min buffer
+    final expiryTime = now.add(Duration(seconds: expiresIn! - 300)); // 5 min buffer
     return now.isAfter(expiryTime);
   }
 

@@ -765,7 +765,7 @@ class _SignUpPageState extends State<SignUpPage> {
       }
 
       final createUserDto = CreateUserDTO(
-        username: _usernameController.text.trim(),
+        username: _emailController.text.trim(), // Use email as username for new backend
         password: _passwordController.text,
         confirmPassword: _confirmPasswordController.text,
         firstName: _firstNameController.text.trim(),
@@ -788,10 +788,22 @@ class _SignUpPageState extends State<SignUpPage> {
         // Navigate to survey after successful signup
         context.push('/survey');
       } else if (mounted) {
+        String errorMessage = authProvider.errorMessage ?? 'Đăng ký thất bại';
+
+        // Check if it's a server error and provide helpful message
+        if (errorMessage.contains('Internal server error') ||
+            errorMessage.contains('500') ||
+            errorMessage.contains('INTERNAL_ERROR')) {
+          errorMessage = 'Hệ thống đang bảo trì. Vui lòng thử lại sau ít phút.';
+        } else if (errorMessage.contains('username must be a valid email')) {
+          errorMessage = 'Vui lòng sử dụng email hợp lệ để đăng ký.';
+        }
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(authProvider.errorMessage ?? 'Đăng ký thất bại'),
+            content: Text(errorMessage),
             backgroundColor: AppColors.error,
+            duration: const Duration(seconds: 5),
           ),
         );
       }

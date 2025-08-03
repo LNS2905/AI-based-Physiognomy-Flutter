@@ -237,14 +237,27 @@ class HttpService {
 
   /// Build URI with query parameters
   Uri _buildUri(String endpoint, Map<String, dynamic>? queryParameters) {
-    // Don't add API version for full endpoints that already include version or are external
-    final path = endpoint.startsWith('http') ||
-                 endpoint.contains('analyze-face-from-cloudinary') ||
-                 endpoint.contains('analyze-palm-cloudinary')
-        ? endpoint.replaceFirst(_baseUrl, '') // Remove base URL if it's included
-        : '${AppConstants.apiVersion}/$endpoint';
+    // Determine which backend to use based on endpoint
+    String baseUrl;
+    String path;
 
-    return Uri.parse(_baseUrl).replace(
+    if (endpoint.contains('analyze-face-from-cloudinary') ||
+        endpoint.contains('analyze-palm-cloudinary') ||
+        endpoint.startsWith('/api/chat')) {
+      // Old Backend APIs (Face/Palm Analysis, Chat)
+      baseUrl = AppConstants.oldBackendBaseUrl;
+      path = endpoint.startsWith('http')
+          ? endpoint.replaceFirst(baseUrl, '')
+          : endpoint;
+    } else {
+      // New Backend APIs (Auth, User Management from OpenAPI docs)
+      baseUrl = AppConstants.baseUrl;
+      path = endpoint.startsWith('http')
+          ? endpoint.replaceFirst(baseUrl, '')
+          : endpoint; // Don't add version prefix for new backend
+    }
+
+    return Uri.parse(baseUrl).replace(
       path: path.startsWith('/') ? path : '/$path',
       queryParameters: queryParameters?.map(
         (key, value) => MapEntry(key, value.toString()),
@@ -276,15 +289,29 @@ class HttpService {
 
     if (response.statusCode >= 200 && response.statusCode < 300) {
       if (response.body.isEmpty) {
+        AppLogger.info('Empty response body for $method $url');
         return <String, dynamic>{};
       }
 
-      final decoded = jsonDecode(response.body);
-      if (decoded is Map<String, dynamic>) {
-        return decoded;
-      } else {
-        // If API returns a List or other type, wrap it in a Map
-        return {'data': decoded};
+      try {
+        AppLogger.info('Parsing response body for $method $url: ${response.body}');
+        final decoded = jsonDecode(response.body);
+        if (decoded is Map<String, dynamic>) {
+          AppLogger.info('Successfully parsed JSON response');
+          return decoded;
+        } else {
+          AppLogger.info('Response is not a Map, wrapping in data field');
+          // If API returns a List or other type, wrap it in a Map
+          return {'data': decoded};
+        }
+      } catch (e) {
+        AppLogger.error('Failed to parse JSON response: $e');
+        AppLogger.error('Response body: ${response.body}');
+        throw ServerException(
+          message: 'Invalid JSON response from server',
+          statusCode: response.statusCode,
+          code: 'INVALID_JSON',
+        );
       }
     }
 

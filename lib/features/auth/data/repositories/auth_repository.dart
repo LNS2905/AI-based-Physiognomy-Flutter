@@ -40,10 +40,47 @@ class AuthRepository {
         (json) => json as Map<String, dynamic>,
       );
 
-      final authResponse = AuthResponseModel.fromJson(generalResponse.data);
+      // For login, backend returns tokens but no user data
+      // We need to get user data separately
+      final tokenData = generalResponse.data;
+
+      // Create AuthResponseModel with tokens but no user initially
+      final authResponse = AuthResponseModel(
+        accessToken: tokenData['accessToken'] as String?,
+        refreshToken: tokenData['refreshToken'] as String?,
+        user: UserModel(
+          id: 'temp', // Temporary ID, will be updated when we get user data
+          email: username, // Use login username as email
+          firstName: '',
+          lastName: '',
+          phone: '',
+          age: 0,
+          gender: Gender.male,
+        ),
+        expiresIn: tokenData['expiresIn'] as int?,
+      );
 
       // Store tokens securely
       await _storeAuthTokens(authResponse);
+
+      // Get current user data to complete the auth response
+      try {
+        final currentUserResult = await getCurrentUser();
+        if (currentUserResult is Success<UserModel>) {
+          final completeAuthResponse = authResponse.copyWith(
+            user: currentUserResult.data,
+          );
+          // Update stored user data
+          await StorageService.store(
+            AppConstants.userDataKey,
+            currentUserResult.data.toJson(),
+          );
+          AppLogger.info('User logged in successfully with complete user data');
+          return Success(completeAuthResponse);
+        }
+      } catch (e) {
+        AppLogger.warning('Failed to get user data after login, but login was successful: $e');
+      }
 
       AppLogger.info('User logged in successfully');
       return Success(authResponse);
@@ -84,12 +121,24 @@ class AuthRepository {
         (json) => json as Map<String, dynamic>,
       );
 
-      final authResponse = AuthResponseModel.fromJson(generalResponse.data);
+      // For signup, backend returns user data directly, not auth tokens
+      // Create AuthResponseModel with user data but no tokens
+      final userData = generalResponse.data;
+      final user = UserModel.fromJson(userData);
+      final authResponse = AuthResponseModel(
+        user: user,
+        accessToken: null, // No token from signup endpoint
+        refreshToken: null,
+        expiresIn: null,
+      );
 
-      // Store tokens securely
+      // Store user data (no tokens from signup)
       await _storeAuthTokens(authResponse);
 
       AppLogger.info('User signed up successfully');
+
+      // Note: For new backend, signup doesn't return tokens
+      // User will need to login separately to get access tokens
       return Success(authResponse);
     } on ValidationException catch (e) {
       AppLogger.error('Signup failed: Validation error', e);
@@ -104,10 +153,11 @@ class AuthRepository {
         statusCode: e.statusCode,
         code: e.code,
       ));
-    } catch (e) {
-      AppLogger.error('Signup failed: Unknown error', e);
+    } catch (e, stackTrace) {
+      AppLogger.error('Signup failed: Unknown error - ${e.toString()}', e);
+      AppLogger.error('Stack trace: $stackTrace');
       return Error(UnknownFailure(
-        message: 'Đã xảy ra lỗi không mong muốn trong quá trình đăng ký',
+        message: 'Đã xảy ra lỗi không mong muốn trong quá trình đăng ký: ${e.toString()}',
         code: 'UNKNOWN_ERROR',
       ));
     }
@@ -271,14 +321,20 @@ class AuthRepository {
 
   /// Store authentication tokens
   Future<void> _storeAuthTokens(AuthResponseModel authResponse) async {
-    await StorageService.storeSecure(
-      AppConstants.accessTokenKey,
-      authResponse.accessToken,
-    );
-    await StorageService.storeSecure(
-      AppConstants.refreshTokenKey,
-      authResponse.refreshToken,
-    );
+    // Only store tokens if they exist
+    if (authResponse.accessToken != null) {
+      await StorageService.storeSecure(
+        AppConstants.accessTokenKey,
+        authResponse.accessToken!,
+      );
+    }
+    if (authResponse.refreshToken != null) {
+      await StorageService.storeSecure(
+        AppConstants.refreshTokenKey,
+        authResponse.refreshToken!,
+      );
+    }
+    // Always store user data
     await StorageService.store(
       AppConstants.userDataKey,
       authResponse.user.toJson(),

@@ -71,8 +71,20 @@ class AuthProvider extends BaseProvider {
     );
 
     if (result != null) {
-      _setAuthState(result);
-      return true;
+      // For new backend, signup doesn't return tokens
+      // We need to login after successful signup to get tokens
+      if (result.accessToken == null) {
+        AppLogger.info('Signup successful, attempting auto-login...');
+        final loginSuccess = await login(
+          username: createUserDto.username,
+          password: createUserDto.password,
+        );
+        return loginSuccess;
+      } else {
+        // Old backend behavior - signup returns tokens
+        _setAuthState(result);
+        return true;
+      }
     }
     return false;
   }

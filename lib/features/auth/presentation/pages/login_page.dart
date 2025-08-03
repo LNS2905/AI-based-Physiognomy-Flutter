@@ -193,9 +193,9 @@ class _LoginPageState extends State<LoginPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Username field
+        // Email field (used as username for new backend)
         const Text(
-          'Tên đăng nhập',
+          'Email',
           style: TextStyle(
             fontFamily: 'Arial',
             fontWeight: FontWeight.w400,
@@ -214,7 +214,7 @@ class _LoginPageState extends State<LoginPage> {
           ),
           child: TextFormField(
             controller: _usernameController,
-            keyboardType: TextInputType.text,
+            keyboardType: TextInputType.emailAddress,
             style: const TextStyle(
               fontFamily: 'Arial',
               fontWeight: FontWeight.w400,
@@ -222,7 +222,7 @@ class _LoginPageState extends State<LoginPage> {
               color: Color(0xFF333333),
             ),
             decoration: const InputDecoration(
-              hintText: 'Nhập tên đăng nhập của bạn',
+              hintText: 'Nhập email của bạn',
               hintStyle: TextStyle(
                 fontFamily: 'Arial',
                 fontWeight: FontWeight.w400,
@@ -234,10 +234,11 @@ class _LoginPageState extends State<LoginPage> {
             ),
             validator: (value) {
               if (value == null || value.isEmpty) {
-                return 'Vui lòng nhập tên đăng nhập của bạn';
+                return 'Vui lòng nhập email của bạn';
               }
-              if (value.length < 3) {
-                return 'Tên đăng nhập phải có ít nhất 3 ký tự';
+              // Basic email validation
+              if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                return 'Vui lòng nhập email hợp lệ';
               }
               return null;
             },

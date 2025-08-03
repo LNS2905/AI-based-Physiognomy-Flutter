@@ -39,13 +39,18 @@ class AnalysisResultsPage extends StatelessWidget {
                   children: [
                     const SizedBox(height: 20),
 
-                    // Combined Key Metrics Section (3 main metrics) - moved to top
-                    _buildCombinedKeyMetricsSection(),
+                    // Main Results Card
+                    _buildMainResultsCard(),
 
                     const SizedBox(height: 20),
 
                     // Analysis Details
                     _buildAnalysisDetails(),
+
+                    const SizedBox(height: 20),
+
+                    // Key Metrics Section (Only Overall Harmony Score + Face Golden Ratio)
+                    _buildKeyMetricsSection(),
 
                     const SizedBox(height: 20),
 
@@ -160,7 +165,46 @@ class AnalysisResultsPage extends StatelessWidget {
     );
   }
 
+  Widget _buildMainResultsCard() {
+    final faceShape = _getPrimaryFaceShape();
+    final harmonyScore = _getHarmonyScoreForDisplay();
 
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 30,
+            offset: const Offset(0, 15),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          // Quality Rating based on harmony score
+          if (harmonyScore != null)
+            _buildQualityRating(harmonyScore),
+
+          if (harmonyScore != null)
+            const SizedBox(height: 20),
+
+          // Face Shape if available
+          if (faceShape != null && faceShape != 'Unknown')
+            _buildFaceShapeChip(faceShape),
+
+          if (faceShape != null && faceShape != 'Unknown')
+            const SizedBox(height: 20),
+
+          // Quick Stats
+          _buildQuickStats(),
+        ],
+      ),
+    );
+  }
 
 
 
@@ -248,14 +292,96 @@ class AnalysisResultsPage extends StatelessWidget {
     );
   }
 
+  Widget _buildQuickStats() {
+    final faceShapeProbabilities = _getFaceShapeProbabilities();
+    final topProbability = faceShapeProbabilities.isNotEmpty
+        ? faceShapeProbabilities.first.probability
+        : 0.0;
+    final harmonyScore = _getHarmonyScoreForDisplay() ?? 0.0;
+
+    return Row(
+      children: [
+        Expanded(
+          child: _buildStatItem(
+            icon: Icons.analytics_outlined,
+            label: 'Độ chính xác',
+            value: '${topProbability.toStringAsFixed(1)}%',
+            color: topProbability >= 80 ? Colors.green : topProbability >= 60 ? Colors.orange : Colors.red,
+          ),
+        ),
+        Container(
+          width: 1,
+          height: 40,
+          color: AppColors.surfaceVariant,
+        ),
+        Expanded(
+          child: _buildStatItem(
+            icon: Icons.balance_outlined,
+            label: 'Hài hòa',
+            value: '${harmonyScore.toStringAsFixed(0)}/100',
+            color: _getScoreColor(harmonyScore),
+          ),
+        ),
+        Container(
+          width: 1,
+          height: 40,
+          color: AppColors.surfaceVariant,
+        ),
+        Expanded(
+          child: _buildStatItem(
+            icon: Icons.psychology_outlined,
+            label: 'Phân tích',
+            value: 'AI v9.5',
+            color: Colors.purple,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStatItem({
+    required IconData icon,
+    required String label,
+    required String value,
+    required Color color,
+  }) {
+    return Column(
+      children: [
+        Icon(
+          icon,
+          size: 24,
+          color: color,
+        ),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 11,
+            color: AppColors.textSecondary,
+          ),
+        ),
+      ],
+    );
+  }
 
 
 
-
-  Widget _buildCombinedKeyMetricsSection() {
+  Widget _buildKeyMetricsSection() {
     final harmonyScore = _getHarmonyScoreForDisplay();
     final faceGoldenRatio = _getFaceGoldenRatio();
-    final faceShape = _getPrimaryFaceShape();
+
+    // Only show if we have at least one metric
+    if (harmonyScore == null && faceGoldenRatio == null) {
+      return const SizedBox.shrink();
+    }
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
@@ -320,130 +446,34 @@ class AnalysisResultsPage extends StatelessWidget {
           ),
           const SizedBox(height: 20),
 
-          // Combined 3-metric grid
-          _buildThreeMetricsGrid(harmonyScore, faceGoldenRatio, faceShape),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildThreeMetricsGrid(double? harmonyScore, double? faceGoldenRatio, String? faceShape) {
-    return Column(
-      children: [
-        // First row: Harmony Score and Golden Ratio
-        Row(
-          children: [
-            if (harmonyScore != null) ...[
-              Expanded(
-                child: _buildMetricCard(
-                  'Điểm hài hòa tổng thể',
-                  '${harmonyScore.toStringAsFixed(1)}/100',
-                  _getScoreColor(harmonyScore),
-                  Icons.balance_outlined,
-                ),
-              ),
-            ],
-            if (harmonyScore != null && faceGoldenRatio != null)
-              const SizedBox(width: 16),
-            if (faceGoldenRatio != null) ...[
-              Expanded(
-                child: _buildMetricCard(
-                  'Tỷ lệ vàng khuôn mặt',
-                  '${faceGoldenRatio.toStringAsFixed(1)}/100',
-                  _getScoreColor(faceGoldenRatio),
-                  Icons.crop_portrait_outlined,
-                ),
-              ),
-            ],
-          ],
-        ),
-
-        // Second row: Face Shape (full width)
-        if (faceShape != null && faceShape != 'Unknown') ...[
-          const SizedBox(height: 16),
-          _buildFaceShapeMetricCard(faceShape),
-        ],
-      ],
-    );
-  }
-
-  Widget _buildFaceShapeMetricCard(String faceShape) {
-    final translatedShape = _translateFaceShape(faceShape);
-    final probability = _getFaceShapePrimaryProbability(faceShape);
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            AppColors.primary.withOpacity(0.08),
-            AppColors.primary.withOpacity(0.03),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: AppColors.primary.withOpacity(0.2),
-          width: 1.5,
-        ),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(
-              Icons.face_outlined,
-              size: 28,
-              color: AppColors.primary,
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          // Metrics Grid
+          if (harmonyScore != null || faceGoldenRatio != null)
+            Row(
               children: [
-                Text(
-                  'Dạng khuôn mặt',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  translatedShape,
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.primary,
-                  ),
-                ),
-                if (probability != null) ...[
-                  const SizedBox(height: 6),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(12),
+                if (harmonyScore != null) ...[
+                  Expanded(
+                    child: _buildMetricCard(
+                      'Điểm hài hòa tổng thể',
+                      '${harmonyScore.toStringAsFixed(1)}/100',
+                      _getScoreColor(harmonyScore),
+                      Icons.balance_outlined,
                     ),
-                    child: Text(
-                      'Độ tương đồng: ${probability.toStringAsFixed(1)}%',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.primary,
-                      ),
+                  ),
+                ],
+                if (harmonyScore != null && faceGoldenRatio != null)
+                  const SizedBox(width: 16),
+                if (faceGoldenRatio != null) ...[
+                  Expanded(
+                    child: _buildMetricCard(
+                      'Tỷ lệ vàng khuôn mặt',
+                      '${faceGoldenRatio.toStringAsFixed(1)}/100',
+                      _getScoreColor(faceGoldenRatio),
+                      Icons.crop_portrait_outlined,
                     ),
                   ),
                 ],
               ],
             ),
-          ),
         ],
       ),
     );
@@ -665,19 +695,16 @@ class AnalysisResultsPage extends StatelessWidget {
 
   Widget _buildImageWidget(String imageUrl) {
     return Container(
-      width: double.infinity,
       constraints: const BoxConstraints(
         minHeight: 200,
         maxHeight: 400,
       ),
       child: Image.network(
         imageUrl,
-        width: double.infinity,
-        fit: BoxFit.cover,
+        fit: BoxFit.contain,
         loadingBuilder: (context, child, loadingProgress) {
           if (loadingProgress == null) return child;
           return Container(
-            width: double.infinity,
             height: 200,
             child: Center(
               child: Column(
@@ -705,7 +732,6 @@ class AnalysisResultsPage extends StatelessWidget {
         errorBuilder: (context, error, stackTrace) {
           AppLogger.error('Failed to load image from URL: $imageUrl', error);
           return Container(
-            width: double.infinity,
             height: 200,
             color: AppColors.surfaceVariant,
             child: Center(
@@ -1017,7 +1043,100 @@ class AnalysisResultsPage extends StatelessWidget {
     return legacyAnalysisData?['total_harmony_score'] as double? ?? null;
   }
 
+  /// Build quality rating widget
+  Widget _buildQualityRating(double score) {
+    String rating;
+    Color color;
+    IconData icon;
 
+    if (score >= 80) {
+      rating = 'Xuất sắc';
+      color = const Color(0xFF4CAF50);
+      icon = Icons.star;
+    } else if (score >= 70) {
+      rating = 'Tốt';
+      color = const Color(0xFF8BC34A);
+      icon = Icons.star;
+    } else if (score >= 50) {
+      rating = 'Khá';
+      color = const Color(0xFFFF9800);
+      icon = Icons.star_half;
+    } else {
+      rating = 'Trung bình';
+      color = const Color(0xFFFF5722);
+      icon = Icons.star_border;
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            color.withOpacity(0.1),
+            color.withOpacity(0.05),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color.withOpacity(0.3), width: 1.5),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: color, size: 24),
+          ),
+          const SizedBox(width: 12),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Điểm hài hòa tổng thể',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Row(
+                children: [
+                  Text(
+                    '${score.toStringAsFixed(1)}/100',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: color,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: color.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      rating,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: color,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
 
   String? _getPrimaryFaceShape() {
     if (analysisResponse?.analysis?.analysisResult?.face?.shape?.primary != null) {

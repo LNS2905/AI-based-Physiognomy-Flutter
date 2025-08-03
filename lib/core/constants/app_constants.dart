@@ -4,26 +4,26 @@ class AppConstants {
   static const String appName = 'Ứng dụng Tướng học AI';
   static const String appVersion = '1.0.0';
   
-  // API Configuration
-  static const String baseUrl = 'https://inspired-bear-emerging.ngrok-free.app';
+  // Old Backend API Configuration (Face/Palm Analysis, Chat)
+  static const String oldBackendBaseUrl = 'https://inspired-bear-emerging.ngrok-free.app';
+
+  // New Backend API Configuration (Auth, User Management from OpenAPI docs)
+  static const String baseUrl = 'https://ai-based-physiognomy-backend.onrender.com';
   static const String apiVersion = 'v1';
 
-  // User Management API Configuration
-  static const String userManagementBaseUrl = 'https://inspired-bear-emerging.ngrok-free.app';
-
-  // Authentication API Endpoints
+  // Authentication API Endpoints (New Backend - OpenAPI docs)
   static const String loginEndpoint = 'auth/user';
   static const String googleLoginEndpoint = 'auth/google';
   static const String getCurrentUserEndpoint = 'auth/me';
 
-  // User Management API Endpoints
+  // User Management API Endpoints (New Backend - OpenAPI docs)
   static const String signupEndpoint = 'users/signUp';
   static const String updateProfileEndpoint = 'users/me';
 
-  // Face Analysis API Configuration
+  // Face Analysis API Configuration (Old Backend)
   static const String faceAnalysisApiUrl = 'analyze-face-from-cloudinary/';
 
-  // Palm Analysis API Configuration
+  // Palm Analysis API Configuration (Old Backend)
   static const String palmAnalysisApiUrl = 'analyze-palm-cloudinary/';
 
   static const Duration requestTimeout = Duration(seconds: 120); // Increased for Cloudinary processing
