@@ -28,8 +28,8 @@ void main() {
     test('Test API endpoint configuration', () {
       expect(AppConstants.faceAnalysisApiUrl,
           equals('analyze-face-from-cloudinary/'));
-      expect(AppConstants.cloudinaryCloudName, equals('dd0wymyqj'));
-      expect(AppConstants.cloudinaryApiKey, equals('389718786139835'));
+      expect(AppConstants.cloudinaryCloudName, equals('dsfmzrwc1'));
+      expect(AppConstants.cloudinaryApiKey, equals('595277418892966'));
     });
 
     test('Test CloudinaryAnalysisRequestModel creation', () {
@@ -135,8 +135,8 @@ void main() {
         'user_id': mockUserId,
         'processed_at': DateTime.now().toIso8601String(),
         'total_harmony_score': 87.3,
-        'annotated_image_url': 'https://res.cloudinary.com/dd0wymyqj/image/private/annotated_${mockUserId}.jpg',
-        'report_image_url': 'https://res.cloudinary.com/dd0wymyqj/image/private/report_${mockUserId}.jpg',
+        'annotated_image_url': 'https://res.cloudinary.com/dsfmzrwc1/image/private/annotated_${mockUserId}.jpg',
+        'report_image_url': 'https://res.cloudinary.com/dsfmzrwc1/image/private/report_${mockUserId}.jpg',
         'analysis': {
           'face_shape': 'oval',
           'features': {

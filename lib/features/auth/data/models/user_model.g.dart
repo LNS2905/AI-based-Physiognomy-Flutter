@@ -8,28 +8,34 @@ part of 'user_model.dart';
 
 UserModel _$UserModelFromJson(Map<String, dynamic> json) => UserModel(
   id: json['id'] as String,
+  username: json['username'] as String?,
   email: json['email'] as String,
-  firstName: json['firstName'] as String?,
-  lastName: json['lastName'] as String?,
-  phoneNumber: json['phoneNumber'] as String?,
-  dateOfBirth: json['dateOfBirth'] == null
+  firstName: json['firstName'] as String,
+  lastName: json['lastName'] as String,
+  phone: json['phone'] as String,
+  age: (json['age'] as num).toDouble(),
+  gender: $enumDecode(_$GenderEnumMap, json['gender']),
+  avatar: json['avatar'] as String?,
+  createdAt: json['createdAt'] == null
       ? null
-      : DateTime.parse(json['dateOfBirth'] as String),
-  gender: json['gender'] as String?,
-  profileImageUrl: json['profileImageUrl'] as String?,
-  createdAt: DateTime.parse(json['createdAt'] as String),
-  updatedAt: DateTime.parse(json['updatedAt'] as String),
+      : DateTime.parse(json['createdAt'] as String),
+  updatedAt: json['updatedAt'] == null
+      ? null
+      : DateTime.parse(json['updatedAt'] as String),
 );
 
 Map<String, dynamic> _$UserModelToJson(UserModel instance) => <String, dynamic>{
   'id': instance.id,
+  'username': instance.username,
   'email': instance.email,
   'firstName': instance.firstName,
   'lastName': instance.lastName,
-  'phoneNumber': instance.phoneNumber,
-  'dateOfBirth': instance.dateOfBirth?.toIso8601String(),
-  'gender': instance.gender,
-  'profileImageUrl': instance.profileImageUrl,
-  'createdAt': instance.createdAt.toIso8601String(),
-  'updatedAt': instance.updatedAt.toIso8601String(),
+  'phone': instance.phone,
+  'age': instance.age,
+  'gender': _$GenderEnumMap[instance.gender]!,
+  'avatar': instance.avatar,
+  'createdAt': instance.createdAt?.toIso8601String(),
+  'updatedAt': instance.updatedAt?.toIso8601String(),
 };
+
+const _$GenderEnumMap = {Gender.male: 'male', Gender.female: 'female'};

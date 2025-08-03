@@ -3,6 +3,7 @@ import '../../../../core/network/api_result.dart';
 import '../../../../core/utils/logger.dart';
 import '../../data/models/auth_response_model.dart';
 import '../../data/models/user_model.dart';
+import '../../data/models/create_user_dto.dart';
 import '../../data/repositories/auth_repository.dart';
 
 /// Authentication provider
@@ -43,13 +44,13 @@ class AuthProvider extends BaseProvider {
     );
   }
 
-  /// Login with email and password
+  /// Login with username and password
   Future<bool> login({
-    required String email,
+    required String username,
     required String password,
   }) async {
     final result = await executeApiOperation(
-      () => _authRepository.login(email: email, password: password),
+      () => _authRepository.login(username: username, password: password),
       operationName: 'login',
     );
 
@@ -60,23 +61,29 @@ class AuthProvider extends BaseProvider {
     return false;
   }
 
-  /// Register new user
-  Future<bool> register({
-    required String email,
-    required String password,
-    required String firstName,
-    required String lastName,
-    String? phoneNumber,
+  /// Sign up new user
+  Future<bool> signup({
+    required CreateUserDTO createUserDto,
   }) async {
     final result = await executeApiOperation(
-      () => _authRepository.register(
-        email: email,
-        password: password,
-        firstName: firstName,
-        lastName: lastName,
-        phoneNumber: phoneNumber,
-      ),
-      operationName: 'register',
+      () => _authRepository.signup(createUserDto: createUserDto),
+      operationName: 'signup',
+    );
+
+    if (result != null) {
+      _setAuthState(result);
+      return true;
+    }
+    return false;
+  }
+
+  /// Login with Google
+  Future<bool> loginWithGoogle({
+    required String googleToken,
+  }) async {
+    final result = await executeApiOperation(
+      () => _authRepository.loginWithGoogle(googleToken: googleToken),
+      operationName: 'loginWithGoogle',
     );
 
     if (result != null) {
@@ -117,9 +124,9 @@ class AuthProvider extends BaseProvider {
   Future<bool> updateProfile({
     String? firstName,
     String? lastName,
-    String? phoneNumber,
-    DateTime? dateOfBirth,
-    String? gender,
+    String? phone,
+    double? age,
+    Gender? gender,
   }) async {
     if (_currentUser == null) return false;
 
@@ -128,8 +135,8 @@ class AuthProvider extends BaseProvider {
     final updatedUser = _currentUser!.copyWith(
       firstName: firstName ?? _currentUser!.firstName,
       lastName: lastName ?? _currentUser!.lastName,
-      phoneNumber: phoneNumber ?? _currentUser!.phoneNumber,
-      dateOfBirth: dateOfBirth ?? _currentUser!.dateOfBirth,
+      phone: phone ?? _currentUser!.phone,
+      age: age ?? _currentUser!.age,
       gender: gender ?? _currentUser!.gender,
       updatedAt: DateTime.now(),
     );
@@ -163,10 +170,9 @@ class AuthProvider extends BaseProvider {
   /// Check if user has completed profile
   bool get hasCompletedProfile {
     if (_currentUser == null) return false;
-    return _currentUser!.firstName != null &&
-           _currentUser!.lastName != null &&
-           _currentUser!.dateOfBirth != null &&
-           _currentUser!.gender != null;
+    return _currentUser!.firstName.isNotEmpty &&
+           _currentUser!.lastName.isNotEmpty &&
+           _currentUser!.phone.isNotEmpty;
   }
 
   /// Get user display name
@@ -178,9 +184,9 @@ class AuthProvider extends BaseProvider {
   /// Get user initials for avatar
   String get userInitials {
     if (_currentUser == null) return 'G';
-    final firstName = _currentUser!.firstName ?? '';
-    final lastName = _currentUser!.lastName ?? '';
-    
+    final firstName = _currentUser!.firstName;
+    final lastName = _currentUser!.lastName;
+
     if (firstName.isNotEmpty && lastName.isNotEmpty) {
       return '${firstName[0]}${lastName[0]}'.toUpperCase();
     } else if (firstName.isNotEmpty) {

@@ -21,6 +21,9 @@ abstract class BaseProvider extends ChangeNotifier {
   /// Check if provider has error
   bool get hasError => _failure != null;
 
+  /// Get error message
+  String? get errorMessage => _failure?.message;
+
   /// Current detailed loading information
   LoadingInfo get loadingInfo => _loadingInfo;
 

@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'create_user_dto.dart'; // Import for Gender enum
 
 part 'user_model.g.dart';
 
@@ -7,27 +8,29 @@ part 'user_model.g.dart';
 @JsonSerializable()
 class UserModel extends Equatable {
   final String id;
+  final String? username;
   final String email;
-  final String? firstName;
-  final String? lastName;
-  final String? phoneNumber;
-  final DateTime? dateOfBirth;
-  final String? gender;
-  final String? profileImageUrl;
-  final DateTime createdAt;
-  final DateTime updatedAt;
+  final String firstName;
+  final String lastName;
+  final String phone;
+  final double age;
+  final Gender gender;
+  final String? avatar;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
 
   const UserModel({
     required this.id,
+    this.username,
     required this.email,
-    this.firstName,
-    this.lastName,
-    this.phoneNumber,
-    this.dateOfBirth,
-    this.gender,
-    this.profileImageUrl,
-    required this.createdAt,
-    required this.updatedAt,
+    required this.firstName,
+    required this.lastName,
+    required this.phone,
+    required this.age,
+    required this.gender,
+    this.avatar,
+    this.createdAt,
+    this.updatedAt,
   });
 
   /// Create UserModel from JSON
@@ -38,12 +41,7 @@ class UserModel extends Equatable {
   Map<String, dynamic> toJson() => _$UserModelToJson(this);
 
   /// Get full name
-  String get fullName {
-    if (firstName != null && lastName != null) {
-      return '$firstName $lastName';
-    }
-    return firstName ?? lastName ?? email;
-  }
+  String get fullName => '$firstName $lastName';
 
   /// Get display name
   String get displayName => fullName.isNotEmpty ? fullName : email;
@@ -51,25 +49,27 @@ class UserModel extends Equatable {
   /// Copy with method
   UserModel copyWith({
     String? id,
+    String? username,
     String? email,
     String? firstName,
     String? lastName,
-    String? phoneNumber,
-    DateTime? dateOfBirth,
-    String? gender,
-    String? profileImageUrl,
+    String? phone,
+    double? age,
+    Gender? gender,
+    String? avatar,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
     return UserModel(
       id: id ?? this.id,
+      username: username ?? this.username,
       email: email ?? this.email,
       firstName: firstName ?? this.firstName,
       lastName: lastName ?? this.lastName,
-      phoneNumber: phoneNumber ?? this.phoneNumber,
-      dateOfBirth: dateOfBirth ?? this.dateOfBirth,
+      phone: phone ?? this.phone,
+      age: age ?? this.age,
       gender: gender ?? this.gender,
-      profileImageUrl: profileImageUrl ?? this.profileImageUrl,
+      avatar: avatar ?? this.avatar,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -78,13 +78,14 @@ class UserModel extends Equatable {
   @override
   List<Object?> get props => [
         id,
+        username,
         email,
         firstName,
         lastName,
-        phoneNumber,
-        dateOfBirth,
+        phone,
+        age,
         gender,
-        profileImageUrl,
+        avatar,
         createdAt,
         updatedAt,
       ];

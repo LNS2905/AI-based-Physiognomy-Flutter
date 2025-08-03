@@ -10,10 +10,8 @@ import '../../../../core/utils/logger.dart';
 import '../../../../core/network/api_result.dart';
 import '../../../../core/errors/exceptions.dart';
 import '../../../../core/widgets/analysis_loading_screen.dart';
-import '../../../../core/enums/loading_state.dart';
 import '../../data/models/cloudinary_analysis_response_model.dart';
 import '../providers/face_scan_provider.dart';
-import 'analysis_results_page.dart';
 
 /// Camera screen for face scanning with beautiful UI design
 class CameraScreen extends StatefulWidget {
@@ -46,8 +44,16 @@ class _CameraScreenState extends State<CameraScreen>
 
   @override
   void dispose() {
+    AppLogger.info('Disposing CameraScreen');
+
     WidgetsBinding.instance.removeObserver(this);
-    _cameraService.stopCamera();
+
+    // Stop camera with proper error handling to prevent buffer leaks
+    _cameraService.stopCamera().then((_) {
+      AppLogger.info('Camera stopped successfully in CameraScreen dispose');
+    }).catchError((error) {
+      AppLogger.error('Error stopping camera in dispose', error);
+    });
 
     // Restore orientation settings
     SystemChrome.setPreferredOrientations([
@@ -63,14 +69,32 @@ class _CameraScreenState extends State<CameraScreen>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     final controller = _cameraService.controller;
+
+    AppLogger.info('App lifecycle state changed to: $state');
+
     if (controller == null || !controller.value.isInitialized) {
       return;
     }
 
-    if (state == AppLifecycleState.inactive) {
-      _cameraService.stopCamera();
-    } else if (state == AppLifecycleState.resumed) {
-      _initializeCamera();
+    switch (state) {
+      case AppLifecycleState.paused:
+      case AppLifecycleState.inactive:
+        // Stop camera to free resources and prevent buffer overflow
+        AppLogger.info('Stopping camera due to app lifecycle change');
+        _cameraService.stopCamera();
+        break;
+      case AppLifecycleState.resumed:
+        // Restart camera when app becomes active
+        AppLogger.info('Restarting camera due to app resume');
+        _initializeCamera();
+        break;
+      case AppLifecycleState.detached:
+        // App is being terminated
+        _cameraService.stopCamera();
+        break;
+      case AppLifecycleState.hidden:
+        // App is hidden but still running
+        break;
     }
   }
 

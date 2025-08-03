@@ -6,7 +6,6 @@ import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/logger.dart';
 import '../../../ai_conversation/data/models/chat_message_model.dart';
 import '../../../ai_conversation/presentation/widgets/message_bubble.dart';
-import '../../data/models/history_item_model.dart';
 import '../../data/models/chat_history_model.dart';
 import '../providers/history_provider.dart';
 

@@ -8,6 +8,18 @@ class AppConstants {
   static const String baseUrl = 'https://inspired-bear-emerging.ngrok-free.app';
   static const String apiVersion = 'v1';
 
+  // User Management API Configuration
+  static const String userManagementBaseUrl = 'https://inspired-bear-emerging.ngrok-free.app';
+
+  // Authentication API Endpoints
+  static const String loginEndpoint = 'auth/user';
+  static const String googleLoginEndpoint = 'auth/google';
+  static const String getCurrentUserEndpoint = 'auth/me';
+
+  // User Management API Endpoints
+  static const String signupEndpoint = 'users/signUp';
+  static const String updateProfileEndpoint = 'users/me';
+
   // Face Analysis API Configuration
   static const String faceAnalysisApiUrl = 'analyze-face-from-cloudinary/';
 
@@ -18,9 +30,9 @@ class AppConstants {
   static const Duration connectTimeout = Duration(seconds: 15);
 
   // Cloudinary Configuration
-  static const String cloudinaryCloudName = 'dd0wymyqj';
-  static const String cloudinaryApiKey = '389718786139835';
-  static const String cloudinaryApiSecret = 'aS_7wWncQjOLpKRKnHEd0_dr07M';
+  static const String cloudinaryCloudName = 'dsfmzrwc1';
+  static const String cloudinaryApiKey = '595277418892966';
+  static const String cloudinaryApiSecret = 'qvNpRQG2NDF9nYeYhAg7bF_-lqo';
   static const String cloudinaryUploadFolder = 'physiognomy_analysis';
   
   // Storage Keys

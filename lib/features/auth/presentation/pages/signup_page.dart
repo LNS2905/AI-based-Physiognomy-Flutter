@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../core/widgets/bagua_logo.dart';
+import '../../data/models/create_user_dto.dart';
+import '../providers/auth_provider.dart';
 
 /// Sign Up page that matches the Figma design
 class SignUpPage extends StatefulWidget {
@@ -14,18 +17,27 @@ class SignUpPage extends StatefulWidget {
 
 class _SignUpPageState extends State<SignUpPage> {
   final _formKey = GlobalKey<FormState>();
-  final _fullNameController = TextEditingController();
+  final _usernameController = TextEditingController();
+  final _firstNameController = TextEditingController();
+  final _lastNameController = TextEditingController();
   final _emailController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _ageController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   bool _isPasswordVisible = false;
   bool _isConfirmPasswordVisible = false;
   bool _agreeToTerms = false;
+  Gender _selectedGender = Gender.male;
 
   @override
   void dispose() {
-    _fullNameController.dispose();
+    _usernameController.dispose();
+    _firstNameController.dispose();
+    _lastNameController.dispose();
     _emailController.dispose();
+    _phoneController.dispose();
+    _ageController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
@@ -197,9 +209,9 @@ class _SignUpPageState extends State<SignUpPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Full Name field
+        // Username field
         const Text(
-          'Họ và tên',
+          'Tên đăng nhập',
           style: TextStyle(
             fontFamily: 'Arial',
             fontWeight: FontWeight.w400,
@@ -210,9 +222,49 @@ class _SignUpPageState extends State<SignUpPage> {
         ),
         const SizedBox(height: 8),
         _buildInputField(
-          controller: _fullNameController,
-          hintText: 'Nhập họ và tên của bạn',
-          validator: (value) => Validators.validateRequired(value, 'Họ và tên'),
+          controller: _usernameController,
+          hintText: 'Nhập tên đăng nhập',
+          validator: (value) => Validators.validateRequired(value, 'Tên đăng nhập'),
+        ),
+
+        const SizedBox(height: 20),
+
+        // First Name field
+        const Text(
+          'Họ',
+          style: TextStyle(
+            fontFamily: 'Arial',
+            fontWeight: FontWeight.w400,
+            fontSize: 14,
+            color: Color(0xFF333333),
+            height: 1.15,
+          ),
+        ),
+        const SizedBox(height: 8),
+        _buildInputField(
+          controller: _firstNameController,
+          hintText: 'Nhập họ của bạn',
+          validator: (value) => Validators.validateRequired(value, 'Họ'),
+        ),
+
+        const SizedBox(height: 20),
+
+        // Last Name field
+        const Text(
+          'Tên',
+          style: TextStyle(
+            fontFamily: 'Arial',
+            fontWeight: FontWeight.w400,
+            fontSize: 14,
+            color: Color(0xFF333333),
+            height: 1.15,
+          ),
+        ),
+        const SizedBox(height: 8),
+        _buildInputField(
+          controller: _lastNameController,
+          hintText: 'Nhập tên của bạn',
+          validator: (value) => Validators.validateRequired(value, 'Tên'),
         ),
 
         const SizedBox(height: 20),
@@ -235,6 +287,76 @@ class _SignUpPageState extends State<SignUpPage> {
           keyboardType: TextInputType.emailAddress,
           validator: Validators.validateEmail,
         ),
+
+        const SizedBox(height: 20),
+
+        // Phone field
+        const Text(
+          'Số điện thoại',
+          style: TextStyle(
+            fontFamily: 'Arial',
+            fontWeight: FontWeight.w400,
+            fontSize: 14,
+            color: Color(0xFF333333),
+            height: 1.15,
+          ),
+        ),
+        const SizedBox(height: 8),
+        _buildInputField(
+          controller: _phoneController,
+          hintText: 'Nhập số điện thoại',
+          keyboardType: TextInputType.phone,
+          validator: (value) => Validators.validatePhoneNumber(value),
+        ),
+
+        const SizedBox(height: 20),
+
+        // Age field
+        const Text(
+          'Tuổi',
+          style: TextStyle(
+            fontFamily: 'Arial',
+            fontWeight: FontWeight.w400,
+            fontSize: 14,
+            color: Color(0xFF333333),
+            height: 1.15,
+          ),
+        ),
+        const SizedBox(height: 8),
+        _buildInputField(
+          controller: _ageController,
+          hintText: 'Nhập tuổi của bạn',
+          keyboardType: TextInputType.number,
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Vui lòng nhập tuổi của bạn';
+            }
+            final age = double.tryParse(value);
+            if (age == null) {
+              return 'Vui lòng nhập số hợp lệ';
+            }
+            if (age < 13 || age > 120) {
+              return 'Tuổi phải từ 13 đến 120';
+            }
+            return null;
+          },
+        ),
+
+        const SizedBox(height: 20),
+
+        // Gender field
+        const Text(
+          'Giới tính',
+          style: TextStyle(
+            fontFamily: 'Arial',
+            fontWeight: FontWeight.w400,
+            fontSize: 14,
+            color: Color(0xFF333333),
+            height: 1.15,
+          ),
+        ),
+        const SizedBox(height: 8),
+        _buildGenderSelector(),
 
         const SizedBox(height: 20),
 
@@ -616,7 +738,7 @@ class _SignUpPageState extends State<SignUpPage> {
     );
   }
 
-  void _handleCreateAccount() {
+  void _handleCreateAccount() async {
     if (!_agreeToTerms) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -628,16 +750,51 @@ class _SignUpPageState extends State<SignUpPage> {
     }
 
     if (_formKey.currentState?.validate() ?? false) {
-      // TODO: Implement actual signup logic with AuthProvider
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Chức năng tạo tài khoản sẽ được triển khai'),
-          backgroundColor: AppColors.info,
-        ),
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+
+      // Parse age
+      final age = double.tryParse(_ageController.text);
+      if (age == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Vui lòng nhập tuổi hợp lệ'),
+            backgroundColor: AppColors.warning,
+          ),
+        );
+        return;
+      }
+
+      final createUserDto = CreateUserDTO(
+        username: _usernameController.text.trim(),
+        password: _passwordController.text,
+        confirmPassword: _confirmPasswordController.text,
+        firstName: _firstNameController.text.trim(),
+        lastName: _lastNameController.text.trim(),
+        email: _emailController.text.trim(),
+        phone: _phoneController.text.trim(),
+        age: age,
+        gender: _selectedGender,
       );
 
-      // Navigate to survey after successful signup
-      context.push('/survey');
+      final success = await authProvider.signup(createUserDto: createUserDto);
+
+      if (success && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Đăng ký thành công!'),
+            backgroundColor: AppColors.success,
+          ),
+        );
+        // Navigate to survey after successful signup
+        context.push('/survey');
+      } else if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(authProvider.errorMessage ?? 'Đăng ký thất bại'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
     }
   }
 
@@ -657,6 +814,44 @@ class _SignUpPageState extends State<SignUpPage> {
       const SnackBar(
         content: Text('Đăng ký Apple sẽ được triển khai'),
         backgroundColor: AppColors.info,
+      ),
+    );
+  }
+
+  Widget _buildGenderSelector() {
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFFFAFAFA),
+        border: Border.all(color: const Color(0xFFDDDDDD), width: 1),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: RadioListTile<Gender>(
+              title: const Text('Nam'),
+              value: Gender.male,
+              groupValue: _selectedGender,
+              onChanged: (Gender? value) {
+                setState(() {
+                  _selectedGender = value!;
+                });
+              },
+            ),
+          ),
+          Expanded(
+            child: RadioListTile<Gender>(
+              title: const Text('Nữ'),
+              value: Gender.female,
+              groupValue: _selectedGender,
+              onChanged: (Gender? value) {
+                setState(() {
+                  _selectedGender = value!;
+                });
+              },
+            ),
+          ),
+        ],
       ),
     );
   }

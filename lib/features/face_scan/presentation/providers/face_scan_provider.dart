@@ -6,7 +6,6 @@ import '../../../../core/utils/error_handler.dart';
 import '../../../../core/errors/exceptions.dart';
 import '../../../../core/services/camera_service.dart';
 import '../../../../core/services/image_picker_service.dart';
-import '../../../../core/enums/loading_state.dart';
 import '../../../../core/network/api_result.dart';
 import '../../data/models/face_scan_request_model.dart';
 import '../../data/models/face_scan_response_model.dart';

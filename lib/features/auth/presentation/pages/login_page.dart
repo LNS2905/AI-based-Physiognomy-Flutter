@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/bagua_logo.dart';
+import '../providers/auth_provider.dart';
 
 /// Login page that matches the Figma design
 class LoginPage extends StatefulWidget {
@@ -14,13 +16,13 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
+  final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isPasswordVisible = false;
 
   @override
   void dispose() {
-    _emailController.dispose();
+    _usernameController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
@@ -191,9 +193,9 @@ class _LoginPageState extends State<LoginPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Email field
+        // Username field
         const Text(
-          'Email',
+          'Tên đăng nhập',
           style: TextStyle(
             fontFamily: 'Arial',
             fontWeight: FontWeight.w400,
@@ -211,8 +213,8 @@ class _LoginPageState extends State<LoginPage> {
             borderRadius: BorderRadius.circular(8),
           ),
           child: TextFormField(
-            controller: _emailController,
-            keyboardType: TextInputType.emailAddress,
+            controller: _usernameController,
+            keyboardType: TextInputType.text,
             style: const TextStyle(
               fontFamily: 'Arial',
               fontWeight: FontWeight.w400,
@@ -220,7 +222,7 @@ class _LoginPageState extends State<LoginPage> {
               color: Color(0xFF333333),
             ),
             decoration: const InputDecoration(
-              hintText: 'Nhập email của bạn',
+              hintText: 'Nhập tên đăng nhập của bạn',
               hintStyle: TextStyle(
                 fontFamily: 'Arial',
                 fontWeight: FontWeight.w400,
@@ -232,10 +234,10 @@ class _LoginPageState extends State<LoginPage> {
             ),
             validator: (value) {
               if (value == null || value.isEmpty) {
-                return 'Vui lòng nhập email của bạn';
+                return 'Vui lòng nhập tên đăng nhập của bạn';
               }
-              if (!RegExp(AppConstants.emailPattern).hasMatch(value)) {
-                return 'Vui lòng nhập email hợp lệ';
+              if (value.length < 3) {
+                return 'Tên đăng nhập phải có ít nhất 3 ký tự';
               }
               return null;
             },
@@ -555,19 +557,32 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  void _handleLogin() {
+  void _handleLogin() async {
     if (_formKey.currentState?.validate() ?? false) {
-      // TODO: Implement actual login logic with AuthProvider
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Chức năng đăng nhập sẽ được triển khai'),
-          backgroundColor: AppColors.info,
-        ),
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+
+      final success = await authProvider.login(
+        username: _usernameController.text.trim(),
+        password: _passwordController.text,
       );
 
-      // Navigate to survey after successful login (for new users) or home (for returning users)
-      // For demo, navigate to survey
-      context.push('/survey');
+      if (success && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Đăng nhập thành công!'),
+            backgroundColor: AppColors.success,
+          ),
+        );
+        // Navigate to home after successful login
+        context.go('/home');
+      } else if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(authProvider.errorMessage ?? 'Đăng nhập thất bại'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
     }
   }
 }

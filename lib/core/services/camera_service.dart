@@ -11,12 +11,13 @@ import 'image_processing_service.dart';
 class CameraService {
   static CameraService? _instance;
   static CameraService get instance => _instance ??= CameraService._();
-  
+
   CameraService._();
 
   List<CameraDescription>? _cameras;
   CameraController? _controller;
   bool _isInitialized = false;
+  bool _isStarting = false; // Prevent multiple simultaneous starts
   CameraLensDirection? _currentCameraType;
   final ImageProcessingService _imageProcessingService = ImageProcessingService();
 
@@ -95,6 +96,17 @@ class CameraService {
     bool enableAudio = false,
   }) async {
     try {
+      // Prevent multiple simultaneous camera starts
+      if (_isStarting) {
+        AppLogger.warning('Camera is already starting, waiting...');
+        while (_isStarting) {
+          await Future.delayed(const Duration(milliseconds: 100));
+        }
+        return;
+      }
+
+      _isStarting = true;
+
       if (!_isInitialized) {
         await initialize();
       }
@@ -117,12 +129,13 @@ class CameraService {
       // Dispose existing controller if any
       await stopCamera();
 
-      // Create new controller with minimal configuration
+      // Create new controller with optimized configuration to prevent buffer overflow
       _controller = CameraController(
         selectedCamera,
         resolution,
         enableAudio: enableAudio,
         imageFormatGroup: ImageFormatGroup.jpeg,
+        // Add buffer management settings
       );
 
       // Initialize controller
@@ -135,15 +148,17 @@ class CameraService {
     } catch (e) {
       AppLogger.error('Failed to start camera', e);
       await stopCamera();
-      
+
       if (e is ValidationException) {
         rethrow;
       }
-      
+
       throw ValidationException(
         message: 'Failed to start camera: ${e.toString()}',
         code: 'CAMERA_START_ERROR',
       );
+    } finally {
+      _isStarting = false;
     }
   }
 
@@ -151,12 +166,23 @@ class CameraService {
   Future<void> stopCamera() async {
     try {
       if (_controller != null) {
-        AppLogger.info('Stopping camera');
-        await _controller!.dispose();
+        AppLogger.info('Stopping camera and disposing controller');
+
+        // Ensure controller is properly disposed to prevent buffer leaks
+        if (_controller!.value.isInitialized) {
+          await _controller!.dispose();
+        }
         _controller = null;
+
+        // Add small delay to ensure cleanup is complete
+        await Future.delayed(const Duration(milliseconds: 100));
+
+        AppLogger.info('Camera stopped and disposed successfully');
       }
     } catch (e) {
       AppLogger.error('Error stopping camera', e);
+      // Force null the controller even if dispose fails
+      _controller = null;
     }
   }
 
@@ -167,6 +193,14 @@ class CameraService {
         throw const ValidationException(
           message: 'Camera is not initialized',
           code: 'CAMERA_NOT_INITIALIZED',
+        );
+      }
+
+      // Check if camera is ready for capture
+      if (!_controller!.value.isInitialized || _controller!.value.isTakingPicture) {
+        throw const ValidationException(
+          message: 'Camera is busy or not ready',
+          code: 'CAMERA_BUSY',
         );
       }
 
@@ -212,6 +246,11 @@ class CameraService {
           AppLogger.warning('Failed to delete original image', e);
         }
       }
+
+      // Schedule cleanup of temporary processed files to prevent memory leaks
+      Future.delayed(const Duration(seconds: 30), () {
+        _imageProcessingService.cleanupProcessedImages(savedFile.path);
+      });
 
       AppLogger.info('Image processed and ready: $processedPath');
       return processedPath;

@@ -25,7 +25,7 @@ CLOUDINARY_API_KEY = '389718786139835'
 CLOUDINARY_API_SECRET = 'aS_7wWncQjOLpKRKnHEd0_dr07M'
 UPLOAD_FOLDER = 'physiognomy_analysis'
 
-# API endpoint
+# API endpoint - Server URL (không phải Colab)
 FACE_ANALYSIS_API_URL = 'https://inspired-bear-emerging.ngrok-free.app/analyze-face-from-cloudinary/'
 
 def generate_signature(params_to_sign, api_secret):
@@ -151,7 +151,7 @@ def main():
         print('🚀 Bắt đầu xử lý ảnh khuôn mặt...')
         
         # Đường dẫn đến file ảnh
-        image_path = 'small.jpg'
+        image_path = 'khuon-mat-hinh-chu-nhat.jpg'
         
         # Kiểm tra file
         if not os.path.exists(image_path):

@@ -17,7 +17,8 @@ HistoryItemModel _$HistoryItemModelFromJson(Map<String, dynamic> json) =>
       metadata: json['metadata'] as Map<String, dynamic>?,
       thumbnailUrl: json['thumbnailUrl'] as String?,
       isFavorite: json['isFavorite'] as bool? ?? false,
-      tags: (json['tags'] as List<dynamic>?)?.map((e) => e as String).toList() ??
+      tags:
+          (json['tags'] as List<dynamic>?)?.map((e) => e as String).toList() ??
           const [],
     );
 
@@ -42,79 +43,81 @@ const _$HistoryItemTypeEnumMap = {
 };
 
 FaceAnalysisHistoryModel _$FaceAnalysisHistoryModelFromJson(
-        Map<String, dynamic> json) =>
-    FaceAnalysisHistoryModel(
-      id: json['id'] as String,
-      title: json['title'] as String,
-      description: json['description'] as String,
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      updatedAt: DateTime.parse(json['updatedAt'] as String),
-      analysisResult: CloudinaryAnalysisResponseModel.fromJson(
-          json['analysisResult'] as Map<String, dynamic>),
-      originalImageUrl: json['originalImageUrl'] as String?,
-      annotatedImageUrl: json['annotatedImageUrl'] as String?,
-      reportUrl: json['reportUrl'] as String?,
-      metadata: json['metadata'] as Map<String, dynamic>?,
-      thumbnailUrl: json['thumbnailUrl'] as String?,
-      isFavorite: json['isFavorite'] as bool? ?? false,
-      tags: (json['tags'] as List<dynamic>?)?.map((e) => e as String).toList() ??
-          const [],
-    );
+  Map<String, dynamic> json,
+) => FaceAnalysisHistoryModel(
+  id: json['id'] as String,
+  title: json['title'] as String,
+  description: json['description'] as String,
+  createdAt: DateTime.parse(json['createdAt'] as String),
+  updatedAt: DateTime.parse(json['updatedAt'] as String),
+  analysisResult: CloudinaryAnalysisResponseModel.fromJson(
+    json['analysisResult'] as Map<String, dynamic>,
+  ),
+  originalImageUrl: json['originalImageUrl'] as String?,
+  annotatedImageUrl: json['annotatedImageUrl'] as String?,
+  reportUrl: json['reportUrl'] as String?,
+  metadata: json['metadata'] as Map<String, dynamic>?,
+  thumbnailUrl: json['thumbnailUrl'] as String?,
+  isFavorite: json['isFavorite'] as bool? ?? false,
+  tags:
+      (json['tags'] as List<dynamic>?)?.map((e) => e as String).toList() ??
+      const [],
+);
 
 Map<String, dynamic> _$FaceAnalysisHistoryModelToJson(
-        FaceAnalysisHistoryModel instance) =>
-    <String, dynamic>{
-      'id': instance.id,
-      'title': instance.title,
-      'description': instance.description,
-      'type': _$HistoryItemTypeEnumMap[instance.type]!,
-      'createdAt': instance.createdAt.toIso8601String(),
-      'updatedAt': instance.updatedAt.toIso8601String(),
-      'metadata': instance.metadata,
-      'thumbnailUrl': instance.thumbnailUrl,
-      'isFavorite': instance.isFavorite,
-      'tags': instance.tags,
-      'analysisResult': instance.analysisResult.toJson(),
-      'originalImageUrl': instance.originalImageUrl,
-      'annotatedImageUrl': instance.annotatedImageUrl,
-      'reportUrl': instance.reportUrl,
-    };
+  FaceAnalysisHistoryModel instance,
+) => <String, dynamic>{
+  'id': instance.id,
+  'title': instance.title,
+  'description': instance.description,
+  'createdAt': instance.createdAt.toIso8601String(),
+  'updatedAt': instance.updatedAt.toIso8601String(),
+  'metadata': instance.metadata,
+  'thumbnailUrl': instance.thumbnailUrl,
+  'isFavorite': instance.isFavorite,
+  'tags': instance.tags,
+  'analysisResult': instance.analysisResult,
+  'originalImageUrl': instance.originalImageUrl,
+  'annotatedImageUrl': instance.annotatedImageUrl,
+  'reportUrl': instance.reportUrl,
+};
 
 PalmAnalysisHistoryModel _$PalmAnalysisHistoryModelFromJson(
-        Map<String, dynamic> json) =>
-    PalmAnalysisHistoryModel(
-      id: json['id'] as String,
-      title: json['title'] as String,
-      description: json['description'] as String,
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      updatedAt: DateTime.parse(json['updatedAt'] as String),
-      analysisResult: PalmAnalysisResponseModel.fromJson(
-          json['analysisResult'] as Map<String, dynamic>),
-      originalImageUrl: json['originalImageUrl'] as String?,
-      annotatedImageUrl: json['annotatedImageUrl'] as String?,
-      comparisonImageUrl: json['comparisonImageUrl'] as String?,
-      metadata: json['metadata'] as Map<String, dynamic>?,
-      thumbnailUrl: json['thumbnailUrl'] as String?,
-      isFavorite: json['isFavorite'] as bool? ?? false,
-      tags: (json['tags'] as List<dynamic>?)?.map((e) => e as String).toList() ??
-          const [],
-    );
+  Map<String, dynamic> json,
+) => PalmAnalysisHistoryModel(
+  id: json['id'] as String,
+  title: json['title'] as String,
+  description: json['description'] as String,
+  createdAt: DateTime.parse(json['createdAt'] as String),
+  updatedAt: DateTime.parse(json['updatedAt'] as String),
+  analysisResult: PalmAnalysisResponseModel.fromJson(
+    json['analysisResult'] as Map<String, dynamic>,
+  ),
+  originalImageUrl: json['originalImageUrl'] as String?,
+  annotatedImageUrl: json['annotatedImageUrl'] as String?,
+  comparisonImageUrl: json['comparisonImageUrl'] as String?,
+  metadata: json['metadata'] as Map<String, dynamic>?,
+  thumbnailUrl: json['thumbnailUrl'] as String?,
+  isFavorite: json['isFavorite'] as bool? ?? false,
+  tags:
+      (json['tags'] as List<dynamic>?)?.map((e) => e as String).toList() ??
+      const [],
+);
 
 Map<String, dynamic> _$PalmAnalysisHistoryModelToJson(
-        PalmAnalysisHistoryModel instance) =>
-    <String, dynamic>{
-      'id': instance.id,
-      'title': instance.title,
-      'description': instance.description,
-      'type': _$HistoryItemTypeEnumMap[instance.type]!,
-      'createdAt': instance.createdAt.toIso8601String(),
-      'updatedAt': instance.updatedAt.toIso8601String(),
-      'metadata': instance.metadata,
-      'thumbnailUrl': instance.thumbnailUrl,
-      'isFavorite': instance.isFavorite,
-      'tags': instance.tags,
-      'analysisResult': instance.analysisResult.toJson(),
-      'originalImageUrl': instance.originalImageUrl,
-      'annotatedImageUrl': instance.annotatedImageUrl,
-      'comparisonImageUrl': instance.comparisonImageUrl,
-    };
+  PalmAnalysisHistoryModel instance,
+) => <String, dynamic>{
+  'id': instance.id,
+  'title': instance.title,
+  'description': instance.description,
+  'createdAt': instance.createdAt.toIso8601String(),
+  'updatedAt': instance.updatedAt.toIso8601String(),
+  'metadata': instance.metadata,
+  'thumbnailUrl': instance.thumbnailUrl,
+  'isFavorite': instance.isFavorite,
+  'tags': instance.tags,
+  'analysisResult': instance.analysisResult,
+  'originalImageUrl': instance.originalImageUrl,
+  'annotatedImageUrl': instance.annotatedImageUrl,
+  'comparisonImageUrl': instance.comparisonImageUrl,
+};

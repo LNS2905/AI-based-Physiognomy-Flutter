@@ -1,10 +1,19 @@
 import 'package:flutter/material.dart';
 import '../../../../core/providers/base_provider.dart';
+import '../../../../core/network/api_result.dart';
 import '../../../../core/utils/logger.dart';
 import '../../../auth/data/models/user_model.dart';
+import '../../../auth/data/models/update_user_dto.dart';
+import '../../../auth/data/models/create_user_dto.dart'; // For Gender enum
+import '../../../auth/data/repositories/user_repository.dart';
 
 /// Profile provider for managing user profile state
 class ProfileProvider extends BaseProvider {
+  final UserRepository _userRepository;
+
+  ProfileProvider({UserRepository? userRepository})
+      : _userRepository = userRepository ?? UserRepository();
+
   UserModel? _currentUser;
   Map<String, dynamic>? _profileStats;
   List<ProfileMenuItem> _menuItems = [];
@@ -18,29 +27,64 @@ class ProfileProvider extends BaseProvider {
   /// Profile menu items
   List<ProfileMenuItem> get menuItems => _menuItems;
 
-  /// Initialize profile with mock data
-  void initializeProfile() {
-    _loadMockUserData();
-    _loadMockStats();
-    _loadMenuItems();
-    notifyListeners();
+  /// Initialize profile with user data
+  Future<void> initializeProfile() async {
+    await executeOperation(
+      () async {
+        await _loadUserFromStorage();
+        _loadMockStats();
+        _loadMenuItems();
+      },
+      operationName: 'initializeProfile',
+      showLoading: false,
+    );
+  }
+
+  /// Load user data from storage
+  Future<void> _loadUserFromStorage() async {
+    final result = await _userRepository.getCurrentUserFromStorage();
+    if (result is Success<UserModel>) {
+      _currentUser = result.data;
+      AppLogger.info('ProfileProvider: User data loaded from storage: ${_currentUser?.displayName}');
+    } else {
+      AppLogger.warning('ProfileProvider: Failed to load user from storage, using mock data');
+      _loadMockUserData();
+    }
+  }
+
+  /// Update user profile
+  Future<bool> updateProfile({
+    required UpdateUserDTO updateUserDto,
+  }) async {
+    final result = await executeApiOperation(
+      () => _userRepository.updateProfile(updateUserDto: updateUserDto),
+      operationName: 'updateProfile',
+    );
+
+    if (result != null) {
+      _currentUser = result;
+      AppLogger.info('ProfileProvider: Profile updated successfully');
+      return true;
+    }
+    return false;
   }
 
   /// Load mock user data
   void _loadMockUserData() {
     _currentUser = UserModel(
       id: 'mock_user_001',
+      username: 'nguyenvana',
       email: 'nguyenvana@example.com',
       firstName: 'Nguyễn',
       lastName: 'Văn A',
-      phoneNumber: '+84 123 456 789',
-      dateOfBirth: DateTime(1990, 5, 15),
-      gender: 'Nam',
-      profileImageUrl: null, // Will use default avatar
+      phone: '+84 123 456 789',
+      age: 30,
+      gender: Gender.male,
+      avatar: null, // Will use default avatar
       createdAt: DateTime(2024, 1, 1),
       updatedAt: DateTime.now(),
     );
-    
+
     AppLogger.info('ProfileProvider: Mock user data loaded: ${_currentUser?.displayName}');
   }
 
@@ -107,45 +151,7 @@ class ProfileProvider extends BaseProvider {
     ];
   }
 
-  /// Update user profile
-  Future<bool> updateProfile({
-    String? firstName,
-    String? lastName,
-    String? phoneNumber,
-    DateTime? dateOfBirth,
-    String? gender,
-    String? profileImageUrl,
-  }) async {
-    if (_currentUser == null) return false;
 
-    setLoading(true);
-    
-    try {
-      // Simulate API call delay
-      await Future.delayed(const Duration(seconds: 1));
-      
-      final updatedUser = _currentUser!.copyWith(
-        firstName: firstName ?? _currentUser!.firstName,
-        lastName: lastName ?? _currentUser!.lastName,
-        phoneNumber: phoneNumber ?? _currentUser!.phoneNumber,
-        dateOfBirth: dateOfBirth ?? _currentUser!.dateOfBirth,
-        gender: gender ?? _currentUser!.gender,
-        profileImageUrl: profileImageUrl ?? _currentUser!.profileImageUrl,
-        updatedAt: DateTime.now(),
-      );
-
-      _currentUser = updatedUser;
-      AppLogger.info('ProfileProvider: Profile updated successfully');
-
-      setLoading(false);
-      notifyListeners();
-      return true;
-    } catch (e) {
-      AppLogger.error('ProfileProvider: Failed to update profile', e);
-      setLoading(false);
-      return false;
-    }
-  }
 
   /// Navigation methods (to be implemented)
   void _navigateToPersonalInfo() {

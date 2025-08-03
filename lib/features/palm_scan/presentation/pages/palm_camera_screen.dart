@@ -62,8 +62,17 @@ class _PalmCameraScreenState extends State<PalmCameraScreen> {
 
   @override
   void dispose() {
+    AppLogger.info('Disposing PalmCameraScreen');
+
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-    _cameraService.stopCamera();
+
+    // Stop camera with proper error handling to prevent buffer leaks
+    _cameraService.stopCamera().then((_) {
+      AppLogger.info('Camera stopped successfully in PalmCameraScreen dispose');
+    }).catchError((error) {
+      AppLogger.error('Error stopping camera in palm dispose', error);
+    });
+
     super.dispose();
   }
 

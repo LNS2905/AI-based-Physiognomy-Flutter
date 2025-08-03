@@ -17,14 +17,22 @@ class CloudinaryService {
   void initialize() {
     if (_isInitialized) return;
 
-    _cloudinary = Cloudinary.signedConfig(
-      cloudName: AppConstants.cloudinaryCloudName,
-      apiKey: AppConstants.cloudinaryApiKey,
-      apiSecret: AppConstants.cloudinaryApiSecret,
-    );
+    try {
+      _cloudinary = Cloudinary.signedConfig(
+        cloudName: AppConstants.cloudinaryCloudName,
+        apiKey: AppConstants.cloudinaryApiKey,
+        apiSecret: AppConstants.cloudinaryApiSecret,
+      );
 
-    _isInitialized = true;
-    AppLogger.info('Cloudinary service initialized');
+      _isInitialized = true;
+      AppLogger.info('Cloudinary service initialized successfully with cloud: ${AppConstants.cloudinaryCloudName}');
+    } catch (e) {
+      AppLogger.error('Failed to initialize Cloudinary service', e);
+      throw CloudinaryException(
+        message: 'Failed to initialize Cloudinary: ${e.toString()}',
+        code: 'INIT_FAILED',
+      );
+    }
   }
 
   /// Upload image to Cloudinary and return signed URL
@@ -44,6 +52,8 @@ class CloudinaryService {
       final publicId = 'physiognomy_${userId ?? 'user'}_$timestamp';
 
       // Upload image to Cloudinary as private resource
+      AppLogger.info('Uploading with params: folder=${AppConstants.cloudinaryUploadFolder}, publicId=$publicId, type=private');
+
       final response = await _cloudinary.upload(
         file: imagePath,
         resourceType: CloudinaryResourceType.image,
@@ -69,6 +79,7 @@ class CloudinaryService {
           secureUrl: response.secureUrl,
         );
       } else {
+        AppLogger.error('Cloudinary upload failed: ${response.error}');
         throw CloudinaryException(
           message: 'Upload failed: ${response.error}',
           code: 'UPLOAD_FAILED',

@@ -76,10 +76,10 @@ class ProfileHeader extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
           
-          if (user.phoneNumber != null) ...[
+          if (user.phone.isNotEmpty) ...[
             SizedBox(height: isTablet ? 6 : 4),
             Text(
-              user.phoneNumber!,
+              user.phone,
               style: TextStyle(
                 fontSize: isTablet ? 16 : 14,
                 color: AppColors.textSecondary,
@@ -114,9 +114,9 @@ class ProfileHeader extends StatelessWidget {
         ],
       ),
       child: ClipOval(
-        child: user.profileImageUrl != null
+        child: user.avatar != null
             ? Image.network(
-                user.profileImageUrl!,
+                user.avatar!,
                 width: size,
                 height: size,
                 fit: BoxFit.cover,
@@ -192,19 +192,19 @@ class ProfileHeader extends StatelessWidget {
   /// Get user initials for default avatar
   String _getUserInitials() {
     String initials = '';
-    
-    if (user.firstName != null && user.firstName!.isNotEmpty) {
-      initials += user.firstName![0].toUpperCase();
+
+    if (user.firstName.isNotEmpty) {
+      initials += user.firstName[0].toUpperCase();
     }
-    
-    if (user.lastName != null && user.lastName!.isNotEmpty) {
-      initials += user.lastName![0].toUpperCase();
+
+    if (user.lastName.isNotEmpty) {
+      initials += user.lastName[0].toUpperCase();
     }
-    
+
     if (initials.isEmpty) {
       initials = user.email[0].toUpperCase();
     }
-    
+
     return initials;
   }
 }
