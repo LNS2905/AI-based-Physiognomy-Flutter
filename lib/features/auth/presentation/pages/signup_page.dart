@@ -209,25 +209,25 @@ class _SignUpPageState extends State<SignUpPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Username field
-        const Text(
-          'Tên đăng nhập',
-          style: TextStyle(
-            fontFamily: 'Arial',
-            fontWeight: FontWeight.w400,
-            fontSize: 14,
-            color: Color(0xFF333333),
-            height: 1.15,
-          ),
-        ),
-        const SizedBox(height: 8),
-        _buildInputField(
-          controller: _usernameController,
-          hintText: 'Nhập tên đăng nhập',
-          validator: (value) => Validators.validateRequired(value, 'Tên đăng nhập'),
-        ),
-
-        const SizedBox(height: 20),
+        // Username field - Hidden from UI but controller still exists
+        // const Text(
+        //   'Tên đăng nhập',
+        //   style: TextStyle(
+        //     fontFamily: 'Arial',
+        //     fontWeight: FontWeight.w400,
+        //     fontSize: 14,
+        //     color: Color(0xFF333333),
+        //     height: 1.15,
+        //   ),
+        // ),
+        // const SizedBox(height: 8),
+        // _buildInputField(
+        //   controller: _usernameController,
+        //   hintText: 'Nhập tên đăng nhập',
+        //   validator: (value) => Validators.validateRequired(value, 'Tên đăng nhập'),
+        // ),
+        //
+        // const SizedBox(height: 20),
 
         // First Name field
         const Text(
@@ -286,6 +286,10 @@ class _SignUpPageState extends State<SignUpPage> {
           hintText: 'Nhập email của bạn',
           keyboardType: TextInputType.emailAddress,
           validator: Validators.validateEmail,
+          onChanged: (value) {
+            // Automatically set username to email value
+            _usernameController.text = value;
+          },
         ),
 
         const SizedBox(height: 20),
@@ -423,6 +427,7 @@ class _SignUpPageState extends State<SignUpPage> {
     bool obscureText = false,
     String? Function(String?)? validator,
     Widget? suffixIcon,
+    void Function(String)? onChanged,
   }) {
     return Container(
       height: 56,
@@ -435,6 +440,7 @@ class _SignUpPageState extends State<SignUpPage> {
         controller: controller,
         keyboardType: keyboardType,
         obscureText: obscureText,
+        onChanged: onChanged,
         style: const TextStyle(
           fontFamily: 'Arial',
           fontWeight: FontWeight.w400,
@@ -748,6 +754,9 @@ class _SignUpPageState extends State<SignUpPage> {
       );
       return;
     }
+
+    // Ensure username is set to email before validation
+    _usernameController.text = _emailController.text.trim();
 
     if (_formKey.currentState?.validate() ?? false) {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
