@@ -6,13 +6,20 @@ import '../../../auth/data/models/user_model.dart';
 import '../../../auth/data/models/update_user_dto.dart';
 import '../../../auth/data/models/create_user_dto.dart'; // For Gender enum
 import '../../../auth/data/repositories/user_repository.dart';
+import '../../../auth/data/repositories/auth_repository.dart';
+import '../models/profile_stats.dart';
+import '../models/profile_menu_item.dart';
 
 /// Profile provider for managing user profile state
 class ProfileProvider extends BaseProvider {
   final UserRepository _userRepository;
+  final AuthRepository _authRepository;
 
-  ProfileProvider({UserRepository? userRepository})
-      : _userRepository = userRepository ?? UserRepository();
+  ProfileProvider({
+    UserRepository? userRepository,
+    AuthRepository? authRepository,
+  })  : _userRepository = userRepository ?? UserRepository(),
+        _authRepository = authRepository ?? AuthRepository();
 
   UserModel? _currentUser;
   Map<String, dynamic>? _profileStats;
@@ -29,6 +36,7 @@ class ProfileProvider extends BaseProvider {
 
   /// Initialize profile with user data
   Future<void> initializeProfile() async {
+    AppLogger.info('ProfileProvider: Initializing profile...');
     await executeOperation(
       () async {
         await _loadUserFromStorage();
@@ -47,9 +55,65 @@ class ProfileProvider extends BaseProvider {
       _currentUser = result.data;
       AppLogger.info('ProfileProvider: User data loaded from storage: ${_currentUser?.displayName}');
     } else {
-      AppLogger.warning('ProfileProvider: Failed to load user from storage, using mock data');
+      AppLogger.warning('ProfileProvider: Failed to load user from storage: ${result is Error ? (result as Error).failure.message : 'Unknown error'}');
+      AppLogger.warning('ProfileProvider: Using mock data for demonstration');
       _loadMockUserData();
     }
+  }
+
+  /// Load user data from AuthProvider (alternative method)
+  void loadUserFromAuthProvider(UserModel? user) {
+    if (user != null) {
+      _currentUser = user;
+      AppLogger.info('ProfileProvider: User data loaded from AuthProvider: ${_currentUser?.displayName}');
+      notifyListeners();
+    } else {
+      AppLogger.warning('ProfileProvider: No user data from AuthProvider, using mock data');
+      _loadMockUserData();
+      notifyListeners();
+    }
+  }
+
+  /// Refresh user data from API /auth/me
+  Future<void> refreshUserData() async {
+    AppLogger.info('ProfileProvider: Refreshing user data from API...');
+    await executeOperation(
+      () async {
+        final result = await _authRepository.getCurrentUser();
+        AppLogger.info('ProfileProvider: API call result type: ${result.runtimeType}');
+
+        if (result is Success<UserModel>) {
+          _currentUser = result.data;
+          AppLogger.info('ProfileProvider: User data refreshed successfully');
+          AppLogger.info('ProfileProvider: User ID: ${_currentUser?.id}');
+          AppLogger.info('ProfileProvider: User Name: ${_currentUser?.displayName}');
+          AppLogger.info('ProfileProvider: User Email: ${_currentUser?.email}');
+          AppLogger.info('ProfileProvider: User Phone: ${_currentUser?.phone}');
+          AppLogger.info('ProfileProvider: User Age: ${_currentUser?.age}');
+          AppLogger.info('ProfileProvider: User Gender: ${_currentUser?.gender}');
+          AppLogger.info('ProfileProvider: User Username: ${_currentUser?.username}');
+          AppLogger.info('ProfileProvider: User Avatar: ${_currentUser?.avatar}');
+          AppLogger.info('ProfileProvider: User Created At: ${_currentUser?.createdAt}');
+          AppLogger.info('ProfileProvider: User Updated At: ${_currentUser?.updatedAt}');
+
+          // Update stored user data
+          await _userRepository.storeUserData(result.data);
+
+          // Refresh stats after getting updated user data
+          _loadMockStats();
+        } else if (result is Error<UserModel>) {
+          AppLogger.error('ProfileProvider: Failed to refresh user data: ${result.failure.message}');
+          AppLogger.error('ProfileProvider: Failure type: ${result.failure.runtimeType}');
+          AppLogger.error('ProfileProvider: Failure code: ${result.failure.code}');
+          throw Exception('Failed to refresh user data: ${result.failure.message}');
+        } else {
+          AppLogger.error('ProfileProvider: Unexpected result type: ${result.runtimeType}');
+          throw Exception('Unexpected result type from API call');
+        }
+      },
+      operationName: 'refreshUserData',
+      showLoading: true,
+    );
   }
 
   /// Update user profile

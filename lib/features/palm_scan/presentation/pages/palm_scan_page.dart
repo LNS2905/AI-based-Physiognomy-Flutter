@@ -539,45 +539,78 @@ class _PalmScanPageState extends State<PalmScanPage> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          _buildBottomNavItem(Icons.home_outlined, isActive: false),
-          _buildBottomNavItem(Icons.search_outlined, isActive: false),
-          _buildBottomNavItem(Icons.back_hand, isActive: true),
-          _buildBottomNavItem(Icons.person_outline, isActive: false),
+          _buildBottomNavItem(
+            Icons.home_outlined,
+            isActive: false,
+            onTap: () => _navigateToHome(),
+          ),
+          _buildBottomNavItem(
+            Icons.search_outlined,
+            isActive: false,
+            onTap: () => _navigateToSearch(),
+          ),
+          _buildBottomNavItem(
+            Icons.back_hand,
+            isActive: true,
+            onTap: () => {}, // Current page, no action needed
+          ),
+          _buildBottomNavItem(
+            Icons.person_outline,
+            isActive: false,
+            onTap: () => _navigateToProfile(),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildBottomNavItem(IconData icon, {required bool isActive}) {
-    return Container(
-      width: 45,
-      height: 45,
-      decoration: BoxDecoration(
-        gradient: isActive
-            ? LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [AppColors.primary, AppColors.primaryDark],
-              )
-            : null,
-        color: isActive ? null : Colors.transparent,
-        borderRadius: BorderRadius.circular(15),
-        boxShadow: isActive
-            ? [
-                BoxShadow(
-                  color: AppColors.primary.withOpacity(0.3),
-                  blurRadius: 10,
-                  offset: const Offset(0, 5),
-                ),
-              ]
-            : null,
-      ),
-      child: Icon(
-        icon,
-        size: isActive ? 22 : 20,
-        color: isActive ? Colors.white : AppColors.textSecondary,
+  Widget _buildBottomNavItem(IconData icon, {required bool isActive, required VoidCallback onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 45,
+        height: 45,
+        decoration: BoxDecoration(
+          gradient: isActive
+              ? LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [AppColors.primary, AppColors.primaryDark],
+                )
+              : null,
+          color: isActive ? null : Colors.transparent,
+          borderRadius: BorderRadius.circular(15),
+          boxShadow: isActive
+              ? [
+                  BoxShadow(
+                    color: AppColors.primary.withOpacity(0.3),
+                    blurRadius: 10,
+                    offset: const Offset(0, 5),
+                  ),
+                ]
+              : null,
+        ),
+        child: Icon(
+          icon,
+          size: isActive ? 22 : 20,
+          color: isActive ? Colors.white : AppColors.textSecondary,
+        ),
       ),
     );
+  }
+
+  // Navigation methods
+  void _navigateToHome() {
+    context.go('/home');
+  }
+
+  void _navigateToSearch() {
+    // Navigate to search/history page
+    context.push('/history');
+  }
+
+  void _navigateToProfile() {
+    context.push('/profile');
   }
 
   /// Handle upload photo button tap

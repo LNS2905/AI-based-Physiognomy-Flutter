@@ -18,6 +18,22 @@ String _idFromJson(dynamic value) {
 /// Helper function to convert id to JSON
 dynamic _idToJson(String id) => id;
 
+/// Helper function to convert age from JSON (can be int or double)
+double _ageFromJson(dynamic value) {
+  if (value is int) {
+    return value.toDouble();
+  } else if (value is double) {
+    return value;
+  } else if (value is String) {
+    return double.tryParse(value) ?? 0.0;
+  } else {
+    return 0.0;
+  }
+}
+
+/// Helper function to convert age to JSON
+dynamic _ageToJson(double age) => age;
+
 /// User data model
 @JsonSerializable()
 class UserModel extends Equatable {
@@ -28,6 +44,7 @@ class UserModel extends Equatable {
   final String firstName;
   final String lastName;
   final String phone;
+  @JsonKey(fromJson: _ageFromJson, toJson: _ageToJson)
   final double age;
   final Gender gender;
   final String? avatar;

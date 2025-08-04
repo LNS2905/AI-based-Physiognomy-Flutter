@@ -26,17 +26,24 @@ class AuthProvider extends BaseProvider {
   Future<void> initialize() async {
     await executeOperation(
       () async {
+        AppLogger.info('AuthProvider: Initializing authentication state...');
         final isLoggedIn = await _authRepository.isLoggedIn();
+        AppLogger.info('AuthProvider: Is logged in: $isLoggedIn');
+
         if (isLoggedIn) {
           final result = await _authRepository.getCurrentUser();
+          AppLogger.info('AuthProvider: Get current user result: ${result.runtimeType}');
+
           if (result is Success<UserModel>) {
             _currentUser = result.data;
             _isAuthenticated = true;
-            AppLogger.info('User authentication restored');
+            AppLogger.info('AuthProvider: User authentication restored: ${result.data.displayName}');
           } else if (result is Error<UserModel>) {
-            AppLogger.warning('Failed to restore user session: ${result.failure.message}');
+            AppLogger.warning('AuthProvider: Failed to restore user session: ${result.failure.message}');
             _clearAuthState();
           }
+        } else {
+          AppLogger.info('AuthProvider: User not logged in');
         }
       },
       operationName: 'initialize',

@@ -13,7 +13,7 @@ UserModel _$UserModelFromJson(Map<String, dynamic> json) => UserModel(
   firstName: json['firstName'] as String,
   lastName: json['lastName'] as String,
   phone: json['phone'] as String,
-  age: (json['age'] as num).toDouble(),
+  age: _ageFromJson(json['age']),
   gender: $enumDecode(_$GenderEnumMap, json['gender']),
   avatar: json['avatar'] as String?,
   createdAt: json['createdAt'] == null
@@ -31,7 +31,7 @@ Map<String, dynamic> _$UserModelToJson(UserModel instance) => <String, dynamic>{
   'firstName': instance.firstName,
   'lastName': instance.lastName,
   'phone': instance.phone,
-  'age': instance.age,
+  'age': _ageToJson(instance.age),
   'gender': _$GenderEnumMap[instance.gender]!,
   'avatar': instance.avatar,
   'createdAt': instance.createdAt?.toIso8601String(),

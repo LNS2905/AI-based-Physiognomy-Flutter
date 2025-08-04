@@ -103,6 +103,16 @@ class UserRepository {
     }
   }
 
+  /// Store user data to storage
+  Future<void> storeUserData(UserModel user) async {
+    try {
+      await StorageService.store(AppConstants.userDataKey, user.toJson());
+      AppLogger.info('User data stored to storage');
+    } catch (e) {
+      AppLogger.error('Failed to store user data to storage', e);
+    }
+  }
+
   /// Clear user data from storage
   Future<void> clearUserData() async {
     try {
