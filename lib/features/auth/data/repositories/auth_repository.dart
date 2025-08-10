@@ -196,15 +196,6 @@ class AuthRepository {
         },
       );
 
-      // Debug: Log the response data structure
-      AppLogger.info('API Response: $response');
-      AppLogger.info('Response data: ${response['data']}');
-      AppLogger.info('Response data type: ${response['data'].runtimeType}');
-      if (response['data'] is Map<String, dynamic>) {
-        final data = response['data'] as Map<String, dynamic>;
-        AppLogger.info('ID field: ${data['id']} (type: ${data['id'].runtimeType})');
-      }
-
       final user = UserModel.fromJson(response['data']);
       AppLogger.info('Current user retrieved successfully');
       return Success(user);
