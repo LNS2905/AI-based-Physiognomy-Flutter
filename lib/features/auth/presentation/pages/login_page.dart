@@ -542,7 +542,7 @@ class _LoginPageState extends State<LoginPage> {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
     try {
-      final success = await authProvider.loginWithGoogle();
+      final success = await authProvider.loginWithGoogle(googleToken: 'dummy_token');
 
       if (success && mounted) {
         // Navigate to home after successful login

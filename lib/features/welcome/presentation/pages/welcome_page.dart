@@ -303,7 +303,7 @@ class WelcomePage extends StatelessWidget {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
     try {
-      final success = await authProvider.loginWithGoogle();
+      final success = await authProvider.loginWithGoogle(googleToken: 'dummy_token');
 
       if (success) {
         // Navigate to home after successful login

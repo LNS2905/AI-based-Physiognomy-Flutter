@@ -22,11 +22,12 @@ import '../../features/history/presentation/pages/face_analysis_history_detail_p
 import '../../features/history/presentation/pages/palm_analysis_history_detail_page.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
 import '../../features/history/presentation/pages/chat_history_detail_page.dart';
+import '../../features/testing/presentation/pages/new_api_test_page.dart';
 
 /// Application router configuration using GoRouter
 class AppRouter {
   static final GoRouter _router = GoRouter(
-    initialLocation: AppConstants.introRoute,
+    initialLocation: AppConstants.homeRoute,
     debugLogDiagnostics: true,
     observers: [NavigationObserver()],
     routes: [
@@ -63,6 +64,13 @@ class AppRouter {
         path: '/google-signin-test',
         name: 'google-signin-test',
         builder: (context, state) => const GoogleSignInTestPage(),
+      ),
+
+      // New API Test Route
+      GoRoute(
+        path: '/new-api-test',
+        name: 'new-api-test',
+        builder: (context, state) => const NewApiTestPage(),
       ),
 
       // Survey Route

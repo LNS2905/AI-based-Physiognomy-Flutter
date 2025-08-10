@@ -9,10 +9,6 @@ import '../../../../core/services/google_sign_in_service.dart';
 import '../../../../core/services/logout_service.dart';
 import '../models/auth_response_model.dart';
 import '../models/user_model.dart';
-import '../models/auth_request_model.dart';
-import '../models/create_user_dto.dart';
-import '../models/google_login_request.dart';
-import '../models/general_response_model.dart';
 
 /// Authentication repository
 class AuthRepository {
@@ -25,69 +21,25 @@ class AuthRepository {
   })  : _httpService = httpService ?? HttpService(),
         _googleSignInService = googleSignInService ?? GoogleSignInService();
 
-  /// Login with username and password
+  /// Login with email and password
   Future<ApiResult<AuthResponseModel>> login({
-    required String username,
+    required String email,
     required String password,
   }) async {
     try {
-      final authRequest = AuthRequest(
-        username: username,
-        password: password,
-      );
-
       final response = await _httpService.post(
-        AppConstants.loginEndpoint,
-        body: authRequest.toJson(),
+        'auth/user',
+        body: {
+          'username': email,
+          'password': password,
+        },
       );
 
-      final generalResponse = GeneralResponse<Map<String, dynamic>>.fromJson(
-        response,
-        (json) => json as Map<String, dynamic>,
-      );
-
-      // For login, backend returns tokens but no user data
-      // We need to get user data separately
-      final tokenData = generalResponse.data;
-
-      // Create AuthResponseModel with tokens but no user initially
-      final authResponse = AuthResponseModel(
-        accessToken: tokenData['accessToken'] as String?,
-        refreshToken: tokenData['refreshToken'] as String?,
-        user: UserModel(
-          id: 'temp', // Temporary ID, will be updated when we get user data
-          email: username, // Use login username as email
-          firstName: '',
-          lastName: '',
-          phone: '',
-          age: 0,
-          gender: Gender.male,
-        ),
-        expiresIn: tokenData['expiresIn'] as int?,
-      );
-
+      final authResponse = AuthResponseModel.fromJson(response);
+      
       // Store tokens securely
       await _storeAuthTokens(authResponse);
-
-      // Get current user data to complete the auth response
-      try {
-        final currentUserResult = await getCurrentUser();
-        if (currentUserResult is Success<UserModel>) {
-          final completeAuthResponse = authResponse.copyWith(
-            user: currentUserResult.data,
-          );
-          // Update stored user data
-          await StorageService.store(
-            AppConstants.userDataKey,
-            currentUserResult.data.toJson(),
-          );
-          AppLogger.info('User logged in successfully with complete user data');
-          return Success(completeAuthResponse);
-        }
-      } catch (e) {
-        AppLogger.warning('Failed to get user data after login, but login was successful: $e');
-      }
-
+      
       AppLogger.info('User logged in successfully');
       return Success(authResponse);
     } on AuthException catch (e) {
@@ -112,58 +64,50 @@ class AuthRepository {
     }
   }
 
-  /// Sign up new user
-  Future<ApiResult<AuthResponseModel>> signup({
-    required CreateUserDTO createUserDto,
+  /// Register new user
+  Future<ApiResult<AuthResponseModel>> register({
+    required String email,
+    required String password,
+    required String firstName,
+    required String lastName,
+    String? phoneNumber,
   }) async {
     try {
       final response = await _httpService.post(
-        AppConstants.signupEndpoint,
-        body: createUserDto.toJson(),
+        'auth/register',
+        body: {
+          'email': email,
+          'password': password,
+          'firstName': firstName,
+          'lastName': lastName,
+          if (phoneNumber != null) 'phoneNumber': phoneNumber,
+        },
       );
 
-      final generalResponse = GeneralResponse<Map<String, dynamic>>.fromJson(
-        response,
-        (json) => json as Map<String, dynamic>,
-      );
-
-      // For signup, backend returns user data directly, not auth tokens
-      // Create AuthResponseModel with user data but no tokens
-      final userData = generalResponse.data;
-      final user = UserModel.fromJson(userData);
-      final authResponse = AuthResponseModel(
-        user: user,
-        accessToken: null, // No token from signup endpoint
-        refreshToken: null,
-        expiresIn: null,
-      );
-
-      // Store user data (no tokens from signup)
+      final authResponse = AuthResponseModel.fromJson(response);
+      
+      // Store tokens securely
       await _storeAuthTokens(authResponse);
-
-      AppLogger.info('User signed up successfully');
-
-      // Note: For new backend, signup doesn't return tokens
-      // User will need to login separately to get access tokens
+      
+      AppLogger.info('User registered successfully');
       return Success(authResponse);
     } on ValidationException catch (e) {
-      AppLogger.error('Signup failed: Validation error', e);
+      AppLogger.error('Registration failed: Validation error', e);
       return Error(ValidationFailure(message: e.message, code: e.code));
     } on NetworkException catch (e) {
-      AppLogger.error('Signup failed: Network error', e);
+      AppLogger.error('Registration failed: Network error', e);
       return Error(NetworkFailure(message: e.message, code: e.code));
     } on ServerException catch (e) {
-      AppLogger.error('Signup failed: Server error', e);
+      AppLogger.error('Registration failed: Server error', e);
       return Error(ServerFailure(
         message: e.message,
         statusCode: e.statusCode,
         code: e.code,
       ));
-    } catch (e, stackTrace) {
-      AppLogger.error('Signup failed: Unknown error - ${e.toString()}', e);
-      AppLogger.error('Stack trace: $stackTrace');
+    } catch (e) {
+      AppLogger.error('Registration failed: Unknown error', e);
       return Error(UnknownFailure(
-        message: 'Đã xảy ra lỗi không mong muốn trong quá trình đăng ký: ${e.toString()}',
+        message: 'Đã xảy ra lỗi không mong muốn trong quá trình đăng ký',
         code: 'UNKNOWN_ERROR',
       ));
     }
@@ -191,52 +135,6 @@ class AuthRepository {
       return Error(UnknownFailure(
         message: 'Đăng xuất hoàn tất với lỗi',
         code: 'LOGOUT_ERROR',
-      ));
-    }
-  }
-
-  /// Login with Google
-  Future<ApiResult<AuthResponseModel>> loginWithGoogle({
-    required String googleToken,
-  }) async {
-    try {
-      final googleLoginRequest = GoogleLoginRequest(token: googleToken);
-
-      final response = await _httpService.post(
-        AppConstants.googleLoginEndpoint,
-        body: googleLoginRequest.toJson(),
-      );
-
-      final generalResponse = GeneralResponse<Map<String, dynamic>>.fromJson(
-        response,
-        (json) => json as Map<String, dynamic>,
-      );
-
-      final authResponse = AuthResponseModel.fromJson(generalResponse.data);
-
-      // Store tokens securely
-      await _storeAuthTokens(authResponse);
-
-      AppLogger.info('User logged in with Google successfully');
-      return Success(authResponse);
-    } on AuthException catch (e) {
-      AppLogger.error('Google login failed: Authentication error', e);
-      return Error(AuthFailure(message: e.message, code: e.code));
-    } on NetworkException catch (e) {
-      AppLogger.error('Google login failed: Network error', e);
-      return Error(NetworkFailure(message: e.message, code: e.code));
-    } on ServerException catch (e) {
-      AppLogger.error('Google login failed: Server error', e);
-      return Error(ServerFailure(
-        message: e.message,
-        statusCode: e.statusCode,
-        code: e.code,
-      ));
-    } catch (e) {
-      AppLogger.error('Google login failed: Unknown error', e);
-      return Error(UnknownFailure(
-        message: 'Đã xảy ra lỗi không mong muốn trong quá trình đăng nhập với Google',
-        code: 'UNKNOWN_ERROR',
       ));
     }
   }
@@ -292,18 +190,13 @@ class AuthRepository {
       }
 
       final response = await _httpService.get(
-        AppConstants.getCurrentUserEndpoint,
+        'auth/me',
         headers: {
           'Authorization': 'Bearer $accessToken',
         },
       );
 
-      final generalResponse = GeneralResponse<Map<String, dynamic>>.fromJson(
-        response,
-        (json) => json as Map<String, dynamic>,
-      );
-
-      final user = UserModel.fromJson(generalResponse.data);
+      final user = UserModel.fromJson(response);
       AppLogger.info('Current user retrieved successfully');
       return Success(user);
     } on AuthException catch (e) {
@@ -331,7 +224,6 @@ class AuthRepository {
 
   /// Store authentication tokens
   Future<void> _storeAuthTokens(AuthResponseModel authResponse) async {
-    // Only store tokens if they exist
     if (authResponse.accessToken != null) {
       await StorageService.storeSecure(
         AppConstants.accessTokenKey,
@@ -344,7 +236,6 @@ class AuthRepository {
         authResponse.refreshToken!,
       );
     }
-    // Always store user data
     await StorageService.store(
       AppConstants.userDataKey,
       authResponse.user.toJson(),

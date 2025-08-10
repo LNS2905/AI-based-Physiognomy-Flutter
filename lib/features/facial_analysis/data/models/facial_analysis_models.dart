@@ -59,7 +59,7 @@ class FacialAnalysisDto {
 @JsonSerializable()
 class FacialAnalysis {
   final int id;
-  final String userId;
+  final int userId; // API returns int, not string
   final String resultText;
   final String faceShape;
   final double harmonyScore;
@@ -68,7 +68,9 @@ class FacialAnalysis {
   final List<FacialMetric> metrics;
   final String annotatedImage;
   final String processedAt;
+  @JsonKey(name: 'createAt') // API uses 'createAt' not 'createdAt'
   final DateTime? createdAt;
+  @JsonKey(name: 'updateAt') // API uses 'updateAt' not 'updatedAt'
   final DateTime? updatedAt;
 
   const FacialAnalysis({
@@ -94,7 +96,7 @@ class FacialAnalysis {
   /// Convert to DTO for API requests
   FacialAnalysisDto toDto() {
     return FacialAnalysisDto(
-      userId: userId,
+      userId: userId.toString(), // Convert int to string for API
       resultText: resultText,
       faceShape: faceShape,
       harmonyScore: harmonyScore,

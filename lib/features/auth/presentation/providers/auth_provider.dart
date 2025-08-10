@@ -57,7 +57,7 @@ class AuthProvider extends BaseProvider {
     required String password,
   }) async {
     final result = await executeApiOperation(
-      () => _authRepository.login(username: username, password: password),
+      () => _authRepository.login(email: username, password: password),
       operationName: 'login',
     );
 
@@ -73,7 +73,13 @@ class AuthProvider extends BaseProvider {
     required CreateUserDTO createUserDto,
   }) async {
     final result = await executeApiOperation(
-      () => _authRepository.signup(createUserDto: createUserDto),
+      () => _authRepository.register(
+        email: createUserDto.email,
+        password: createUserDto.password,
+        firstName: createUserDto.firstName,
+        lastName: createUserDto.lastName,
+        phoneNumber: createUserDto.phone,
+      ),
       operationName: 'signup',
     );
 
@@ -101,7 +107,7 @@ class AuthProvider extends BaseProvider {
     required String googleToken,
   }) async {
     final result = await executeApiOperation(
-      () => _authRepository.loginWithGoogle(googleToken: googleToken),
+      () => _authRepository.loginWithGoogle(),
       operationName: 'loginWithGoogle',
     );
 
@@ -215,9 +221,6 @@ class AuthProvider extends BaseProvider {
     final firstName = _currentUser!.firstName ?? '';
     final lastName = _currentUser!.lastName ?? '';
 
-    final firstName = _currentUser!.firstName;
-    final lastName = _currentUser!.lastName;
-
     if (firstName.isNotEmpty && lastName.isNotEmpty) {
       return '${firstName[0]}${lastName[0]}'.toUpperCase();
     } else if (firstName.isNotEmpty) {
@@ -228,19 +231,7 @@ class AuthProvider extends BaseProvider {
     return 'U';
   }
 
-  /// Login with Google
-  Future<bool> loginWithGoogle() async {
-    final result = await executeApiOperation(
-      () => _authRepository.loginWithGoogle(),
-      operationName: 'google_login',
-    );
 
-    if (result != null) {
-      _setAuthState(result);
-      return true;
-    }
-    return false;
-  }
 
   /// Register with Google
   Future<bool> registerWithGoogle() async {

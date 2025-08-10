@@ -176,7 +176,7 @@ class _GoogleSignInTestPageState extends State<GoogleSignInTestPage> {
 
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      final success = await authProvider.loginWithGoogle();
+      final success = await authProvider.loginWithGoogle(googleToken: 'dummy_token');
 
       setState(() {
         _statusMessage = success 

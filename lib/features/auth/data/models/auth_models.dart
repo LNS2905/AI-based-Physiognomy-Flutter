@@ -201,23 +201,34 @@ class User {
   String get fullName => '$firstName $lastName';
 }
 
-/// Auth Response (login response)
+/// Auth Response (login response) - only contains tokens
 @JsonSerializable()
 class AuthResponse {
   final String accessToken;
   final String refreshToken;
-  final User user;
-  final DateTime expiresAt;
 
   const AuthResponse({
     required this.accessToken,
     required this.refreshToken,
-    required this.user,
-    required this.expiresAt,
   });
 
   factory AuthResponse.fromJson(Map<String, dynamic> json) =>
       _$AuthResponseFromJson(json);
 
   Map<String, dynamic> toJson() => _$AuthResponseToJson(this);
+}
+
+/// Register Response - only contains user data
+@JsonSerializable()
+class RegisterResponse {
+  final User user;
+
+  const RegisterResponse({
+    required this.user,
+  });
+
+  factory RegisterResponse.fromJson(Map<String, dynamic> json) =>
+      _$RegisterResponseFromJson(json);
+
+  Map<String, dynamic> toJson() => _$RegisterResponseToJson(this);
 }
