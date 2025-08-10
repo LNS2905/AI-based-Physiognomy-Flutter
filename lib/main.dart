@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'core/storage/storage_service.dart';
 import 'core/theme/app_theme.dart';
 import 'core/navigation/app_router.dart';
 import 'core/utils/logger.dart';
+import 'core/services/google_sign_in_service.dart';
 import 'features/auth/presentation/providers/auth_provider.dart';
 import 'features/survey/presentation/providers/survey_provider.dart';
 import 'features/face_scan/presentation/providers/face_scan_provider.dart';
@@ -42,8 +44,15 @@ void main() async {
 /// Initialize application services
 Future<void> _initializeServices() async {
   try {
+    // Initialize Firebase
+    await Firebase.initializeApp();
+
     // Initialize storage service
     await StorageService.init();
+
+    // Initialize Google Sign-In service
+    GoogleSignInService().initialize();
+
     AppLogger.info('Application services initialized successfully');
   } catch (e) {
     AppLogger.error('Failed to initialize services', e);

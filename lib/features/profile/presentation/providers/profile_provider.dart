@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/providers/base_provider.dart';
 import '../../../../core/utils/logger.dart';
 import '../../../auth/data/models/user_model.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
 
 /// Profile provider for managing user profile state
 class ProfileProvider extends BaseProvider {
   UserModel? _currentUser;
   Map<String, dynamic>? _profileStats;
   List<ProfileMenuItem> _menuItems = [];
+  BuildContext? _context;
 
   /// Current user profile
   UserModel? get currentUser => _currentUser;
@@ -17,6 +21,11 @@ class ProfileProvider extends BaseProvider {
 
   /// Profile menu items
   List<ProfileMenuItem> get menuItems => _menuItems;
+
+  /// Set context for navigation and dialogs
+  void setContext(BuildContext context) {
+    _context = context;
+  }
 
   /// Initialize profile with mock data
   void initializeProfile() {
@@ -180,7 +189,7 @@ class ProfileProvider extends BaseProvider {
 
   void _logout() {
     AppLogger.info('ProfileProvider: Logout requested');
-    // TODO: Implement logout
+    // Logout will be handled by LogoutButton/LogoutListTile widget
   }
 
   /// Get formatted member since text

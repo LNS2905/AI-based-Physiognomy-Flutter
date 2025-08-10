@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
+import '../../../../core/widgets/logout_button.dart';
 import '../providers/profile_provider.dart';
 
 /// Profile menu items widget displaying navigation options
@@ -64,7 +65,28 @@ class ProfileMenuItems extends StatelessWidget {
             final index = entry.key;
             final item = entry.value;
             final isLast = index == menuItems.length - 1;
-            
+
+            // Use LogoutListTile for logout item
+            if (item.title == 'Đăng xuất') {
+              return Container(
+                decoration: BoxDecoration(
+                  border: !isLast
+                      ? Border(
+                          bottom: BorderSide(
+                            color: AppColors.border.withValues(alpha: 0.5),
+                            width: 0.5,
+                          ),
+                        )
+                      : null,
+                ),
+                child: LogoutListTile(
+                  title: item.title,
+                  subtitle: item.subtitle,
+                  icon: item.icon,
+                ),
+              );
+            }
+
             return _buildMenuItem(
               item: item,
               isLast: isLast,

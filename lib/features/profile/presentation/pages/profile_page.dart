@@ -24,9 +24,10 @@ class _ProfilePageState extends State<ProfilePage> {
   void initState() {
     super.initState();
     _profileProvider = context.read<ProfileProvider>();
-    
+
     // Initialize profile data
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      _profileProvider.setContext(context);
       _profileProvider.initializeProfile();
     });
   }

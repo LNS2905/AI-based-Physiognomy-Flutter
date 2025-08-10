@@ -1,4 +1,4 @@
-package com.physiognomy.app.ai_physiognomy_app
+package com.labpixies.flood
 
 import io.flutter.embedding.android.FlutterActivity
 

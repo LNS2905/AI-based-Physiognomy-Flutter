@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/bagua_logo.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
 
 /// Welcome page that matches the Figma design
 class WelcomePage extends StatelessWidget {
@@ -48,32 +50,41 @@ class WelcomePage extends StatelessWidget {
             size: 38,
           ),
           const SizedBox(width: 12),
-          
+
           // App name and subtitle
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Tướng học AI',
-                style: TextStyle(
-                  fontFamily: 'Arial',
-                  fontWeight: FontWeight.w700,
-                  fontSize: 20,
-                  color: Color(0xFF333333),
-                  height: 1.15,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Tướng học AI',
+                  style: TextStyle(
+                    fontFamily: 'Arial',
+                    fontWeight: FontWeight.w700,
+                    fontSize: 20,
+                    color: Color(0xFF333333),
+                    height: 1.15,
+                  ),
                 ),
-              ),
-              const Text(
-                'Phân tích khuôn mặt',
-                style: TextStyle(
-                  fontFamily: 'Arial',
-                  fontWeight: FontWeight.w400,
-                  fontSize: 14,
-                  color: Color(0xFF666666),
-                  height: 1.15,
+                const Text(
+                  'Phân tích khuôn mặt',
+                  style: TextStyle(
+                    fontFamily: 'Arial',
+                    fontWeight: FontWeight.w400,
+                    fontSize: 14,
+                    color: Color(0xFF666666),
+                    height: 1.15,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
+          ),
+
+          // Debug button for Google Sign-In test
+          IconButton(
+            onPressed: () => context.push('/google-signin-test'),
+            icon: const Icon(Icons.bug_report),
+            tooltip: 'Google Sign-In Test',
           ),
         ],
       ),
@@ -288,14 +299,31 @@ class WelcomePage extends StatelessWidget {
     );
   }
 
-  void _handleGoogleLogin(BuildContext context) {
-    // TODO: Implement Google login
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Đăng nhập Google sẽ được triển khai'),
-        backgroundColor: AppColors.info,
-      ),
-    );
+  void _handleGoogleLogin(BuildContext context) async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+
+    try {
+      final success = await authProvider.loginWithGoogle();
+
+      if (success) {
+        // Navigate to home after successful login
+        context.go('/home');
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Đăng nhập Google thành công!'),
+            backgroundColor: AppColors.success,
+          ),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Đăng nhập Google thất bại: ${e.toString()}'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+    }
   }
 
   void _handleAppleLogin(BuildContext context) {

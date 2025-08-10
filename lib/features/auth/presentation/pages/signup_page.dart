@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../core/widgets/bagua_logo.dart';
+import '../providers/auth_provider.dart';
 
 /// Sign Up page that matches the Figma design
 class SignUpPage extends StatefulWidget {
@@ -641,14 +643,33 @@ class _SignUpPageState extends State<SignUpPage> {
     }
   }
 
-  void _handleGoogleSignup(BuildContext context) {
-    // TODO: Implement Google signup
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Đăng ký Google sẽ được triển khai'),
-        backgroundColor: AppColors.info,
-      ),
-    );
+  void _handleGoogleSignup(BuildContext context) async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+
+    try {
+      final success = await authProvider.registerWithGoogle();
+
+      if (success && mounted) {
+        // Navigate to survey for new users or home for existing users
+        context.go('/survey');
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Đăng ký Google thành công!'),
+            backgroundColor: AppColors.success,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Đăng ký Google thất bại: ${e.toString()}'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
   }
 
   void _handleAppleSignup(BuildContext context) {

@@ -88,12 +88,21 @@ class AuthProvider extends BaseProvider {
 
   /// Logout user
   Future<void> logout() async {
+    try {
+      // Sign out from Google if user was signed in with Google
+      await _authRepository.signOutGoogle();
+    } catch (e) {
+      // Continue with logout even if Google sign out fails
+      AppLogger.warning('Google sign out failed during logout', e);
+    }
+
     await executeApiOperation(
       () => _authRepository.logout(),
       operationName: 'logout',
     );
-    
+
     _clearAuthState();
+    AppLogger.info('User logged out successfully');
   }
 
   /// Refresh authentication token
@@ -180,7 +189,7 @@ class AuthProvider extends BaseProvider {
     if (_currentUser == null) return 'G';
     final firstName = _currentUser!.firstName ?? '';
     final lastName = _currentUser!.lastName ?? '';
-    
+
     if (firstName.isNotEmpty && lastName.isNotEmpty) {
       return '${firstName[0]}${lastName[0]}'.toUpperCase();
     } else if (firstName.isNotEmpty) {
@@ -189,5 +198,61 @@ class AuthProvider extends BaseProvider {
       return _currentUser!.email[0].toUpperCase();
     }
     return 'U';
+  }
+
+  /// Login with Google
+  Future<bool> loginWithGoogle() async {
+    final result = await executeApiOperation(
+      () => _authRepository.loginWithGoogle(),
+      operationName: 'google_login',
+    );
+
+    if (result != null) {
+      _setAuthState(result);
+      return true;
+    }
+    return false;
+  }
+
+  /// Register with Google
+  Future<bool> registerWithGoogle() async {
+    final result = await executeApiOperation(
+      () => _authRepository.registerWithGoogle(),
+      operationName: 'google_register',
+    );
+
+    if (result != null) {
+      _setAuthState(result);
+      return true;
+    }
+    return false;
+  }
+
+  /// Silent Google Sign-In (for auto-login)
+  Future<bool> silentGoogleSignIn() async {
+    final result = await executeApiOperation(
+      () => _authRepository.silentGoogleSignIn(),
+      operationName: 'silent_google_signin',
+      showLoading: false,
+    );
+
+    if (result != null) {
+      _setAuthState(result);
+      return true;
+    }
+    return false;
+  }
+
+  /// Sign out from Google
+  Future<void> signOutGoogle() async {
+    await executeApiOperation(
+      () async {
+        await _authRepository.signOutGoogle();
+        return const Success(null); // Return Success for void operations
+      },
+      operationName: 'google_signout',
+    );
+
+    _clearAuthState();
   }
 }

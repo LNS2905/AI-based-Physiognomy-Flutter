@@ -6,6 +6,7 @@ import '../../features/splash/presentation/pages/splash_page.dart';
 import '../../features/welcome/presentation/pages/welcome_page.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/signup_page.dart';
+import '../../features/auth/presentation/pages/google_signin_test_page.dart';
 import '../../features/survey/presentation/pages/survey_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/face_scan/presentation/pages/face_scan_page.dart';
@@ -55,6 +56,13 @@ class AppRouter {
         path: AppConstants.signupRoute,
         name: 'signup',
         builder: (context, state) => const SignUpPage(),
+      ),
+
+      // Google Sign-In Test Route
+      GoRoute(
+        path: '/google-signin-test',
+        name: 'google-signin-test',
+        builder: (context, state) => const GoogleSignInTestPage(),
       ),
 
       // Survey Route

@@ -50,5 +50,18 @@
 	<string>This app needs access to camera for face scanning and physiognomy analysis.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>This app needs access to photo library to save captured images for analysis.</string>
+
+	<!-- Google Sign-In URL Schemes -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.physiognomy.app.aiPhysiognomy</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.physiognomy.app.aiPhysiognomy</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>

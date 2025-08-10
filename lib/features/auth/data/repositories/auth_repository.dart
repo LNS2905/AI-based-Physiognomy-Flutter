@@ -5,15 +5,21 @@ import '../../../../core/constants/app_constants.dart';
 import '../../../../core/errors/exceptions.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/utils/logger.dart';
+import '../../../../core/services/google_sign_in_service.dart';
+import '../../../../core/services/logout_service.dart';
 import '../models/auth_response_model.dart';
 import '../models/user_model.dart';
 
 /// Authentication repository
 class AuthRepository {
   final HttpService _httpService;
+  final GoogleSignInService _googleSignInService;
 
-  AuthRepository({HttpService? httpService})
-      : _httpService = httpService ?? HttpService();
+  AuthRepository({
+    HttpService? httpService,
+    GoogleSignInService? googleSignInService,
+  })  : _httpService = httpService ?? HttpService(),
+        _googleSignInService = googleSignInService ?? GoogleSignInService();
 
   /// Login with email and password
   Future<ApiResult<AuthResponseModel>> login({
@@ -112,16 +118,20 @@ class AuthRepository {
     try {
       // Call logout endpoint if needed
       // await _httpService.post('auth/logout');
-      
-      // Clear stored tokens
-      await _clearAuthTokens();
-      
+
+      // Perform complete logout using LogoutService
+      await LogoutService.performCompleteLogout();
+
       AppLogger.info('User logged out successfully');
       return const Success(null);
     } catch (e) {
       AppLogger.error('Logout failed', e);
-      // Even if logout fails, clear local tokens
-      await _clearAuthTokens();
+      // Even if logout fails, try to clear local data
+      try {
+        await LogoutService.clearAuthDataOnly();
+      } catch (clearError) {
+        AppLogger.error('Failed to clear auth data during logout error', clearError);
+      }
       return Error(UnknownFailure(
         message: 'Đăng xuất hoàn tất với lỗi',
         code: 'LOGOUT_ERROR',
@@ -233,5 +243,139 @@ class AuthRepository {
     await StorageService.removeSecure(AppConstants.accessTokenKey);
     await StorageService.removeSecure(AppConstants.refreshTokenKey);
     await StorageService.remove(AppConstants.userDataKey);
+  }
+
+  /// Login with Google
+  Future<ApiResult<AuthResponseModel>> loginWithGoogle() async {
+    try {
+      AppLogger.info('Starting Google Sign-In authentication');
+
+      // Sign in with Google
+      final googleResult = await _googleSignInService.signInWithGoogle();
+
+      // Send Google auth data to backend
+      final response = await _httpService.post(
+        'auth/google',
+        body: googleResult.toApiMap(),
+      );
+
+      final authResponse = AuthResponseModel.fromJson(response);
+
+      // Store tokens securely
+      await _storeAuthTokens(authResponse);
+
+      AppLogger.info('Google Sign-In completed successfully');
+      return Success(authResponse);
+
+    } on AuthException catch (e) {
+      AppLogger.error('Google Sign-In failed: Authentication error', e);
+      return Error(AuthFailure(message: e.message, code: e.code));
+    } on NetworkException catch (e) {
+      AppLogger.error('Google Sign-In failed: Network error', e);
+      return Error(NetworkFailure(message: e.message, code: e.code));
+    } on ServerException catch (e) {
+      AppLogger.error('Google Sign-In failed: Server error', e);
+      return Error(ServerFailure(
+        message: e.message,
+        statusCode: e.statusCode,
+        code: e.code,
+      ));
+    } catch (e) {
+      AppLogger.error('Google Sign-In failed: Unknown error', e);
+      return Error(UnknownFailure(
+        message: 'Đã xảy ra lỗi không mong muốn trong quá trình đăng nhập Google',
+        code: 'GOOGLE_SIGN_IN_ERROR',
+      ));
+    }
+  }
+
+  /// Register with Google (uses same endpoint as login)
+  Future<ApiResult<AuthResponseModel>> registerWithGoogle() async {
+    try {
+      AppLogger.info('Starting Google Sign-Up authentication');
+
+      // Sign in with Google
+      final googleResult = await _googleSignInService.signInWithGoogle();
+
+      // Send Google auth data to backend (same endpoint as login)
+      final response = await _httpService.post(
+        'auth/google',
+        body: googleResult.toApiMap(),
+      );
+
+      final authResponse = AuthResponseModel.fromJson(response);
+
+      // Store tokens securely
+      await _storeAuthTokens(authResponse);
+
+      AppLogger.info('Google Sign-Up completed successfully');
+      return Success(authResponse);
+
+    } on AuthException catch (e) {
+      AppLogger.error('Google Sign-Up failed: Authentication error', e);
+      return Error(AuthFailure(message: e.message, code: e.code));
+    } on NetworkException catch (e) {
+      AppLogger.error('Google Sign-Up failed: Network error', e);
+      return Error(NetworkFailure(message: e.message, code: e.code));
+    } on ServerException catch (e) {
+      AppLogger.error('Google Sign-Up failed: Server error', e);
+      return Error(ServerFailure(
+        message: e.message,
+        statusCode: e.statusCode,
+        code: e.code,
+      ));
+    } catch (e) {
+      AppLogger.error('Google Sign-Up failed: Unknown error', e);
+      return Error(UnknownFailure(
+        message: 'Đã xảy ra lỗi không mong muốn trong quá trình đăng ký Google',
+        code: 'GOOGLE_SIGN_UP_ERROR',
+      ));
+    }
+  }
+
+  /// Silent Google Sign-In (for auto-login)
+  Future<ApiResult<AuthResponseModel?>> silentGoogleSignIn() async {
+    try {
+      AppLogger.info('Attempting silent Google Sign-In');
+
+      final googleResult = await _googleSignInService.silentSignIn();
+
+      if (googleResult == null) {
+        AppLogger.info('No previous Google Sign-In found');
+        return const Success(null);
+      }
+
+      // Authenticate with backend using same endpoint
+      final response = await _httpService.post(
+        'auth/google',
+        body: googleResult.toApiMap(),
+      );
+
+      final authResponse = AuthResponseModel.fromJson(response);
+
+      // Store tokens securely
+      await _storeAuthTokens(authResponse);
+
+      AppLogger.info('Silent Google Sign-In completed successfully');
+      return Success(authResponse);
+
+    } catch (e) {
+      AppLogger.warning('Silent Google Sign-In failed', e);
+      return const Success(null);
+    }
+  }
+
+  /// Sign out from Google
+  Future<void> signOutGoogle() async {
+    try {
+      await _googleSignInService.signOut();
+      AppLogger.info('Google Sign-Out completed');
+    } catch (e) {
+      AppLogger.error('Google Sign-Out failed', e);
+      throw AuthException(
+        message: 'Đăng xuất Google thất bại: ${e.toString()}',
+        code: 'GOOGLE_SIGN_OUT_ERROR',
+      );
+    }
   }
 }

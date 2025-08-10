@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "353105233475",
+    "project_id": "eggo123",
+    "storage_bucket": "eggo123.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:353105233475:android:d1e41d91fa7230524676f6",
+        "android_client_info": {
+          "package_name": "com.physiognomy.app.ai_physiognomy"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCOvoMOSYJ9_1lkQtZl7UqNdQ1ZZcxK8kM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/bagua_logo.dart';
+import '../providers/auth_provider.dart';
 
 /// Login page that matches the Figma design
 class LoginPage extends StatefulWidget {
@@ -535,14 +537,33 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  void _handleGoogleLogin(BuildContext context) {
-    // TODO: Implement Google login
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Đăng nhập Google sẽ được triển khai'),
-        backgroundColor: AppColors.info,
-      ),
-    );
+  void _handleGoogleLogin(BuildContext context) async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+
+    try {
+      final success = await authProvider.loginWithGoogle();
+
+      if (success && mounted) {
+        // Navigate to home after successful login
+        context.go('/home');
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Đăng nhập Google thành công!'),
+            backgroundColor: AppColors.success,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Đăng nhập Google thất bại: ${e.toString()}'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
   }
 
   void _handleAppleLogin(BuildContext context) {
