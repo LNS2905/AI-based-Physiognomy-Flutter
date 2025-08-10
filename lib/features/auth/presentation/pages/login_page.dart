@@ -16,13 +16,13 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
+  final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isPasswordVisible = false;
 
   @override
   void dispose() {
-    _emailController.dispose();
+    _usernameController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
@@ -193,7 +193,7 @@ class _LoginPageState extends State<LoginPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Email field
+        // Email field (used as username for new backend)
         const Text(
           'Email',
           style: TextStyle(
@@ -213,7 +213,7 @@ class _LoginPageState extends State<LoginPage> {
             borderRadius: BorderRadius.circular(8),
           ),
           child: TextFormField(
-            controller: _emailController,
+            controller: _usernameController,
             keyboardType: TextInputType.emailAddress,
             style: const TextStyle(
               fontFamily: 'Arial',
@@ -236,7 +236,8 @@ class _LoginPageState extends State<LoginPage> {
               if (value == null || value.isEmpty) {
                 return 'Vui lòng nhập email của bạn';
               }
-              if (!RegExp(AppConstants.emailPattern).hasMatch(value)) {
+              // Basic email validation
+              if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
                 return 'Vui lòng nhập email hợp lệ';
               }
               return null;
@@ -576,19 +577,32 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  void _handleLogin() {
+  void _handleLogin() async {
     if (_formKey.currentState?.validate() ?? false) {
-      // TODO: Implement actual login logic with AuthProvider
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Chức năng đăng nhập sẽ được triển khai'),
-          backgroundColor: AppColors.info,
-        ),
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+
+      final success = await authProvider.login(
+        username: _usernameController.text.trim(),
+        password: _passwordController.text,
       );
 
-      // Navigate to survey after successful login (for new users) or home (for returning users)
-      // For demo, navigate to survey
-      context.push('/survey');
+      if (success && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Đăng nhập thành công!'),
+            backgroundColor: AppColors.success,
+          ),
+        );
+        // Navigate to home after successful login
+        context.go('/home');
+      } else if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(authProvider.errorMessage ?? 'Đăng nhập thất bại'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
     }
   }
 }

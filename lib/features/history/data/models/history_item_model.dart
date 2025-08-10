@@ -2,7 +2,6 @@ import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 import '../../../face_scan/data/models/cloudinary_analysis_response_model.dart';
 import '../../../palm_scan/data/models/palm_analysis_response_model.dart';
-import '../../../ai_conversation/data/models/conversation_model.dart';
 
 part 'history_item_model.g.dart';
 

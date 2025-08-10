@@ -391,14 +391,7 @@ class _FaceAnalysisHistoryDetailPageState extends State<FaceAnalysisHistoryDetai
             const SizedBox(height: 8),
           ],
 
-          if (analysis?.analysisResult?.face?.proportionality != null) ...[
-            _buildAnalysisItem(
-              'Điểm hài hòa',
-              '${((analysis!.analysisResult!.face!.proportionality!.overallHarmonyScore ?? 0) * 100).toStringAsFixed(1)}/100',
-              'Đánh giá tổng thể về tỷ lệ khuôn mặt',
-            ),
-            const SizedBox(height: 8),
-          ],
+
 
           if (analysis?.result != null) ...[
             _buildAnalysisItem(

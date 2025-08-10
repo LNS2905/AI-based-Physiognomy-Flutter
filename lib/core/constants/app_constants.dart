@@ -4,23 +4,35 @@ class AppConstants {
   static const String appName = 'Ứng dụng Tướng học AI';
   static const String appVersion = '1.0.0';
   
-  // API Configuration
-  static const String baseUrl = 'https://inspired-bear-emerging.ngrok-free.app';
+  // Old Backend API Configuration (Face/Palm Analysis, Chat)
+  static const String oldBackendBaseUrl = 'https://inspired-bear-emerging.ngrok-free.app';
+
+  // New Backend API Configuration (Auth, User Management from OpenAPI docs)
+  static const String baseUrl = 'https://ai-based-physiognomy-backend.onrender.com';
   static const String apiVersion = 'v1';
 
-  // Face Analysis API Configuration
+  // Authentication API Endpoints (New Backend - OpenAPI docs)
+  static const String loginEndpoint = 'auth/user';
+  static const String googleLoginEndpoint = 'auth/google';
+  static const String getCurrentUserEndpoint = 'auth/me';
+
+  // User Management API Endpoints (New Backend - OpenAPI docs)
+  static const String signupEndpoint = 'users/signUp';
+  static const String updateProfileEndpoint = 'users/me';
+
+  // Face Analysis API Configuration (Old Backend)
   static const String faceAnalysisApiUrl = 'analyze-face-from-cloudinary/';
 
-  // Palm Analysis API Configuration
+  // Palm Analysis API Configuration (Old Backend)
   static const String palmAnalysisApiUrl = 'analyze-palm-cloudinary/';
 
   static const Duration requestTimeout = Duration(seconds: 120); // Increased for Cloudinary processing
   static const Duration connectTimeout = Duration(seconds: 15);
 
   // Cloudinary Configuration
-  static const String cloudinaryCloudName = 'dd0wymyqj';
-  static const String cloudinaryApiKey = '389718786139835';
-  static const String cloudinaryApiSecret = 'aS_7wWncQjOLpKRKnHEd0_dr07M';
+  static const String cloudinaryCloudName = 'dsfmzrwc1';
+  static const String cloudinaryApiKey = '595277418892966';
+  static const String cloudinaryApiSecret = 'qvNpRQG2NDF9nYeYhAg7bF_-lqo';
   static const String cloudinaryUploadFolder = 'physiognomy_analysis';
   
   // Storage Keys

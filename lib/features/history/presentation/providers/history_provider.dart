@@ -29,6 +29,7 @@ class HistoryProvider extends BaseProvider {
 
   // Error handling
   String? _errorMessage;
+  @override
   String? get errorMessage => _errorMessage;
 
   void setError(String message) {
@@ -37,6 +38,7 @@ class HistoryProvider extends BaseProvider {
     notifyListeners();
   }
 
+  @override
   void clearError() {
     _errorMessage = null;
     notifyListeners();

@@ -2,6 +2,13 @@
 """
 Script để upload ảnh khuôn mặt lên Cloudinary và tạo body request cho face analysis API
 Sử dụng: python upload_face_image.py
+
+UPDATED VALIDATION LOGIC:
+- API now validates harmony scores < 0.45 and returns error for photo quality
+- Error message changed from "lỗi điểm hài hòa" to "Ảnh chụp chưa chuẩn, vui lòng chụp lại"
+- Client implements retry logic with user guidance for photo improvement
+- Harmony score display removed from UI while keeping internal validation
+- Score descriptions optimized to show only "Cao" and "Trung bình" levels
 """
 
 import os
@@ -18,7 +25,7 @@ CLOUDINARY_API_KEY = '389718786139835'
 CLOUDINARY_API_SECRET = 'aS_7wWncQjOLpKRKnHEd0_dr07M'
 UPLOAD_FOLDER = 'physiognomy_analysis'
 
-# API endpoint
+# API endpoint - Server URL (không phải Colab)
 FACE_ANALYSIS_API_URL = 'https://inspired-bear-emerging.ngrok-free.app/analyze-face-from-cloudinary/'
 
 def generate_signature(params_to_sign, api_secret):
@@ -144,7 +151,7 @@ def main():
         print('🚀 Bắt đầu xử lý ảnh khuôn mặt...')
         
         # Đường dẫn đến file ảnh
-        image_path = 'small.jpg'
+        image_path = 'khuon-mat-hinh-chu-nhat.jpg'
         
         # Kiểm tra file
         if not os.path.exists(image_path):

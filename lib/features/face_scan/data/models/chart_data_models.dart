@@ -92,29 +92,26 @@ class ChartDataProcessor {
 
     return harmonyScores.entries.map((entry) {
       final score = entry.value;
+      // Convert to 0-100 scale if needed
+      final normalizedScore = score > 1 ? score : score * 100;
       Color color;
       String description;
 
-      if (score >= 80) {
+      // Optimized scoring: show "Cao", "Khá", "Trung bình"
+      if (normalizedScore >= 70) {
         color = const Color(0xFF4CAF50); // Green
-        description = 'Xuất sắc';
-      } else if (score >= 60) {
+        description = 'Cao';
+      } else if (normalizedScore >= 50) {
         color = const Color(0xFF8BC34A); // Light Green
-        description = 'Tốt';
-      } else if (score >= 40) {
-        color = const Color(0xFFFF9800); // Orange
-        description = 'Trung bình';
-      } else if (score >= 20) {
-        color = const Color(0xFFFF5722); // Deep Orange
-        description = 'Dưới trung bình';
+        description = 'Khá';
       } else {
-        color = const Color(0xFFF44336); // Red
-        description = 'Kém';
+        color = const Color(0xFFFF9800); // Orange
+        description = 'Trung bình'; // Round up all lower scores
       }
 
       return HarmonyScoreData(
         scoreName: entry.key,
-        score: score,
+        score: normalizedScore,
         color: color,
         description: description,
       );
@@ -138,21 +135,23 @@ class ChartDataProcessor {
     }).toList();
   }
 
-  /// Get color for score value
+  /// Get color for score value - optimized to show only positive colors
   static Color getScoreColor(double score) {
-    if (score >= 80) return const Color(0xFF4CAF50); // Green
-    if (score >= 60) return const Color(0xFF8BC34A); // Light Green
-    if (score >= 40) return const Color(0xFFFF9800); // Orange
-    if (score >= 20) return const Color(0xFFFF5722); // Deep Orange
-    return const Color(0xFFF44336); // Red
+    // Convert to 0-100 scale if needed
+    final normalizedScore = score > 1 ? score : score * 100;
+
+    if (normalizedScore >= 70) return const Color(0xFF4CAF50); // Green for "Cao"
+    if (normalizedScore >= 50) return const Color(0xFF8BC34A); // Light Green for "Khá"
+    return const Color(0xFFFF9800); // Orange for "Trung bình"
   }
 
-  /// Get description for score value
+  /// Get description for score value - optimized to show only positive levels
   static String getScoreDescription(double score) {
-    if (score >= 80) return 'Xuất sắc';
-    if (score >= 60) return 'Tốt';
-    if (score >= 40) return 'Trung bình';
-    if (score >= 20) return 'Dưới trung bình';
-    return 'Kém';
+    // Convert to 0-100 scale if needed
+    final normalizedScore = score > 1 ? score : score * 100;
+
+    if (normalizedScore >= 70) return 'Cao';
+    if (normalizedScore >= 50) return 'Khá';
+    return 'Trung bình'; // Round up all scores below 50 to "Trung bình"
   }
 }

@@ -1,9 +1,11 @@
 import 'dart:io';
+import 'package:flutter/material.dart';
 import '../../../../core/providers/base_provider.dart';
 import '../../../../core/utils/logger.dart';
+import '../../../../core/utils/error_handler.dart';
+import '../../../../core/errors/exceptions.dart';
 import '../../../../core/services/camera_service.dart';
 import '../../../../core/services/image_picker_service.dart';
-import '../../../../core/enums/loading_state.dart';
 import '../../../../core/network/api_result.dart';
 import '../../data/models/face_scan_request_model.dart';
 import '../../data/models/face_scan_response_model.dart';
@@ -30,6 +32,10 @@ class FaceScanProvider extends BaseProvider {
   bool _isCameraActive = false;
   bool _isCameraInitialized = false;
   String _selectedTab = 'face_scan'; // face_scan, upload_photo, user_guide
+
+  // Photo quality retry logic
+  int _photoQualityRetryCount = 0;
+  static const int _maxPhotoQualityRetries = 3;
 
   // Palm analysis state
   PalmAnalysisResponseModel? _currentPalmResult;
@@ -291,7 +297,7 @@ class FaceScanProvider extends BaseProvider {
   }
 
   /// Pick image from gallery and start analysis
-  Future<bool> pickImageAndAnalyze() async {
+  Future<bool> pickImageAndAnalyze({BuildContext? context}) async {
     try {
       AppLogger.info('Starting image selection from gallery');
 
@@ -318,6 +324,13 @@ class FaceScanProvider extends BaseProvider {
           if (result is Success<CloudinaryAnalysisResponseModel>) {
             return result.data;
           } else {
+            // Check if it's a validation error (photo quality or face detection)
+            if (result.failure?.code == 'PHOTO_QUALITY_LOW' || result.failure?.code == 'FACE_DETECTION_FAILED') {
+              throw ValidationException(
+                message: result.failure!.message,
+                code: result.failure!.code,
+              );
+            }
             throw Exception('Face analysis failed: ${result.failure?.message ?? 'Unknown error'}');
           }
         },
@@ -332,10 +345,97 @@ class FaceScanProvider extends BaseProvider {
       );
 
       return result != null;
+    } on ValidationException catch (e) {
+      AppLogger.error('ValidationException caught: $e');
+      AppLogger.info('🔍 ValidationException details:');
+      AppLogger.info('  - message: ${e.message}');
+      AppLogger.info('  - code: ${e.code}');
+
+      if (context != null) {
+        if (e.code == 'PHOTO_QUALITY_LOW') {
+          AppLogger.info('🔄 Handling photo quality error with retry logic');
+          return await _handlePhotoQualityError(context);
+        } else if (e.code == 'FACE_DETECTION_FAILED') {
+          AppLogger.info('🔄 Handling face detection error with retry logic');
+          return await _handleFaceDetectionError(context);
+        }
+      }
+
+      return false;
     } catch (e) {
       AppLogger.error('Failed to pick image and analyze', e);
+      AppLogger.info('🔍 Exception type: ${e.runtimeType}');
+
+      // Check if the exception message contains validation error info
+      final errorMessage = e.toString().toLowerCase();
+      if (errorMessage.contains('ảnh chụp chưa chuẩn') && context != null) {
+        AppLogger.info('🔄 Detected photo quality error from exception message');
+        return await _handlePhotoQualityError(context);
+      } else if (errorMessage.contains('chụp ảnh chưa chính xác') && context != null) {
+        AppLogger.info('🔄 Detected face detection error from exception message');
+        return await _handleFaceDetectionError(context);
+      }
+
       return false;
     }
+  }
+
+  /// Handle photo quality error with retry logic
+  Future<bool> _handlePhotoQualityError(BuildContext context) async {
+    _photoQualityRetryCount++;
+
+    // Show error dialog with guidance
+    final shouldRetry = await ErrorHandler.showPhotoQualityErrorDialog(
+      context,
+      retryCount: _photoQualityRetryCount,
+      maxRetries: _maxPhotoQualityRetries,
+    );
+
+    if (shouldRetry && _photoQualityRetryCount <= _maxPhotoQualityRetries) {
+      // Reset selected image and try again
+      _selectedImagePath = null;
+      notifyListeners();
+      return await pickImageAndAnalyze(context: context);
+    } else {
+      // Reset retry counter for next attempt
+      _photoQualityRetryCount = 0;
+      return false;
+    }
+  }
+
+  /// Handle face detection error with retry logic
+  Future<bool> _handleFaceDetectionError(BuildContext context) async {
+    _photoQualityRetryCount++;
+
+    // Show error dialog with face detection guidance
+    final shouldRetry = await ErrorHandler.showFaceDetectionErrorDialog(
+      context,
+      retryCount: _photoQualityRetryCount,
+      maxRetries: _maxPhotoQualityRetries,
+    );
+
+    if (shouldRetry && _photoQualityRetryCount <= _maxPhotoQualityRetries) {
+      // Reset selected image and try again
+      _selectedImagePath = null;
+      notifyListeners();
+      return await pickImageAndAnalyze(context: context);
+    } else {
+      // Reset retry counter for next attempt
+      _photoQualityRetryCount = 0;
+      return false;
+    }
+  }
+
+  /// Reset photo quality retry counter
+  void resetPhotoQualityRetryCounter() {
+    _photoQualityRetryCount = 0;
+  }
+
+  /// Reset all error states and retry counters
+  void resetErrorState() {
+    _photoQualityRetryCount = 0;
+    resetLoadingState();
+    notifyListeners();
   }
 
   // Store analysis results
@@ -354,8 +454,7 @@ class FaceScanProvider extends BaseProvider {
   /// Get report image URL from Cloudinary analysis (using annotated image URL)
   String? get reportImageUrl => _currentCloudinaryResult?.annotatedImageUrl;
 
-  /// Get total harmony score from Cloudinary analysis
-  double? get totalHarmonyScore => _currentCloudinaryResult?.analysis?.analysisResult?.face?.proportionality?.overallHarmonyScore;
+
 
   /// Get analysis data from Cloudinary analysis
   CloudinaryAnalysisDataModel? get cloudinaryAnalysisData => _currentCloudinaryResult?.analysis;

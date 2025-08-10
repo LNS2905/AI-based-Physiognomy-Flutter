@@ -214,43 +214,77 @@ class _UserGuidePageState extends State<UserGuidePage>
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          _buildBottomNavItem(Icons.home_outlined, 'Trang chủ'),
-          _buildBottomNavItem(Icons.search_outlined, 'Tìm kiếm'),
-          _buildBottomNavItem(Icons.face_retouching_natural, 'Quét', isActive: true),
-          _buildBottomNavItem(Icons.person_outline, 'Hồ sơ'),
+          _buildBottomNavItem(
+            Icons.home_outlined,
+            'Trang chủ',
+            onTap: () => _navigateToHome(),
+          ),
+          _buildBottomNavItem(
+            Icons.search_outlined,
+            'Tìm kiếm',
+            onTap: () => _navigateToSearch(),
+          ),
+          _buildBottomNavItem(
+            Icons.face_retouching_natural,
+            'Quét',
+            isActive: true,
+            onTap: () => {}, // Current section, no action needed
+          ),
+          _buildBottomNavItem(
+            Icons.person_outline,
+            'Hồ sơ',
+            onTap: () => _navigateToProfile(),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildBottomNavItem(IconData icon, String label, {bool isActive = false}) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Container(
-          width: 30,
-          height: 30,
-          decoration: BoxDecoration(
-            color: isActive ? AppColors.primary : Colors.transparent,
-            borderRadius: BorderRadius.circular(15),
+  Widget _buildBottomNavItem(IconData icon, String label, {bool isActive = false, required VoidCallback onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            width: 30,
+            height: 30,
+            decoration: BoxDecoration(
+              color: isActive ? AppColors.primary : Colors.transparent,
+              borderRadius: BorderRadius.circular(15),
+            ),
+            child: Icon(
+              icon,
+              size: 20,
+              color: isActive ? Colors.white : AppColors.textSecondary,
+            ),
           ),
-          child: Icon(
-            icon,
-            size: 20,
-            color: isActive ? Colors.white : AppColors.textSecondary,
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w500,
+              color: isActive ? AppColors.primary : AppColors.textSecondary,
+            ),
           ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 10,
-            fontWeight: FontWeight.w500,
-            color: isActive ? AppColors.primary : AppColors.textSecondary,
-          ),
-        ),
-      ],
+        ],
+      ),
     );
+  }
+
+  // Navigation methods
+  void _navigateToHome() {
+    context.go('/home');
+  }
+
+  void _navigateToSearch() {
+    // Navigate to search/history page
+    context.push('/history');
+  }
+
+  void _navigateToProfile() {
+    context.push('/profile');
   }
 
   void _showStepDetails(BuildContext context, int stepNumber) {

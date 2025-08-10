@@ -62,8 +62,17 @@ class _PalmCameraScreenState extends State<PalmCameraScreen> {
 
   @override
   void dispose() {
+    AppLogger.info('Disposing PalmCameraScreen');
+
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-    _cameraService.stopCamera();
+
+    // Stop camera with proper error handling to prevent buffer leaks
+    _cameraService.stopCamera().then((_) {
+      AppLogger.info('Camera stopped successfully in PalmCameraScreen dispose');
+    }).catchError((error) {
+      AppLogger.error('Error stopping camera in palm dispose', error);
+    });
+
     super.dispose();
   }
 
@@ -204,16 +213,16 @@ class _PalmCameraScreenState extends State<PalmCameraScreen> {
       ),
       child: Center(
         child: SizedBox(
-          width: 320,
-          height: 400,
+          width: MediaQuery.of(context).size.width * 2.5,
+          height: MediaQuery.of(context).size.height * 1.6,
           child: Stack(
             children: [
               // Palm scanner image overlay
               Center(
                 child: Image.asset(
-                  'palm-scanner.png',
-                  width: 300,
-                  height: 380,
+                  'palm-scanner-scaleup.png',
+                  width: MediaQuery.of(context).size.width * 2.0,
+                  height: MediaQuery.of(context).size.height * 1.4,
                   fit: BoxFit.contain,
                 ),
               ),
@@ -221,17 +230,17 @@ class _PalmCameraScreenState extends State<PalmCameraScreen> {
               // Center guide text
               Center(
                 child: Container(
-                  margin: const EdgeInsets.only(top: 120),
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  margin: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.15),
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                   decoration: BoxDecoration(
                     color: Colors.black.withOpacity(0.7),
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(25),
                   ),
                   child: const Text(
                     '🖐️ Đặt bàn tay vào khung',
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 16,
+                      fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
                   ),

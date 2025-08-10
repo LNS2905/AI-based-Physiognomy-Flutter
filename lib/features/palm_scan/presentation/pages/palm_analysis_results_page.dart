@@ -63,7 +63,7 @@ class _PalmAnalysisResultsPageState extends State<PalmAnalysisResultsPage>
         ),
       ),
       body: SafeArea(
-        bottom: true, // Đảm bảo có safe area ở bottom
+        bottom: true,
         child: TabBarView(
           controller: _tabController,
           children: [
@@ -74,24 +74,6 @@ class _PalmAnalysisResultsPageState extends State<PalmAnalysisResultsPage>
       ),
     );
   }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
   Widget _buildInterpretationTab() {
     // Try to get interpretation data from the analysis response
@@ -120,20 +102,30 @@ class _PalmAnalysisResultsPageState extends State<PalmAnalysisResultsPage>
     }
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24), // Giảm padding bottom
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildInterpretationHeader(),
           const SizedBox(height: 16),
-          if (interpretationData.containsKey('summary_text'))
+          if (interpretationData.containsKey('summary_text') &&
+              interpretationData['summary_text'] != null &&
+              (interpretationData['summary_text'] as String).isNotEmpty)
             _buildSummarySection(interpretationData['summary_text'] as String),
-          const SizedBox(height: 16),
-          if (interpretationData.containsKey('detailed_analysis'))
+          if (interpretationData.containsKey('summary_text') &&
+              interpretationData['summary_text'] != null &&
+              (interpretationData['summary_text'] as String).isNotEmpty)
+            const SizedBox(height: 16),
+          if (interpretationData.containsKey('detailed_analysis') &&
+              interpretationData['detailed_analysis'] != null)
             _buildDetailedAnalysisSection(interpretationData['detailed_analysis'] as Map<String, dynamic>),
-          const SizedBox(height: 16),
-          if (interpretationData.containsKey('life_aspects'))
-            _buildLifeAspectsSection(interpretationData['life_aspects'] as Map<String, dynamic>),
+          // Ẩn phần "Các khía cạnh cuộc sống" vì trùng lập với "Phân tích chi tiết"
+          // if (interpretationData.containsKey('detailed_analysis') &&
+          //     interpretationData['detailed_analysis'] != null)
+          //   const SizedBox(height: 16),
+          // if (interpretationData.containsKey('life_aspects') &&
+          //     interpretationData['life_aspects'] != null)
+          //   _buildLifeAspectsSection(interpretationData['life_aspects'] as Map<String, dynamic>),
         ],
       ),
     );
@@ -221,6 +213,40 @@ class _PalmAnalysisResultsPageState extends State<PalmAnalysisResultsPage>
       'fate_line': {'name': 'Đường Vận Mệnh', 'icon': Icons.star, 'color': Colors.purple},
     };
 
+    // Lọc ra các đường vân tay có dữ liệu hợp lệ để tránh trùng lập
+    final validLines = <Widget>[];
+    final processedKeys = <String>{};
+
+    for (final lineKey in palmLineNames.keys) {
+      if (detailedAnalysis.containsKey(lineKey) && !processedKeys.contains(lineKey)) {
+        final lineAnalysis = detailedAnalysis[lineKey] as Map<String, dynamic>;
+
+        // Kiểm tra xem có dữ liệu thực sự không
+        if (lineAnalysis.isNotEmpty &&
+            (lineAnalysis.containsKey('pattern') || lineAnalysis.containsKey('meaning'))) {
+          validLines.add(
+            Column(
+              children: [
+                _buildLineAnalysisCard(
+                  palmLineNames[lineKey]!['name'] as String,
+                  lineAnalysis,
+                  palmLineNames[lineKey]!['icon'] as IconData,
+                  palmLineNames[lineKey]!['color'] as Color,
+                ),
+                const SizedBox(height: 12),
+              ],
+            ),
+          );
+          processedKeys.add(lineKey);
+        }
+      }
+    }
+
+    // Nếu không có dữ liệu hợp lệ, không hiển thị section này
+    if (validLines.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -233,67 +259,12 @@ class _PalmAnalysisResultsPageState extends State<PalmAnalysisResultsPage>
           ),
         ),
         const SizedBox(height: 12),
-        ...palmLineNames.keys.map((lineKey) {
-          if (detailedAnalysis.containsKey(lineKey)) {
-            final lineAnalysis = detailedAnalysis[lineKey] as Map<String, dynamic>;
-            return Column(
-              children: [
-                _buildLineAnalysisCard(
-                  palmLineNames[lineKey]!['name'] as String,
-                  lineAnalysis,
-                  palmLineNames[lineKey]!['icon'] as IconData,
-                  palmLineNames[lineKey]!['color'] as Color,
-                ),
-                const SizedBox(height: 12),
-              ],
-            );
-          }
-          return const SizedBox.shrink();
-        }).toList(),
+        ...validLines,
       ],
     );
   }
 
   Widget _buildLineAnalysisCard(String title, Map<String, dynamic> analysis, IconData icon, Color color) {
-    // Try to get confidence from confidence_scores first, then fall back to analysis confidence
-    double? confidence;
-
-    // Get the line key from title
-    String lineKey = '';
-    switch (title) {
-      case 'Đường Sinh Mệnh':
-        lineKey = 'life_line';
-        break;
-      case 'Đường Trí Tuệ':
-        lineKey = 'head_line';
-        break;
-      case 'Đường Tình Cảm':
-        lineKey = 'heart_line';
-        break;
-      case 'Đường Vận Mệnh':
-        lineKey = 'fate_line';
-        break;
-    }
-
-    // Try to get confidence from the parent interpretation data
-    final analysisData = widget.palmResult.analysis;
-    if (analysisData?.palmDetection?.handsData != null &&
-        analysisData!.palmDetection!.handsData!.isNotEmpty) {
-      for (var handData in analysisData.palmDetection!.handsData!) {
-        final handJson = handData.toJson();
-        if (handJson.containsKey('confidence_scores')) {
-          final confidenceScores = handJson['confidence_scores'] as Map<String, dynamic>?;
-          if (confidenceScores != null && confidenceScores.containsKey(lineKey)) {
-            confidence = (confidenceScores[lineKey] as num?)?.toDouble();
-            break;
-          }
-        }
-      }
-    }
-
-    // Fall back to analysis confidence if not found
-    confidence ??= (analysis['confidence'] as num?)?.toDouble();
-
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
@@ -333,8 +304,6 @@ class _PalmAnalysisResultsPageState extends State<PalmAnalysisResultsPage>
             _buildAnalysisItem('Đặc điểm', analysis['pattern'] as String, Icons.pattern),
           if (analysis.containsKey('meaning'))
             _buildAnalysisItem('Ý nghĩa', analysis['meaning'] as String, Icons.lightbulb),
-          if (confidence != null)
-            _buildAnalysisItem('Độ tin cậy', '${(confidence * 100).toStringAsFixed(1)}%', Icons.verified),
         ],
       ),
     );
@@ -385,6 +354,39 @@ class _PalmAnalysisResultsPageState extends State<PalmAnalysisResultsPage>
       'personality': {'name': 'Tính Cách', 'icon': Icons.psychology, 'color': Colors.blue},
     };
 
+    // Lọc ra các khía cạnh có dữ liệu hợp lệ để tránh trùng lập
+    final validAspects = <Widget>[];
+    final processedKeys = <String>{};
+
+    for (final aspectKey in aspectNames.keys) {
+      if (lifeAspects.containsKey(aspectKey) && !processedKeys.contains(aspectKey)) {
+        final aspectData = lifeAspects[aspectKey] as List<dynamic>;
+
+        // Kiểm tra xem có dữ liệu thực sự không
+        if (aspectData.isNotEmpty) {
+          validAspects.add(
+            Column(
+              children: [
+                _buildLifeAspectCard(
+                  aspectNames[aspectKey]!['name'] as String,
+                  aspectData,
+                  aspectNames[aspectKey]!['icon'] as IconData,
+                  aspectNames[aspectKey]!['color'] as Color,
+                ),
+                const SizedBox(height: 12),
+              ],
+            ),
+          );
+          processedKeys.add(aspectKey);
+        }
+      }
+    }
+
+    // Nếu không có dữ liệu hợp lệ, không hiển thị section này
+    if (validAspects.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -397,25 +399,7 @@ class _PalmAnalysisResultsPageState extends State<PalmAnalysisResultsPage>
           ),
         ),
         const SizedBox(height: 12),
-        ...aspectNames.keys.map((aspectKey) {
-          if (lifeAspects.containsKey(aspectKey)) {
-            final aspectData = lifeAspects[aspectKey] as List<dynamic>;
-            if (aspectData.isNotEmpty) {
-              return Column(
-                children: [
-                  _buildLifeAspectCard(
-                    aspectNames[aspectKey]!['name'] as String,
-                    aspectData,
-                    aspectNames[aspectKey]!['icon'] as IconData,
-                    aspectNames[aspectKey]!['color'] as Color,
-                  ),
-                  const SizedBox(height: 12),
-                ],
-              );
-            }
-          }
-          return const SizedBox.shrink();
-        }).toList(),
+        ...validAspects,
       ],
     );
   }
@@ -586,6 +570,4 @@ class _PalmAnalysisResultsPageState extends State<PalmAnalysisResultsPage>
       ),
     );
   }
-
-
 }
