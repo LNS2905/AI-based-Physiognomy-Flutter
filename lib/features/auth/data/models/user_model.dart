@@ -6,10 +6,13 @@ part 'user_model.g.dart';
 
 /// Helper function to convert id from JSON (can be int or String)
 String _idFromJson(dynamic value) {
+  print('DEBUG: _idFromJson received value: $value (type: ${value.runtimeType})');
   if (value is int) {
     return value.toString();
   } else if (value is String) {
     return value;
+  } else if (value == null) {
+    throw ArgumentError('ID must be int or String, got Null');
   } else {
     throw ArgumentError('ID must be int or String, got ${value.runtimeType}');
   }

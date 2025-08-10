@@ -4,21 +4,15 @@ import 'user_model.dart';
 
 part 'auth_response_model.g.dart';
 
-/// Authentication response model
+/// Authentication response model (only tokens from login)
 @JsonSerializable()
 class AuthResponseModel extends Equatable {
-  final String? accessToken;
-  final String? refreshToken;
-  final UserModel user;
-  final String tokenType;
-  final int? expiresIn;
+  final String accessToken;
+  final String refreshToken;
 
   const AuthResponseModel({
-    this.accessToken,
-    this.refreshToken,
-    required this.user,
-    this.tokenType = 'Bearer',
-    this.expiresIn,
+    required this.accessToken,
+    required this.refreshToken,
   });
 
   /// Create AuthResponseModel from JSON
@@ -29,30 +23,16 @@ class AuthResponseModel extends Equatable {
   Map<String, dynamic> toJson() => _$AuthResponseModelToJson(this);
 
   /// Get authorization header value
-  String? get authorizationHeader => accessToken != null ? '$tokenType $accessToken' : null;
-
-  /// Check if token is expired (with 5 minute buffer)
-  bool get isExpired {
-    if (expiresIn == null) return false;
-    final now = DateTime.now();
-    final expiryTime = now.add(Duration(seconds: expiresIn! - 300)); // 5 min buffer
-    return now.isAfter(expiryTime);
-  }
+  String get authorizationHeader => 'Bearer $accessToken';
 
   /// Copy with method
   AuthResponseModel copyWith({
     String? accessToken,
     String? refreshToken,
-    UserModel? user,
-    String? tokenType,
-    int? expiresIn,
   }) {
     return AuthResponseModel(
       accessToken: accessToken ?? this.accessToken,
       refreshToken: refreshToken ?? this.refreshToken,
-      user: user ?? this.user,
-      tokenType: tokenType ?? this.tokenType,
-      expiresIn: expiresIn ?? this.expiresIn,
     );
   }
 
@@ -60,8 +40,5 @@ class AuthResponseModel extends Equatable {
   List<Object?> get props => [
         accessToken,
         refreshToken,
-        user,
-        tokenType,
-        expiresIn,
       ];
 }

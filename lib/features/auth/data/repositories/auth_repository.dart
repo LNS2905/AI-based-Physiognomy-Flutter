@@ -35,11 +35,11 @@ class AuthRepository {
         },
       );
 
-      final authResponse = AuthResponseModel.fromJson(response);
-      
+      final authResponse = AuthResponseModel.fromJson(response['data']);
+
       // Store tokens securely
       await _storeAuthTokens(authResponse);
-      
+
       AppLogger.info('User logged in successfully');
       return Success(authResponse);
     } on AuthException catch (e) {
@@ -196,7 +196,16 @@ class AuthRepository {
         },
       );
 
-      final user = UserModel.fromJson(response);
+      // Debug: Log the response data structure
+      AppLogger.info('API Response: $response');
+      AppLogger.info('Response data: ${response['data']}');
+      AppLogger.info('Response data type: ${response['data'].runtimeType}');
+      if (response['data'] is Map<String, dynamic>) {
+        final data = response['data'] as Map<String, dynamic>;
+        AppLogger.info('ID field: ${data['id']} (type: ${data['id'].runtimeType})');
+      }
+
+      final user = UserModel.fromJson(response['data']);
       AppLogger.info('Current user retrieved successfully');
       return Success(user);
     } on AuthException catch (e) {
@@ -236,10 +245,7 @@ class AuthRepository {
         authResponse.refreshToken!,
       );
     }
-    await StorageService.store(
-      AppConstants.userDataKey,
-      authResponse.user.toJson(),
-    );
+    // User data will be stored separately when getCurrentUser is called
   }
 
   /// Clear authentication tokens
@@ -382,4 +388,6 @@ class AuthRepository {
       );
     }
   }
+
+
 }

@@ -56,14 +56,24 @@ class AuthProvider extends BaseProvider {
     required String username,
     required String password,
   }) async {
-    final result = await executeApiOperation(
+    final authResult = await executeApiOperation(
       () => _authRepository.login(email: username, password: password),
       operationName: 'login',
     );
 
-    if (result != null) {
-      _setAuthState(result);
-      return true;
+    if (authResult != null) {
+      // Login successful, now get user data
+      final userResult = await executeApiOperation(
+        () => _authRepository.getCurrentUser(),
+        operationName: 'get_current_user',
+      );
+
+      if (userResult != null) {
+        _currentUser = userResult;
+        _isAuthenticated = true;
+        notifyListeners();
+        return true;
+      }
     }
     return false;
   }
@@ -94,9 +104,18 @@ class AuthProvider extends BaseProvider {
         );
         return loginSuccess;
       } else {
-        // Old backend behavior - signup returns tokens
-        _setAuthState(result);
-        return true;
+        // Old backend behavior - signup returns tokens, get user data
+        final userResult = await executeApiOperation(
+          () => _authRepository.getCurrentUser(),
+          operationName: 'get_current_user_after_signup',
+        );
+
+        if (userResult != null) {
+          _currentUser = userResult;
+          _isAuthenticated = true;
+          notifyListeners();
+          return true;
+        }
       }
     }
     return false;
@@ -112,8 +131,18 @@ class AuthProvider extends BaseProvider {
     );
 
     if (result != null) {
-      _setAuthState(result);
-      return true;
+      // Google login successful, get user data
+      final userResult = await executeApiOperation(
+        () => _authRepository.getCurrentUser(),
+        operationName: 'get_current_user_after_google_login',
+      );
+
+      if (userResult != null) {
+        _currentUser = userResult;
+        _isAuthenticated = true;
+        notifyListeners();
+        return true;
+      }
     }
     return false;
   }
@@ -146,12 +175,23 @@ class AuthProvider extends BaseProvider {
     );
 
     if (result != null) {
-      _setAuthState(result);
-      return true;
+      // Refresh token successful, get updated user data
+      final userResult = await executeApiOperation(
+        () => _authRepository.getCurrentUser(),
+        operationName: 'get_current_user_after_refresh',
+      );
+
+      if (userResult != null) {
+        _currentUser = userResult;
+        _isAuthenticated = true;
+        notifyListeners();
+        return true;
+      }
     } else {
       _clearAuthState();
       return false;
     }
+    return false;
   }
 
   /// Update user profile
@@ -182,16 +222,7 @@ class AuthProvider extends BaseProvider {
   }
 
   /// Set authentication state
-  void _setAuthState(AuthResponseModel authResponse) {
-    _currentUser = authResponse.user;
-    _isAuthenticated = true;
-    AppLogger.logStateChange(
-      runtimeType.toString(),
-      'setAuthState',
-      'authenticated: ${authResponse.user.email}',
-    );
-    notifyListeners();
-  }
+
 
   /// Clear authentication state
   void _clearAuthState() {
@@ -241,8 +272,18 @@ class AuthProvider extends BaseProvider {
     );
 
     if (result != null) {
-      _setAuthState(result);
-      return true;
+      // Google register successful, get user data
+      final userResult = await executeApiOperation(
+        () => _authRepository.getCurrentUser(),
+        operationName: 'get_current_user_after_google_register',
+      );
+
+      if (userResult != null) {
+        _currentUser = userResult;
+        _isAuthenticated = true;
+        notifyListeners();
+        return true;
+      }
     }
     return false;
   }
@@ -256,8 +297,18 @@ class AuthProvider extends BaseProvider {
     );
 
     if (result != null) {
-      _setAuthState(result);
-      return true;
+      // Silent Google sign-in successful, get user data
+      final userResult = await executeApiOperation(
+        () => _authRepository.getCurrentUser(),
+        operationName: 'get_current_user_after_silent_google_signin',
+      );
+
+      if (userResult != null) {
+        _currentUser = userResult;
+        _isAuthenticated = true;
+        notifyListeners();
+        return true;
+      }
     }
     return false;
   }
