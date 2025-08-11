@@ -6,6 +6,9 @@ import '../../features/splash/presentation/pages/splash_page.dart';
 import '../../features/welcome/presentation/pages/welcome_page.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/signup_page.dart';
+import '../../features/auth/presentation/pages/forgot_password_page.dart';
+import '../../features/auth/presentation/pages/reset_password_page.dart';
+import '../../features/auth/presentation/pages/change_password_page.dart';
 import '../../features/auth/presentation/pages/google_signin_test_page.dart';
 import '../../features/survey/presentation/pages/survey_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
@@ -13,6 +16,7 @@ import '../../features/face_scan/presentation/pages/face_scan_page.dart';
 import '../../features/face_scan/presentation/pages/camera_screen.dart';
 import '../../features/palm_scan/presentation/pages/palm_scan_page.dart';
 import '../../features/palm_scan/presentation/pages/palm_camera_screen.dart';
+import '../../features/palm_scan/presentation/pages/palm_analysis_history_list_page.dart';
 import '../../features/news/presentation/pages/news_detail_page.dart';
 import '../../features/news/presentation/pages/news_list_page.dart';
 import '../../features/face_scan/presentation/pages/user_guide_page.dart';
@@ -28,7 +32,7 @@ import '../widgets/auth_guard.dart';
 /// Application router configuration using GoRouter
 class AppRouter {
   static final GoRouter _router = GoRouter(
-    initialLocation: AppConstants.homeRoute,
+    initialLocation: AppConstants.splashRoute,
     debugLogDiagnostics: true,
     observers: [NavigationObserver()],
     routes: [
@@ -67,6 +71,32 @@ class AppRouter {
         builder: (context, state) => const GoogleSignInTestPage(),
       ),
 
+      // Forgot Password Route
+      GoRoute(
+        path: '/forgot-password',
+        name: 'forgot-password',
+        builder: (context, state) => const ForgotPasswordPage(),
+      ),
+
+      // Reset Password Route
+      GoRoute(
+        path: '/reset-password',
+        name: 'reset-password',
+        builder: (context, state) {
+          final token = state.uri.queryParameters['token'] ?? '';
+          return ResetPasswordPage(token: token);
+        },
+      ),
+
+      // Change Password Route (requires authentication)
+      GoRoute(
+        path: '/change-password',
+        name: 'change-password',
+        builder: (context, state) => const ChangePasswordPage().withAuthGuard(
+          redirectRoute: AppConstants.introRoute,
+        ),
+      ),
+
       // New API Test Route
       GoRoute(
         path: '/new-api-test',
@@ -103,21 +133,27 @@ class AppRouter {
       GoRoute(
         path: AppConstants.homeRoute,
         name: 'home',
-        builder: (context, state) => const HomePage(),
+        builder: (context, state) => const HomePage().withAuthGuard(
+          redirectRoute: AppConstants.introRoute,
+        ),
       ),
 
       // Face Scanning Route
       GoRoute(
         path: AppConstants.faceScanningRoute,
         name: 'face-scanning',
-        builder: (context, state) => const FaceScanPage(),
+        builder: (context, state) => const FaceScanPage().withAuthGuard(
+          redirectRoute: AppConstants.introRoute,
+        ),
       ),
 
       // Palm Scanning Route
       GoRoute(
         path: AppConstants.palmScanningRoute,
         name: 'palm-scanning',
-        builder: (context, state) => const PalmScanPage(),
+        builder: (context, state) => const PalmScanPage().withAuthGuard(
+          redirectRoute: AppConstants.introRoute,
+        ),
       ),
 
       // User Guide Route
@@ -131,14 +167,27 @@ class AppRouter {
       GoRoute(
         path: AppConstants.cameraRoute,
         name: 'camera',
-        builder: (context, state) => const CameraScreen(),
+        builder: (context, state) => const CameraScreen().withAuthGuard(
+          redirectRoute: AppConstants.introRoute,
+        ),
       ),
 
       // Palm Camera Route
       GoRoute(
         path: AppConstants.palmCameraRoute,
         name: 'palm-camera',
-        builder: (context, state) => const PalmCameraScreen(),
+        builder: (context, state) => const PalmCameraScreen().withAuthGuard(
+          redirectRoute: AppConstants.introRoute,
+        ),
+      ),
+
+      // Palm Analysis History List Route
+      GoRoute(
+        path: '/palm-analysis-history',
+        name: 'palm-analysis-history',
+        builder: (context, state) => const PalmAnalysisHistoryListPage().withAuthGuard(
+          redirectRoute: AppConstants.introRoute,
+        ),
       ),
 
       // Result Route
@@ -172,7 +221,9 @@ class AppRouter {
         name: 'ai-conversation',
         builder: (context, state) {
           final conversationId = state.uri.queryParameters['id'];
-          return AIConversationPage(conversationId: conversationId);
+          return AIConversationPage(conversationId: conversationId).withAuthGuard(
+            redirectRoute: AppConstants.introRoute,
+          );
         },
       ),
 
@@ -197,7 +248,9 @@ class AppRouter {
       GoRoute(
         path: AppConstants.profileRoute,
         name: 'profile',
-        builder: (context, state) => const ProfilePage(),
+        builder: (context, state) => const ProfilePage().withAuthGuard(
+          redirectRoute: AppConstants.introRoute,
+        ),
       ),
 
       // History Route (Protected)
@@ -205,6 +258,7 @@ class AppRouter {
         path: AppConstants.historyRoute,
         name: 'history',
         builder: (context, state) => const HistoryPage().withAuthGuard(
+          redirectRoute: AppConstants.introRoute,
           loadingMessage: 'Đang tải lịch sử...',
         ),
       ),
@@ -215,7 +269,9 @@ class AppRouter {
         name: 'history-face-analysis-detail',
         builder: (context, state) {
           final historyId = state.pathParameters['historyId'] ?? '';
-          return FaceAnalysisHistoryDetailPage(historyId: historyId);
+          return FaceAnalysisHistoryDetailPage(historyId: historyId).withAuthGuard(
+            redirectRoute: AppConstants.introRoute,
+          );
         },
       ),
 
@@ -224,7 +280,9 @@ class AppRouter {
         name: 'history-palm-analysis-detail',
         builder: (context, state) {
           final historyId = state.pathParameters['historyId'] ?? '';
-          return PalmAnalysisHistoryDetailPage(historyId: historyId);
+          return PalmAnalysisHistoryDetailPage(historyId: historyId).withAuthGuard(
+            redirectRoute: AppConstants.introRoute,
+          );
         },
       ),
 
@@ -233,7 +291,9 @@ class AppRouter {
         name: 'history-chat-detail',
         builder: (context, state) {
           final historyId = state.pathParameters['historyId'] ?? '';
-          return ChatHistoryDetailPage(historyId: historyId);
+          return ChatHistoryDetailPage(historyId: historyId).withAuthGuard(
+            redirectRoute: AppConstants.introRoute,
+          );
         },
       ),
     ],
@@ -293,6 +353,10 @@ class AppRouter {
   }
   static void goToProfile() => _router.go(AppConstants.profileRoute);
   static void goToHistory() => _router.go(AppConstants.historyRoute);
+  static void goToPalmAnalysisHistory() => _router.go(AppConstants.palmAnalysisHistoryRoute);
+  static void goToForgotPassword() => _router.go('/forgot-password');
+  static void goToResetPassword(String token) => _router.go('/reset-password?token=$token');
+  static void goToChangePassword() => _router.go('/change-password');
 
   /// Push navigation methods
   static void pushWelcome() => _router.push(AppConstants.introRoute);
@@ -316,6 +380,10 @@ class AppRouter {
   }
   static void pushProfile() => _router.push(AppConstants.profileRoute);
   static void pushHistory() => _router.push(AppConstants.historyRoute);
+  static void pushPalmAnalysisHistory() => _router.push(AppConstants.palmAnalysisHistoryRoute);
+  static void pushForgotPassword() => _router.push('/forgot-password');
+  static void pushResetPassword(String token) => _router.push('/reset-password?token=$token');
+  static void pushChangePassword() => _router.push('/change-password');
 
   /// Go back
   static void goBack() {

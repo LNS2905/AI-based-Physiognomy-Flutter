@@ -364,14 +364,14 @@ class _SurveyPageState extends State<SurveyPage> {
 
   /// Complete survey and navigate
   void _completeSurvey(SurveyProvider surveyProvider) {
-    // TODO: Submit survey data to API
+    // Survey completed locally - no API submission needed
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Khảo sát đã hoàn thành thành công!'),
         backgroundColor: AppColors.success,
       ),
     );
-    
+
     // Navigate to home or next screen
     context.go(AppConstants.homeRoute);
   }

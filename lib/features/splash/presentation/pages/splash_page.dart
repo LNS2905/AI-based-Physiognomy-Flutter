@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import '../../../../core/constants/app_constants.dart';
+import '../../../../core/utils/logger.dart';
+import '../../../auth/presentation/providers/enhanced_auth_provider.dart';
 
 /// Splash screen page
 class SplashPage extends StatefulWidget {
@@ -18,14 +21,45 @@ class _SplashPageState extends State<SplashPage> {
   }
 
   Future<void> _initializeApp() async {
-    // Add initialization logic here
-    await Future.delayed(const Duration(seconds: 2));
+    try {
+      AppLogger.info('SplashPage: Starting app initialization');
 
-    // Navigate to appropriate screen based on app state
-    // This is where you would check if user is logged in, first time user, etc.
-    if (mounted) {
-      // Navigate to welcome screen for new users
-      context.go('/intro');
+      // Wait for minimum splash duration
+      await Future.delayed(const Duration(seconds: 2));
+
+      if (!mounted) return;
+
+      // Get auth provider
+      final authProvider = Provider.of<EnhancedAuthProvider>(context, listen: false);
+
+      // Initialize auth provider if not already initialized
+      if (!authProvider.hasInitialized) {
+        AppLogger.info('SplashPage: Initializing auth provider');
+        await authProvider.initializeAuth();
+      }
+
+      if (!mounted) return;
+
+      // Check authentication status
+      AppLogger.info('SplashPage: Checking authentication status');
+      final isAuthenticated = await authProvider.checkAuthStatus();
+
+      if (!mounted) return;
+
+      // Navigate based on authentication status
+      if (isAuthenticated) {
+        AppLogger.info('SplashPage: User is authenticated, navigating to home');
+        context.go(AppConstants.homeRoute);
+      } else {
+        AppLogger.info('SplashPage: User is not authenticated, navigating to welcome');
+        context.go(AppConstants.introRoute);
+      }
+    } catch (e) {
+      AppLogger.error('SplashPage: Error during initialization', e);
+      if (mounted) {
+        // On error, navigate to welcome screen as fallback
+        context.go(AppConstants.introRoute);
+      }
     }
   }
 

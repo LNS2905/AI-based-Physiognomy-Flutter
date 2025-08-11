@@ -101,23 +101,25 @@ class PalmAnalysisDto extends Equatable {
   Map<String, dynamic> toJson() => _$PalmAnalysisDtoToJson(this);
 }
 
-/// Interpretation DTO for palm analysis
+/// Interpretation DTO for palm analysis - Updated to match API requirement
 @JsonSerializable()
 class InterpretationDto extends Equatable {
-  final String category;
-  final String title;
-  final String description;
+  final String lineType;
+  final String pattern;
+  final String meaning;
+  final double lengthPx;
   final double confidence;
 
   const InterpretationDto({
-    required this.category,
-    required this.title,
-    required this.description,
+    required this.lineType,
+    required this.pattern,
+    required this.meaning,
+    required this.lengthPx,
     required this.confidence,
   });
 
   @override
-  List<Object?> get props => [category, title, description, confidence];
+  List<Object?> get props => [lineType, pattern, meaning, lengthPx, confidence];
 
   factory InterpretationDto.fromJson(Map<String, dynamic> json) =>
       _$InterpretationDtoFromJson(json);
@@ -125,23 +127,19 @@ class InterpretationDto extends Equatable {
   Map<String, dynamic> toJson() => _$InterpretationDtoToJson(this);
 }
 
-/// Life aspect DTO for palm analysis
+/// Life aspect DTO for palm analysis - Updated to match API requirement
 @JsonSerializable()
 class LifeAspectDto extends Equatable {
   final String aspect;
-  final String prediction;
-  final double score;
-  final String details;
+  final String content;
 
   const LifeAspectDto({
     required this.aspect,
-    required this.prediction,
-    required this.score,
-    required this.details,
+    required this.content,
   });
 
   @override
-  List<Object?> get props => [aspect, prediction, score, details];
+  List<Object?> get props => [aspect, content];
 
   factory LifeAspectDto.fromJson(Map<String, dynamic> json) =>
       _$LifeAspectDtoFromJson(json);

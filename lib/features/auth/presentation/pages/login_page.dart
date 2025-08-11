@@ -325,13 +325,7 @@ class _LoginPageState extends State<LoginPage> {
         Align(
           alignment: Alignment.centerRight,
           child: GestureDetector(
-            onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Tính năng quên mật khẩu sẽ sớm ra mắt'),
-                ),
-              );
-            },
+            onTap: () => context.go('/forgot-password'),
             child: const Text(
               'Quên mật khẩu?',
               style: TextStyle(

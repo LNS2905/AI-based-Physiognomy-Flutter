@@ -5,6 +5,7 @@ import '../../../../core/errors/failures.dart';
 import '../../../../core/utils/logger.dart';
 import '../../../face_scan/data/models/cloudinary_analysis_response_model.dart';
 import '../../../palm_scan/data/models/palm_analysis_response_model.dart';
+import '../../../palm_scan/data/models/palm_analysis_server_model.dart';
 import '../../../auth/presentation/providers/enhanced_auth_provider.dart';
 import '../models/history_item_model.dart';
 
@@ -121,30 +122,30 @@ class HistoryRepository {
       for (int i = 0; i < dataList.length; i++) {
         final item = dataList[i];
         try {
-          // Create PalmAnalysisResponseModel from API data
-          final analysisResult = PalmAnalysisResponseModel.fromJson(item);
+          // Parse server response using PalmAnalysisServerModel
+          final serverModel = PalmAnalysisServerModel.fromJson(item);
+          
+          // Convert server model to PalmAnalysisResponseModel for history display
+          final analysisResult = _convertServerModelToResponseModel(serverModel);
           
           // Create history item
           final historyItem = PalmAnalysisHistoryModel.fromAnalysis(
-            id: 'palm_${item['id'] ?? i}',
+            id: 'palm_${serverModel.id}',
             analysisResult: analysisResult,
-            originalImageUrl: item['originalImageUrl'] ?? '',
-            annotatedImageUrl: item['annotatedImageUrl'] ?? '',
-            comparisonImageUrl: item['comparisonImageUrl'] ?? '',
+            originalImageUrl: '',
+            annotatedImageUrl: serverModel.annotatedImage,
+            comparisonImageUrl: '',
             metadata: {
               'analysis_version': '1.0.0',
               'device_type': 'mobile',
               'api_source': true,
+              'server_id': serverModel.id,
             },
           );
 
           historyItems.add(historyItem.copyWith(
-            createdAt: item['createdAt'] != null 
-                ? DateTime.parse(item['createdAt']) 
-                : DateTime.now(),
-            updatedAt: item['updatedAt'] != null 
-                ? DateTime.parse(item['updatedAt']) 
-                : DateTime.now(),
+            createdAt: DateTime.parse(serverModel.createdAt),
+            updatedAt: DateTime.parse(serverModel.updatedAt),
           ));
         } catch (e) {
           AppLogger.warning('Failed to parse palm analysis item $i: $e');
@@ -173,6 +174,44 @@ class HistoryRepository {
         code: 'PALM_ANALYSIS_HISTORY_ERROR',
       ));
     }
+  }
+
+  /// Convert PalmAnalysisServerModel to PalmAnalysisResponseModel for display
+  PalmAnalysisResponseModel _convertServerModelToResponseModel(PalmAnalysisServerModel serverModel) {
+    return PalmAnalysisResponseModel(
+      status: 'success',
+      message: 'Palm analysis completed',
+      userId: serverModel.userId.toString(),
+      processedAt: serverModel.createdAt,
+      handsDetected: serverModel.palmLinesDetected,
+      processingTime: 0.0,
+      analysisType: 'palm_analysis',
+      annotatedImageUrl: serverModel.annotatedImage,
+      comparisonImageUrl: null,
+      analysis: PalmAnalysisDataModel(
+        handsDetected: serverModel.palmLinesDetected,
+        handsData: [],
+        measurements: {},
+        palmLines: {
+          'heart': serverModel.detectedHeartLine.toDouble(),
+          'head': serverModel.detectedHeadLine.toDouble(),
+          'life': serverModel.detectedLifeLine.toDouble(),
+          'fate': serverModel.detectedFateLine.toDouble(),
+        },
+        fingerAnalysis: {},
+      ),
+      measurementsSummary: MeasurementsSummaryModel(
+        averagePalmWidth: serverModel.imageWidth,
+        averageHandLength: serverModel.imageHeight,
+        totalHands: serverModel.palmLinesDetected,
+        leftHands: 0,
+        rightHands: 0,
+        palmTypes: [],
+        confidenceScores: {
+          'overall': 0.8,
+        },
+      ),
+    );
   }
 
   /// Get all history items for current user (combines facial and palm analysis)

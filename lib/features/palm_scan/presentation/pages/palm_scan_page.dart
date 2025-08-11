@@ -152,6 +152,33 @@ class _PalmScanPageState extends State<PalmScanPage> {
                     ),
                   ),
                 ),
+                // History button
+                GestureDetector(
+                  onTap: () => context.push('/palm-analysis-history'),
+                  child: Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: AppColors.secondary,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.secondary.withOpacity(0.3),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: const Center(
+                      child: Icon(
+                        Icons.history,
+                        size: 20,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
                 // User Guide button
                 GestureDetector(
                   onTap: () => context.push('/user-guide'),

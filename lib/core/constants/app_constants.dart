@@ -62,6 +62,7 @@ class AppConstants {
   static const String historyFaceAnalysisDetailRoute = '/history/face-analysis';
   static const String historyPalmAnalysisDetailRoute = '/history/palm-analysis';
   static const String historyChatDetailRoute = '/history/chat';
+  static const String palmAnalysisHistoryRoute = '/palm-analysis-history';
   static const String profileRoute = '/profile';
   
   // Error Messages

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/providers/base_provider.dart';
 import '../../../../core/network/api_result.dart';
 import '../../../../core/utils/logger.dart';
@@ -20,7 +21,7 @@ class ProfileProvider extends BaseProvider {
   User? _currentUser;
   Map<String, dynamic>? _profileStats;
   List<ProfileMenuItem> _menuItems = [];
-  // BuildContext? _context; // Currently unused
+  BuildContext? _context;
 
   /// Current user profile
   User? get currentUser => _currentUser;
@@ -32,9 +33,9 @@ class ProfileProvider extends BaseProvider {
   List<ProfileMenuItem> get menuItems => _menuItems;
 
   /// Set context for navigation and dialogs
-  // void setContext(BuildContext context) {
-  //   _context = context;
-  // }
+  void setContext(BuildContext context) {
+    _context = context;
+  }
 
   /// Initialize profile with user data
   Future<void> initializeProfile() async {
@@ -172,6 +173,12 @@ class ProfileProvider extends BaseProvider {
         onTap: () => _navigateToPersonalInfo(),
       ),
       ProfileMenuItem(
+        icon: Icons.lock_outline,
+        title: 'Đổi mật khẩu',
+        subtitle: 'Thay đổi mật khẩu tài khoản',
+        onTap: () => _navigateToChangePassword(),
+      ),
+      ProfileMenuItem(
         icon: Icons.history,
         title: 'Lịch sử phân tích',
         subtitle: 'Xem lại các kết quả đã phân tích',
@@ -217,6 +224,13 @@ class ProfileProvider extends BaseProvider {
   void _navigateToPersonalInfo() {
     AppLogger.info('ProfileProvider: Navigate to personal info');
     // TODO: Implement navigation
+  }
+
+  void _navigateToChangePassword() {
+    AppLogger.info('ProfileProvider: Navigate to change password');
+    if (_context != null) {
+      _context!.go('/change-password');
+    }
   }
 
   void _navigateToHistory() {

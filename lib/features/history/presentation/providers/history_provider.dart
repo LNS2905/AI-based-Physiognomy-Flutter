@@ -4,6 +4,8 @@ import '../../../../core/utils/logger.dart';
 import '../../../../core/network/api_result.dart';
 import '../../../auth/data/models/user_model.dart';
 import '../../../auth/presentation/providers/enhanced_auth_provider.dart';
+import '../../../palm_scan/data/models/palm_analysis_server_model.dart';
+import '../../../palm_scan/data/services/palm_analysis_history_service.dart';
 import '../../data/models/history_item_model.dart';
 import '../../data/models/chat_history_model.dart';
 import '../../data/services/mock_history_service.dart';
@@ -12,6 +14,7 @@ import '../../data/repositories/history_repository.dart';
 /// Provider for managing history state and operations
 class HistoryProvider extends BaseProvider {
   final HistoryRepository _historyRepository;
+  final PalmAnalysisHistoryService _palmAnalysisHistoryService;
   final EnhancedAuthProvider _authProvider;
 
   // History data
@@ -30,7 +33,8 @@ class HistoryProvider extends BaseProvider {
 
   HistoryProvider({required EnhancedAuthProvider authProvider})
       : _authProvider = authProvider,
-        _historyRepository = HistoryRepository(authProvider: authProvider) {
+        _historyRepository = HistoryRepository(authProvider: authProvider),
+        _palmAnalysisHistoryService = PalmAnalysisHistoryService(authProvider: authProvider) {
     _setupAuthListener();
   }
 
@@ -296,6 +300,52 @@ class HistoryProvider extends BaseProvider {
   /// Get favorite items
   List<HistoryItemModel> getFavoriteItems() {
     return _allHistoryItems.where((item) => item.isFavorite).toList();
+  }
+
+  /// Get palm analysis detail from server by ID
+  Future<PalmAnalysisServerModel?> getPalmAnalysisDetail(int analysisId) async {
+    try {
+      AppLogger.info('Getting palm analysis detail for ID: $analysisId');
+
+      final result = await executeApiOperation(
+        () => _palmAnalysisHistoryService.getPalmAnalysisById(analysisId),
+        operationName: 'getPalmAnalysisDetail',
+      );
+
+      if (result != null) {
+        AppLogger.info('Palm analysis detail retrieved successfully');
+        return result;
+      } else {
+        AppLogger.error('Failed to get palm analysis detail');
+        return null;
+      }
+    } catch (e) {
+      AppLogger.error('Exception in getPalmAnalysisDetail', e);
+      return null;
+    }
+  }
+
+  /// Get all palm analysis history from server
+  Future<List<PalmAnalysisServerModel>> getPalmAnalysisHistory() async {
+    try {
+      AppLogger.info('Getting palm analysis history from server');
+
+      final result = await executeApiOperation(
+        () => _palmAnalysisHistoryService.getPalmAnalysisHistory(),
+        operationName: 'getPalmAnalysisHistory',
+      );
+
+      if (result != null) {
+        AppLogger.info('Palm analysis history retrieved: ${result.length} items');
+        return result;
+      } else {
+        AppLogger.error('Failed to get palm analysis history');
+        return [];
+      }
+    } catch (e) {
+      AppLogger.error('Exception in getPalmAnalysisHistory', e);
+      return [];
+    }
   }
 
   /// Apply filters and sorting

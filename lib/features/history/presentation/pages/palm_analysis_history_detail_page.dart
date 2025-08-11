@@ -6,6 +6,10 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/logger.dart';
 import '../../../palm_scan/presentation/pages/palm_analysis_results_page.dart';
+import '../../../palm_scan/presentation/pages/palm_analysis_history_results_page.dart';
+
+import '../../../palm_scan/data/models/palm_analysis_server_model.dart';
+import '../../../palm_scan/data/models/palm_analysis_response_model.dart';
 import '../../data/models/history_item_model.dart';
 import '../providers/history_provider.dart';
 
@@ -512,13 +516,156 @@ class _PalmAnalysisHistoryDetailPageState extends State<PalmAnalysisHistoryDetai
   }
 
   void _viewFullAnalysis() {
-    // Navigate to the full palm analysis results page
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => PalmAnalysisResultsPage(
-          palmResult: _historyItem!.analysisResult,
-          annotatedImagePath: _historyItem!.annotatedImageUrl,
+    // Check if this is a server-based analysis (has metadata with server_id)
+    final metadata = _historyItem!.metadata;
+    if (metadata != null && metadata.containsKey('server_id')) {
+      // This is from server API, navigate to the new detailed page
+      _navigateToServerAnalysisDetail();
+    } else {
+      // This is from the old analysis flow, use the original page
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => PalmAnalysisResultsPage(
+            palmResult: _historyItem!.analysisResult,
+            annotatedImagePath: _historyItem!.annotatedImageUrl,
+          ),
         ),
+      );
+    }
+  }
+
+  void _navigateToServerAnalysisDetail() async {
+    try {
+      // Show loading indicator
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+
+      // Get the server analysis data from the provider
+      final provider = context.read<HistoryProvider>();
+      final serverId = _historyItem!.metadata?['server_id'];
+
+      if (serverId == null) {
+        Navigator.of(context).pop(); // Close loading dialog
+        _showError('Không thể tải chi tiết phân tích');
+        return;
+      }
+
+      // Get all palm analysis history from server
+      final allAnalyses = await provider.getPalmAnalysisHistory();
+
+      Navigator.of(context).pop(); // Close loading dialog
+
+      if (allAnalyses.isNotEmpty) {
+        try {
+          // Find the specific analysis by server ID
+          final targetAnalysis = allAnalyses.firstWhere(
+            (analysis) => analysis.id == int.parse(serverId.toString()),
+          );
+
+          // Use the new dedicated history results page with the specific analysis
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => PalmAnalysisHistoryResultsPage(
+                analysisData: targetAnalysis,
+              ),
+            ),
+          );
+        } catch (e) {
+          // Analysis not found in server data, use fallback
+          AppLogger.warning('Analysis with ID $serverId not found in server data');
+          _showError('Không tìm thấy dữ liệu phân tích trên server');
+        }
+      } else {
+        // No server data available, use fallback
+        AppLogger.warning('No server data available, using local data');
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => PalmAnalysisResultsPage(
+              palmResult: _historyItem!.analysisResult,
+              annotatedImagePath: _historyItem!.annotatedImageUrl,
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      Navigator.of(context).pop(); // Close loading dialog if still open
+      AppLogger.error('Error navigating to server analysis detail', e);
+      _showError('Có lỗi xảy ra khi tải chi tiết phân tích');
+    }
+  }
+
+  /// Convert PalmAnalysisServerModel to PalmAnalysisResponseModel for display
+  PalmAnalysisResponseModel _convertServerModelToResponseModel(PalmAnalysisServerModel serverModel) {
+    return PalmAnalysisResponseModel(
+      status: 'success',
+      message: 'Palm analysis completed',
+      userId: serverModel.userId.toString(),
+      processedAt: serverModel.createdAt,
+      handsDetected: serverModel.palmLinesDetected,
+      processingTime: 0.0,
+      analysisType: 'palm_analysis',
+      annotatedImageUrl: serverModel.annotatedImage,
+      comparisonImageUrl: null,
+      analysis: PalmAnalysisDataModel(
+        handsDetected: serverModel.palmLinesDetected,
+        handsData: [],
+        measurements: {},
+        palmLines: {
+          'heart': serverModel.detectedHeartLine.toDouble(),
+          'head': serverModel.detectedHeadLine.toDouble(),
+          'life': serverModel.detectedLifeLine.toDouble(),
+          'fate': serverModel.detectedFateLine.toDouble(),
+        },
+        fingerAnalysis: {},
+      ),
+      measurementsSummary: MeasurementsSummaryModel(
+        averagePalmWidth: serverModel.imageWidth,
+        averageHandLength: serverModel.imageHeight,
+        totalHands: serverModel.palmLinesDetected,
+        leftHands: 0,
+        rightHands: 0,
+        palmTypes: [],
+        confidenceScores: {
+          'overall': 0.8,
+        },
+      ),
+    );
+  }
+
+  PalmAnalysisServerModel _createServerModelFromHistoryItem(PalmAnalysisHistoryModel historyItem) {
+    // Create a server model from the history item data
+    // This is a temporary solution - ideally you'd fetch from the server
+    return PalmAnalysisServerModel(
+      id: int.tryParse(historyItem.metadata?['server_id']?.toString() ?? '0') ?? 0,
+      userId: 18, // Default user ID - should be from auth provider
+      annotatedImage: historyItem.annotatedImageUrl ?? '',
+      palmLinesDetected: historyItem.analysisResult.handsDetected,
+      detectedHeartLine: historyItem.analysisResult.analysis?.palmLines['heart']?.round() ?? 0,
+      detectedHeadLine: historyItem.analysisResult.analysis?.palmLines['head']?.round() ?? 0,
+      detectedLifeLine: historyItem.analysisResult.analysis?.palmLines['life']?.round() ?? 0,
+      detectedFateLine: historyItem.analysisResult.analysis?.palmLines['fate']?.round() ?? 0,
+      targetLines: 'heart,head,life,fate',
+      imageHeight: historyItem.analysisResult.measurementsSummary?.averageHandLength ?? 480.0,
+      imageWidth: historyItem.analysisResult.measurementsSummary?.averagePalmWidth ?? 640.0,
+      imageChannels: 3.0,
+      summaryText: 'Palm analysis completed successfully. Analysis provides insights into personality traits and life patterns based on traditional palmistry principles.',
+      createdAt: historyItem.createdAt.toIso8601String(),
+      updatedAt: historyItem.updatedAt.toIso8601String(),
+      interpretations: [], // Empty for now - would be populated from server
+      lifeAspects: [], // Empty for now - would be populated from server
+    );
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: AppColors.error,
       ),
     );
   }

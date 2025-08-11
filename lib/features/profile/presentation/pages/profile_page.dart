@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
@@ -10,6 +10,8 @@ import '../providers/profile_provider.dart';
 import '../widgets/profile_header.dart';
 import '../widgets/profile_stats.dart';
 import '../widgets/profile_menu_items.dart';
+import '../widgets/password_management_section.dart';
+import '../widgets/profile_quick_access.dart';
 
 /// Profile page displaying user information and settings
 class ProfilePage extends StatefulWidget {
@@ -28,6 +30,9 @@ class _ProfilePageState extends State<ProfilePage> {
     super.initState();
     _profileProvider = context.read<ProfileProvider>();
     _authProvider = context.read<EnhancedAuthProvider>();
+
+    // Set context for navigation
+    _profileProvider.setContext(context);
 
     // Initialize profile data asynchronously
     Future.microtask(() => _initializeProfileData());
@@ -259,6 +264,11 @@ class _ProfilePageState extends State<ProfilePage> {
               
               const SizedBox(height: 8),
               
+              // Quick access buttons
+              const ProfileQuickAccess(),
+              
+              const SizedBox(height: 8),
+              
               // Profile statistics
               if (provider.profileStats != null &&
                   provider.memberSinceText.isNotEmpty)
@@ -268,67 +278,15 @@ class _ProfilePageState extends State<ProfilePage> {
                   lastAnalysisText: provider.lastAnalysisText,
                 ),
               
+              // Password Management Section
+              const PasswordManagementSection(),
+              
               // Menu items
               ProfileMenuItems(
                 menuItems: provider.menuItems,
               ),
 
-              // Development/Testing section
-              if (kDebugMode) ...[
-                const SizedBox(height: 16),
-                Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 16),
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.orange.shade50,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.orange.shade200),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Development Tools',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.orange.shade800,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: ElevatedButton.icon(
-                              onPressed: () => context.go('/new-api-test'),
-                              icon: const Icon(Icons.api, size: 18),
-                              label: const Text('New API Test'),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.orange,
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(vertical: 12),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: ElevatedButton.icon(
-                              onPressed: () => context.go('/google-signin-test'),
-                              icon: const Icon(Icons.login, size: 18),
-                              label: const Text('Google Test'),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.blue,
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(vertical: 12),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+
               
               // Bottom spacing
               SizedBox(height: isTablet ? 32 : 24),

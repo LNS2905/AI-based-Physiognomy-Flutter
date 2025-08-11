@@ -14,6 +14,8 @@ import '../../data/models/facial_analysis_dto.dart';
 import '../../data/repositories/face_scan_repository.dart';
 import '../../../palm_scan/data/models/palm_analysis_response_model.dart';
 import '../../../palm_scan/data/models/palm_analysis_dto.dart';
+import '../../../palm_scan/data/services/palm_analysis_interpretation_service.dart';
+import '../../../palm_scan/data/services/palm_analysis_history_service.dart';
 import '../../../auth/presentation/providers/enhanced_auth_provider.dart';
 
 /// Provider for face scanning functionality
@@ -114,10 +116,10 @@ class FaceScanProvider extends BaseProvider {
     _palmHistory.add(result);
     AppLogger.logStateChange(runtimeType.toString(), 'setCurrentPalmResult', 'Palm analysis result set');
 
-    // Auto-save to backend
+    // Auto-save to backend with real interpretations and life aspects
     savePalmAnalysis(result).then((success) {
       if (success) {
-        AppLogger.info('Palm analysis auto-saved to backend');
+        AppLogger.info('Palm analysis auto-saved to backend with real data');
       } else {
         AppLogger.warning('Failed to auto-save palm analysis to backend');
       }
@@ -584,7 +586,7 @@ class FaceScanProvider extends BaseProvider {
     }
   }
 
-  /// Save palm analysis result to backend
+  /// Save palm analysis result to backend using real data from API
   Future<bool> savePalmAnalysis(PalmAnalysisResponseModel analysisResult) async {
     if (_authProvider?.userId == null) {
       AppLogger.error('No current user found for saving palm analysis');
@@ -592,16 +594,44 @@ class FaceScanProvider extends BaseProvider {
     }
 
     try {
-      final palmAnalysisDto = _convertToPalmAnalysisDto(analysisResult);
+      AppLogger.info('Saving palm analysis with real data from API response');
+
+      // Use the new interpretation service to create real data from API response
+      final interpretations = PalmAnalysisInterpretationService.createInterpretationsFromAnalysis(analysisResult);
+      final lifeAspects = PalmAnalysisInterpretationService.createLifeAspectsFromAnalysis(analysisResult);
+      final summaryText = PalmAnalysisInterpretationService.createSummaryFromAnalysis(analysisResult);
+
+      // Extract palm line detection data
+      final palmLines = analysisResult.analysis?.palmLines ?? {};
+      final detectedHeartLine = palmLines['heart'] != null && palmLines['heart'] > 0 ? 1 : 0;
+      final detectedHeadLine = palmLines['head'] != null && palmLines['head'] > 0 ? 1 : 0;
+      final detectedLifeLine = palmLines['life'] != null && palmLines['life'] > 0 ? 1 : 0;
+      final detectedFateLine = palmLines['fate'] != null && palmLines['fate'] > 0 ? 1 : 0;
+
+      // Use PalmAnalysisHistoryService to save with real data
+      final palmAnalysisHistoryService = PalmAnalysisHistoryService(authProvider: _authProvider!);
 
       final result = await executeApiOperation(
-        () => _repository.savePalmAnalysis(palmAnalysisDto),
+        () => palmAnalysisHistoryService.savePalmAnalysis(
+          annotatedImage: analysisResult.annotatedImageUrl ?? '',
+          summaryText: summaryText,
+          interpretations: interpretations,
+          lifeAspects: lifeAspects,
+          palmLinesDetected: analysisResult.handsDetected,
+          detectedHeartLine: detectedHeartLine,
+          detectedHeadLine: detectedHeadLine,
+          detectedLifeLine: detectedLifeLine,
+          detectedFateLine: detectedFateLine,
+          imageHeight: 480.0,
+          imageWidth: 640.0,
+          imageChannels: 3.0,
+        ),
         operationName: 'savePalmAnalysis',
         showLoading: false,
       );
 
       if (result != null) {
-        AppLogger.info('Palm analysis saved successfully');
+        AppLogger.info('Palm analysis saved successfully with real interpretations and life aspects');
         return true;
       } else {
         AppLogger.error('Failed to save palm analysis');
@@ -647,117 +677,9 @@ class FaceScanProvider extends BaseProvider {
     );
   }
 
-  /// Convert PalmAnalysisResponseModel to PalmAnalysisDto
-  PalmAnalysisDto _convertToPalmAnalysisDto(PalmAnalysisResponseModel analysisResult) {
-    // Generate interpretations from available data
-    final interpretations = _generateInterpretationsFromPalmData(analysisResult);
-
-    // Generate life aspects from available data
-    final lifeAspects = _generateLifeAspectsFromPalmData(analysisResult);
-
-    // Generate summary text from available data
-    final summaryText = _generateSummaryTextFromPalmData(analysisResult);
-
-    return PalmAnalysisDto(
-      userId: _authProvider!.userId!.toDouble(),
-      annotatedImage: analysisResult.annotatedImageUrl ?? '',
-      targetLines: 'heart,head,life,fate',
-      imageHeight: 0.0, // These would come from image metadata
-      imageWidth: 0.0,
-      imageChannels: 3.0,
-      summaryText: summaryText,
-      interpretations: interpretations,
-      lifeAspects: lifeAspects,
-      palmLinesDetected: analysisResult.handsDetected.toDouble(),
-    );
-  }
-
-  /// Generate interpretations from palm analysis data
-  List<InterpretationDto> _generateInterpretationsFromPalmData(PalmAnalysisResponseModel analysisResult) {
-    final interpretations = <InterpretationDto>[];
-
-    // Basic interpretation from hands detected
-    if (analysisResult.handsDetected > 0) {
-      interpretations.add(InterpretationDto(
-        category: 'Detection',
-        title: 'Hand Detection',
-        description: 'Successfully detected ${analysisResult.handsDetected} hand(s) in the image',
-        confidence: 0.9,
-      ));
-    }
-
-    // Interpretation from palm lines if available
-    if (analysisResult.analysis?.palmLines.isNotEmpty == true) {
-      interpretations.add(InterpretationDto(
-        category: 'Palm Lines',
-        title: 'Palm Line Analysis',
-        description: 'Palm lines have been analyzed for life insights',
-        confidence: 0.8,
-      ));
-    }
-
-    // Interpretation from measurements if available
-    if (analysisResult.measurementsSummary != null) {
-      final summary = analysisResult.measurementsSummary!;
-      interpretations.add(InterpretationDto(
-        category: 'Measurements',
-        title: 'Palm Measurements',
-        description: 'Average palm width: ${summary.averagePalmWidth.toStringAsFixed(1)}mm, Hand length: ${summary.averageHandLength.toStringAsFixed(1)}mm',
-        confidence: 0.85,
-      ));
-    }
-
-    return interpretations;
-  }
-
-  /// Generate life aspects from palm analysis data
-  List<LifeAspectDto> _generateLifeAspectsFromPalmData(PalmAnalysisResponseModel analysisResult) {
-    final lifeAspects = <LifeAspectDto>[];
-
-    // Generate basic life aspects based on available data
-    lifeAspects.add(LifeAspectDto(
-      aspect: 'Health',
-      prediction: 'Based on palm analysis, health indicators show positive signs',
-      score: 0.75,
-      details: 'Palm structure suggests good vitality and energy levels',
-    ));
-
-    lifeAspects.add(LifeAspectDto(
-      aspect: 'Career',
-      prediction: 'Career prospects appear favorable based on palm lines',
-      score: 0.8,
-      details: 'Hand structure indicates potential for professional success',
-    ));
-
-    lifeAspects.add(LifeAspectDto(
-      aspect: 'Relationships',
-      prediction: 'Relationship patterns suggest emotional stability',
-      score: 0.7,
-      details: 'Palm features indicate capacity for meaningful connections',
-    ));
-
-    return lifeAspects;
-  }
-
-  /// Generate summary text from palm analysis data
-  String _generateSummaryTextFromPalmData(PalmAnalysisResponseModel analysisResult) {
-    final buffer = StringBuffer();
-
-    buffer.write('Palm analysis completed successfully. ');
-
-    if (analysisResult.handsDetected > 0) {
-      buffer.write('Detected ${analysisResult.handsDetected} hand(s). ');
-    }
-
-    if (analysisResult.measurementsSummary != null) {
-      final summary = analysisResult.measurementsSummary!;
-      buffer.write('Palm measurements: ${summary.averagePalmWidth.toStringAsFixed(1)}mm width, ${summary.averageHandLength.toStringAsFixed(1)}mm length. ');
-    }
-
-    buffer.write('Analysis provides insights into personality traits and life patterns based on traditional palmistry principles.');
-
-    return buffer.toString();
-  }
+  /// REMOVED: All fake data generation methods have been removed
+  /// Real interpretations, life aspects, and summary text are now generated
+  /// from actual API data using PalmAnalysisInterpretationService
 
   @override
   void dispose() {
