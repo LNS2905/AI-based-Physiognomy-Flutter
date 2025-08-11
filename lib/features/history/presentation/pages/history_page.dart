@@ -10,6 +10,10 @@ import '../providers/history_provider.dart';
 import '../widgets/history_item_card.dart';
 import '../widgets/history_filter_bar.dart';
 import '../widgets/history_empty_state.dart';
+import '../../../face_scan/presentation/pages/facial_analysis_history_results_page.dart';
+import '../../../face_scan/data/models/facial_analysis_server_model.dart';
+import '../../../palm_scan/presentation/pages/palm_analysis_history_results_page.dart';
+import '../../../palm_scan/data/models/palm_analysis_server_model.dart';
 
 /// Main history page displaying all user history
 class HistoryPage extends StatefulWidget {
@@ -534,15 +538,146 @@ class _HistoryPageState extends State<HistoryPage> with TickerProviderStateMixin
     
     switch (item.type) {
       case HistoryItemType.faceAnalysis:
-        context.push('/history/face-analysis/${item.id}');
+        // Navigate directly to facial analysis results page
+        if (item is FaceAnalysisHistoryModel) {
+          // Convert CloudinaryAnalysisResponseModel to FacialAnalysisServerModel
+          final analysisData = _convertToFacialAnalysisServerModel(item);
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => FacialAnalysisHistoryResultsPage(
+                analysisData: analysisData,
+              ),
+            ),
+          );
+        }
         break;
       case HistoryItemType.palmAnalysis:
-        context.push('/history/palm-analysis/${item.id}');
+        // Navigate directly to palm analysis results page
+        if (item is PalmAnalysisHistoryModel) {
+          // Convert PalmAnalysisResponseModel to PalmAnalysisServerModel
+          final analysisData = _convertToPalmAnalysisServerModel(item);
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => PalmAnalysisHistoryResultsPage(
+                analysisData: analysisData,
+              ),
+            ),
+          );
+        }
         break;
       case HistoryItemType.chatConversation:
         context.push('/history/chat/${item.id}');
         break;
     }
+  }
+  
+  FacialAnalysisServerModel _convertToFacialAnalysisServerModel(FaceAnalysisHistoryModel item) {
+    final analysis = item.analysisResult;
+    final faceData = analysis?.analysis?.analysisResult?.face;
+    final metadata = item.metadata;
+    
+    return FacialAnalysisServerModel(
+      id: int.tryParse(metadata?['serverId']?.toString() ?? '') ?? 0,
+      userId: analysis?.userId ?? '',
+      resultText: analysis?.analysis?.result ?? '',
+      faceShape: faceData?.shape?.primary ?? 'Unknown',
+      harmonyScore: faceData?.proportionality?.overallHarmonyScore ?? 0.0,
+      probabilities: faceData?.shape?.probabilities ?? {},
+      harmonyDetails: faceData?.proportionality?.harmonyScores ?? {},
+      metrics: (faceData?.proportionality?.metrics ?? []).map((m) => 
+        FacialMetricServerModel(
+          label: m.label ?? '',
+          pixels: m.pixels ?? 0.0,
+          percentage: m.percentage ?? 0.0,
+          orientation: m.orientation ?? '',
+        )
+      ).toList(),
+      annotatedImage: item.annotatedImageUrl ?? analysis?.annotatedImageUrl ?? '',
+      processedAt: analysis?.processedAt ?? DateTime.now().toIso8601String(),
+      createdAt: item.createdAt.toIso8601String(),
+      updatedAt: item.updatedAt.toIso8601String(),
+    );
+  }
+  
+  PalmAnalysisServerModel _convertToPalmAnalysisServerModel(PalmAnalysisHistoryModel item) {
+    final metadata = item.metadata;
+    final serverId = metadata?['server_id'] ?? 0;
+    
+    // Get original server data if stored in metadata
+    final originalInterpretations = metadata?['interpretations'] as List<dynamic>? ?? [];
+    final originalLifeAspects = metadata?['lifeAspects'] as List<dynamic>? ?? [];
+    
+    // Convert interpretations from metadata
+    final interpretations = originalInterpretations.map((data) {
+      if (data is Map<String, dynamic>) {
+        try {
+          // Safely parse numeric values
+          final int idValue = data['id'] is int ? data['id'] : int.tryParse(data['id']?.toString() ?? '') ?? 0;
+          final int analysisIdValue = data['analysisId'] is int ? data['analysisId'] : int.tryParse(data['analysisId']?.toString() ?? '') ?? serverId;
+          final int lengthPxValue = data['lengthPx'] is int 
+              ? data['lengthPx'] 
+              : (data['lengthPx'] is double 
+                  ? (data['lengthPx'] as double).toInt() 
+                  : int.tryParse(data['lengthPx']?.toString() ?? '') ?? 0);
+          final double confidenceValue = data['confidence'] is double 
+              ? data['confidence'] 
+              : (data['confidence'] is int 
+                  ? (data['confidence'] as int).toDouble() 
+                  : double.tryParse(data['confidence']?.toString() ?? '') ?? 0.0);
+          
+          return InterpretationServerModel(
+            id: idValue,
+            analysisId: analysisIdValue,
+            lineType: data['lineType']?.toString() ?? '',
+            pattern: data['pattern']?.toString() ?? '',
+            meaning: data['meaning']?.toString() ?? '',
+            lengthPx: lengthPxValue,
+            confidence: confidenceValue,
+            createdAt: data['createdAt']?.toString() ?? DateTime.now().toIso8601String(),
+          );
+        } catch (e) {
+          AppLogger.error('Error converting interpretation data: $e');
+          return null;
+        }
+      }
+      return null;
+    }).whereType<InterpretationServerModel>().toList();
+    
+    // Convert life aspects from metadata
+    final lifeAspects = originalLifeAspects.map((data) {
+      if (data is Map<String, dynamic>) {
+        return LifeAspectServerModel(
+          id: data['id'] ?? 0,
+          analysisId: data['analysisId'] ?? serverId,
+          aspect: data['aspect'] ?? '',
+          content: data['content'] ?? '',
+        );
+      }
+      return null;
+    }).whereType<LifeAspectServerModel>().toList();
+    
+    // Use summary text from metadata if available, otherwise use message
+    final summaryText = metadata?['summaryText'] ?? item.analysisResult?.message ?? '';
+    
+    return PalmAnalysisServerModel(
+      id: serverId is int ? serverId : int.tryParse(serverId.toString()) ?? 0,
+      userId: int.tryParse(item.analysisResult?.userId ?? '0') ?? 0,
+      palmLinesDetected: item.analysisResult?.handsDetected ?? 0,
+      detectedHeartLine: (item.analysisResult?.analysis?.palmLines?['heart'] ?? 0).toInt(),
+      detectedHeadLine: (item.analysisResult?.analysis?.palmLines?['head'] ?? 0).toInt(),
+      detectedLifeLine: (item.analysisResult?.analysis?.palmLines?['life'] ?? 0).toInt(),
+      detectedFateLine: (item.analysisResult?.analysis?.palmLines?['fate'] ?? 0).toInt(),
+      targetLines: 'heart,head,life,fate',
+      summaryText: summaryText,
+      interpretations: interpretations,
+      lifeAspects: lifeAspects,
+      annotatedImage: item.annotatedImageUrl ?? '',
+      imageWidth: item.analysisResult?.measurementsSummary?.averagePalmWidth?.toDouble() ?? 0.0,
+      imageHeight: item.analysisResult?.measurementsSummary?.averageHandLength?.toDouble() ?? 0.0,
+      imageChannels: 3.0,
+      createdAt: item.createdAt.toIso8601String(),
+      updatedAt: item.updatedAt.toIso8601String(),
+    );
   }
 
   void _handleMenuAction(String action) {

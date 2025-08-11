@@ -4,6 +4,7 @@ import '../../../../core/exceptions/app_exceptions.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/utils/logger.dart';
 import '../../../face_scan/data/models/cloudinary_analysis_response_model.dart';
+import '../../../face_scan/data/models/facial_analysis_server_model.dart';
 import '../../../palm_scan/data/models/palm_analysis_response_model.dart';
 import '../../../palm_scan/data/models/palm_analysis_server_model.dart';
 import '../../../auth/presentation/providers/enhanced_auth_provider.dart';
@@ -44,30 +45,32 @@ class HistoryRepository {
       for (int i = 0; i < dataList.length; i++) {
         final item = dataList[i];
         try {
-          // Create CloudinaryAnalysisResponseModel from API data
-          final analysisResult = CloudinaryAnalysisResponseModel.fromJson(item);
+          // Parse server response using FacialAnalysisServerModel
+          final serverModel = FacialAnalysisServerModel.fromJson(item);
+          
+          // Convert server model to CloudinaryAnalysisResponseModel for history display
+          final analysisResult = _convertServerModelToCloudinaryModel(serverModel);
           
           // Create history item
           final historyItem = FaceAnalysisHistoryModel.fromAnalysis(
-            id: 'face_${item['id'] ?? i}',
+            id: 'face_${serverModel.id}',
             analysisResult: analysisResult,
-            originalImageUrl: item['originalImageUrl'] ?? '',
-            annotatedImageUrl: item['annotatedImageUrl'] ?? '',
-            reportUrl: item['reportUrl'],
+            originalImageUrl: serverModel.annotatedImage,
+            annotatedImageUrl: serverModel.annotatedImage,
+            reportUrl: null,
             metadata: {
               'analysis_version': '1.0.0',
               'device_type': 'mobile',
               'api_source': true,
+              'serverId': serverModel.id.toString(),
             },
           );
 
+          // Use processedAt date from server
+          final createdAtStr = serverModel.createdAt ?? serverModel.processedAt;
           historyItems.add(historyItem.copyWith(
-            createdAt: item['createdAt'] != null 
-                ? DateTime.parse(item['createdAt']) 
-                : DateTime.now(),
-            updatedAt: item['updatedAt'] != null 
-                ? DateTime.parse(item['updatedAt']) 
-                : DateTime.now(),
+            createdAt: DateTime.parse(createdAtStr),
+            updatedAt: DateTime.parse(serverModel.updatedAt ?? createdAtStr),
           ));
         } catch (e) {
           AppLogger.warning('Failed to parse facial analysis item $i: $e');
@@ -128,7 +131,7 @@ class HistoryRepository {
           // Convert server model to PalmAnalysisResponseModel for history display
           final analysisResult = _convertServerModelToResponseModel(serverModel);
           
-          // Create history item
+          // Create history item with full server data in metadata
           final historyItem = PalmAnalysisHistoryModel.fromAnalysis(
             id: 'palm_${serverModel.id}',
             analysisResult: analysisResult,
@@ -140,6 +143,23 @@ class HistoryRepository {
               'device_type': 'mobile',
               'api_source': true,
               'server_id': serverModel.id,
+              'summaryText': serverModel.summaryText,
+              'interpretations': serverModel.interpretations.map((i) => {
+                'id': i.id,
+                'analysisId': i.analysisId,
+                'lineType': i.lineType,
+                'pattern': i.pattern,
+                'meaning': i.meaning,
+                'lengthPx': i.lengthPx, // Keep as int
+                'confidence': i.confidence,
+                'createdAt': i.createdAt,
+              }).toList(),
+              'lifeAspects': serverModel.lifeAspects.map((a) => {
+                'id': a.id,
+                'analysisId': a.analysisId,
+                'aspect': a.aspect,
+                'content': a.content,
+              }).toList(),
             },
           );
 
@@ -263,5 +283,42 @@ class HistoryRepository {
         code: 'ALL_HISTORY_ERROR',
       ));
     }
+  }
+
+  /// Convert FacialAnalysisServerModel to CloudinaryAnalysisResponseModel
+  CloudinaryAnalysisResponseModel _convertServerModelToCloudinaryModel(FacialAnalysisServerModel serverModel) {
+    return CloudinaryAnalysisResponseModel(
+      status: 'success',
+      message: 'Analysis completed successfully',
+      userId: serverModel.userId,
+      processedAt: serverModel.processedAt,
+      annotatedImageUrl: serverModel.annotatedImage,
+      analysis: CloudinaryAnalysisDataModel(
+        metadata: CloudinaryMetadataModel(
+          reportTitle: 'Facial Analysis Report',
+          sourceFilename: 'historical_analysis_${serverModel.id}',
+          timestampUTC: serverModel.processedAt,
+        ),
+        analysisResult: CloudinaryAnalysisResultModel(
+          face: CloudinaryFaceModel(
+            shape: CloudinaryFaceShapeModel(
+              primary: serverModel.faceShape,
+              probabilities: serverModel.probabilities,
+            ),
+            proportionality: CloudinaryProportionalityModel(
+              overallHarmonyScore: serverModel.harmonyScore,
+              harmonyScores: serverModel.harmonyDetails,
+              metrics: serverModel.metrics.map((m) => CloudinaryMetricModel(
+                label: m.label,
+                pixels: m.pixels,
+                percentage: m.percentage,
+                orientation: m.orientation,
+              )).toList(),
+            ),
+          ),
+        ),
+        result: serverModel.resultText,
+      ),
+    );
   }
 }

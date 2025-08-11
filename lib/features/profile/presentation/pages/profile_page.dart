@@ -1,4 +1,5 @@
 
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
@@ -57,17 +58,14 @@ class _ProfilePageState extends State<ProfilePage> {
         } catch (e) {
           // If API call fails due to auth issues, clear auth state
           if (e.toString().contains('Authentication') || e.toString().contains('token')) {
-            if (kDebugMode) print('Authentication failed, clearing auth state: $e');
             // Don't clear auth state here, let the auth provider handle it
           }
-          if (kDebugMode) print('Failed to refresh from API, falling back: $e');
         }
       }
 
       // Final fallback: Load from storage or use mock data
       await _profileProvider.initializeProfile();
     } catch (e) {
-      if (kDebugMode) print('Profile initialization failed: $e');
       // Ensure we have some data to show
       await _profileProvider.initializeProfile();
     }
@@ -142,11 +140,6 @@ class _ProfilePageState extends State<ProfilePage> {
                 child: _buildProfileContent(profileProvider, currentUser),
               );
             } catch (e, stackTrace) {
-              // Log the error for debugging
-              if (kDebugMode) {
-                print('ProfilePage build error: $e');
-                print('Stack trace: $stackTrace');
-              }
               // Catch any rendering errors and show error state
               return _buildErrorState();
             }

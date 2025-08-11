@@ -98,10 +98,10 @@ class FaceScanProvider extends BaseProvider {
     _currentCloudinaryResult = result;
     AppLogger.logStateChange(runtimeType.toString(), 'setCurrentCloudinaryResult', 'Cloudinary analysis result set');
 
-    // Auto-save to backend
+    // Auto-save to backend with real data from API response
     saveFacialAnalysis(result).then((success) {
       if (success) {
-        AppLogger.info('Facial analysis auto-saved to backend');
+        AppLogger.info('Facial analysis auto-saved to backend with real data');
       } else {
         AppLogger.warning('Failed to auto-save facial analysis to backend');
       }
@@ -643,27 +643,44 @@ class FaceScanProvider extends BaseProvider {
     }
   }
 
-  /// Convert CloudinaryAnalysisResponseModel to FacialAnalysisDto
+  /// Convert CloudinaryAnalysisResponseModel to FacialAnalysisDto with correct data mapping
   FacialAnalysisDto _convertToFacialAnalysisDto(CloudinaryAnalysisResponseModel analysisResult) {
     final analysis = analysisResult.analysis;
     final face = analysis?.analysisResult?.face;
 
-    // Extract data with fallbacks
+    // Extract data from API response exactly as documented
     final faceShape = face?.shape?.primary ?? 'Unknown';
-    final probabilities = face?.shape?.probabilities ?? <String, double>{};
+    
+    // Extract probabilities as Map<String, double> from API response
+    final probabilities = <String, double>{};
+    if (face?.shape?.probabilities != null) {
+      face!.shape!.probabilities!.forEach((key, value) {
+        probabilities[key] = value.toDouble();
+      });
+    }
+    
+    // Extract harmony score from overallHarmonyScore
     final harmonyScore = face?.proportionality?.overallHarmonyScore ?? 0.0;
-    final harmonyDetails = face?.proportionality?.harmonyScores ?? <String, double>{};
+    
+    // Extract harmony details from harmonyScores
+    final harmonyDetails = <String, double>{};
+    if (face?.proportionality?.harmonyScores != null) {
+      face!.proportionality!.harmonyScores!.forEach((key, value) {
+        harmonyDetails[key] = value.toDouble();
+      });
+    }
 
-    // Convert metrics
+    // Convert metrics array from API response
     final metrics = face?.proportionality?.metrics?.map((metric) {
       return FacialMetricDto(
-        orientation: metric.orientation ?? '',
+        orientation: metric.orientation ?? 'horizontal',
         percentage: metric.percentage ?? 0.0,
         pixels: metric.pixels ?? 0.0,
         label: metric.label ?? '',
       );
     }).toList() ?? <FacialMetricDto>[];
 
+    // Create DTO with all required fields for POST /facial-analysis
     return FacialAnalysisDto(
       userId: _authProvider!.userId.toString(),
       resultText: analysis?.result ?? 'Face analysis completed',
@@ -673,7 +690,7 @@ class FaceScanProvider extends BaseProvider {
       harmonyDetails: harmonyDetails,
       metrics: metrics,
       annotatedImage: analysisResult.annotatedImageUrl ?? '',
-      processedAt: analysisResult.processedAt,
+      processedAt: analysisResult.processedAt ?? DateTime.now().toIso8601String(),
     );
   }
 

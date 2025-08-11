@@ -17,6 +17,7 @@ import '../../features/face_scan/presentation/pages/camera_screen.dart';
 import '../../features/palm_scan/presentation/pages/palm_scan_page.dart';
 import '../../features/palm_scan/presentation/pages/palm_camera_screen.dart';
 import '../../features/palm_scan/presentation/pages/palm_analysis_history_list_page.dart';
+import '../../features/face_scan/presentation/pages/facial_analysis_history_list_page.dart';
 import '../../features/news/presentation/pages/news_detail_page.dart';
 import '../../features/news/presentation/pages/news_list_page.dart';
 import '../../features/face_scan/presentation/pages/user_guide_page.dart';
@@ -186,6 +187,15 @@ class AppRouter {
         path: '/palm-analysis-history',
         name: 'palm-analysis-history',
         builder: (context, state) => const PalmAnalysisHistoryListPage().withAuthGuard(
+          redirectRoute: AppConstants.introRoute,
+        ),
+      ),
+
+      // Facial Analysis History List Route
+      GoRoute(
+        path: '/facial-analysis-history',
+        name: 'facial-analysis-history',
+        builder: (context, state) => const FacialAnalysisHistoryListPage().withAuthGuard(
           redirectRoute: AppConstants.introRoute,
         ),
       ),

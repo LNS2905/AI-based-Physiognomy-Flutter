@@ -6,6 +6,8 @@ import '../../../auth/data/models/user_model.dart';
 import '../../../auth/presentation/providers/enhanced_auth_provider.dart';
 import '../../../palm_scan/data/models/palm_analysis_server_model.dart';
 import '../../../palm_scan/data/services/palm_analysis_history_service.dart';
+import '../../../face_scan/data/models/facial_analysis_server_model.dart';
+import '../../../face_scan/data/services/facial_analysis_history_service.dart';
 import '../../data/models/history_item_model.dart';
 import '../../data/models/chat_history_model.dart';
 import '../../data/services/mock_history_service.dart';
@@ -15,6 +17,7 @@ import '../../data/repositories/history_repository.dart';
 class HistoryProvider extends BaseProvider {
   final HistoryRepository _historyRepository;
   final PalmAnalysisHistoryService _palmAnalysisHistoryService;
+  final FacialAnalysisHistoryService _facialAnalysisHistoryService;
   final EnhancedAuthProvider _authProvider;
 
   // History data
@@ -34,7 +37,8 @@ class HistoryProvider extends BaseProvider {
   HistoryProvider({required EnhancedAuthProvider authProvider})
       : _authProvider = authProvider,
         _historyRepository = HistoryRepository(authProvider: authProvider),
-        _palmAnalysisHistoryService = PalmAnalysisHistoryService(authProvider: authProvider) {
+        _palmAnalysisHistoryService = PalmAnalysisHistoryService(authProvider: authProvider),
+        _facialAnalysisHistoryService = FacialAnalysisHistoryService(authProvider: authProvider) {
     _setupAuthListener();
   }
 
@@ -322,6 +326,29 @@ class HistoryProvider extends BaseProvider {
     } catch (e) {
       AppLogger.error('Exception in getPalmAnalysisDetail', e);
       return null;
+    }
+  }
+
+  /// Get all facial analysis history from server
+  Future<List<FacialAnalysisServerModel>> getFacialAnalysisHistory() async {
+    try {
+      AppLogger.info('Getting facial analysis history from server');
+
+      final result = await executeApiOperation(
+        () => _facialAnalysisHistoryService.getFacialAnalysisHistory(),
+        operationName: 'getFacialAnalysisHistory',
+      );
+
+      if (result != null) {
+        AppLogger.info('Facial analysis history retrieved: ${result.length} items');
+        return result;
+      } else {
+        AppLogger.error('Failed to get facial analysis history');
+        return [];
+      }
+    } catch (e) {
+      AppLogger.error('Exception in getFacialAnalysisHistory', e);
+      return [];
     }
   }
 
