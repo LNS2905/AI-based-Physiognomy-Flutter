@@ -291,16 +291,37 @@ class EnhancedAuthProvider extends BaseProvider {
     );
   }
 
+  /// Refresh authentication token
+  Future<bool> refreshToken() async {
+    try {
+      AppLogger.info('EnhancedAuthProvider: Manually refreshing token');
+
+      final authResponse = await _authRepository.refreshToken();
+
+      // Get updated user data after token refresh
+      _currentUser = await _authRepository.getCurrentUser();
+      _isAuthenticated = true;
+
+      notifyListeners();
+      AppLogger.info('EnhancedAuthProvider: Token refreshed successfully');
+      return true;
+    } catch (e) {
+      AppLogger.error('EnhancedAuthProvider: Manual token refresh failed', e);
+      await _clearAuthState();
+      return false;
+    }
+  }
+
   /// Logout user
   Future<void> logout() async {
     await executeApiOperation(
       () async {
         AppLogger.info('EnhancedAuthProvider: Logging out user');
-        
+
         await _authRepository.logout();
-        
+
         await _clearAuthState();
-        
+
         AppLogger.info('EnhancedAuthProvider: User logged out successfully');
         return Success(true);
       },
