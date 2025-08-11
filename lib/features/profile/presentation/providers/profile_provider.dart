@@ -1,17 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:go_router/go_router.dart';
 import '../../../../core/providers/base_provider.dart';
 import '../../../../core/network/api_result.dart';
 import '../../../../core/utils/logger.dart';
-import '../../../auth/data/models/user_model.dart';
-import '../../../auth/presentation/providers/auth_provider.dart';
-import '../../../auth/data/models/update_user_dto.dart';
-import '../../../auth/data/models/create_user_dto.dart'; // For Gender enum
+import '../../../auth/data/models/auth_models.dart';
 import '../../../auth/data/repositories/user_repository.dart';
 import '../../../auth/data/repositories/auth_repository.dart';
-import '../models/profile_stats.dart';
-import '../models/profile_menu_item.dart';
 
 /// Profile provider for managing user profile state
 class ProfileProvider extends BaseProvider {
@@ -24,13 +17,13 @@ class ProfileProvider extends BaseProvider {
   })  : _userRepository = userRepository ?? UserRepository(),
         _authRepository = authRepository ?? AuthRepository();
 
-  UserModel? _currentUser;
+  User? _currentUser;
   Map<String, dynamic>? _profileStats;
   List<ProfileMenuItem> _menuItems = [];
-  BuildContext? _context;
+  // BuildContext? _context; // Currently unused
 
   /// Current user profile
-  UserModel? get currentUser => _currentUser;
+  User? get currentUser => _currentUser;
 
   /// Profile statistics
   Map<String, dynamic>? get profileStats => _profileStats;
@@ -39,9 +32,9 @@ class ProfileProvider extends BaseProvider {
   List<ProfileMenuItem> get menuItems => _menuItems;
 
   /// Set context for navigation and dialogs
-  void setContext(BuildContext context) {
-    _context = context;
-  }
+  // void setContext(BuildContext context) {
+  //   _context = context;
+  // }
 
   /// Initialize profile with user data
   Future<void> initializeProfile() async {
@@ -60,7 +53,7 @@ class ProfileProvider extends BaseProvider {
   /// Load user data from storage
   Future<void> _loadUserFromStorage() async {
     final result = await _userRepository.getCurrentUserFromStorage();
-    if (result is Success<UserModel>) {
+    if (result is Success<User>) {
       _currentUser = result.data;
       AppLogger.info('ProfileProvider: User data loaded from storage: ${_currentUser?.displayName}');
     } else {
@@ -71,7 +64,7 @@ class ProfileProvider extends BaseProvider {
   }
 
   /// Load user data from AuthProvider (alternative method)
-  void loadUserFromAuthProvider(UserModel? user) {
+  void loadUserFromAuthProvider(User? user) {
     if (user != null) {
       _currentUser = user;
       AppLogger.info('ProfileProvider: User data loaded from AuthProvider: ${_currentUser?.displayName}');
@@ -91,7 +84,7 @@ class ProfileProvider extends BaseProvider {
         final result = await _authRepository.getCurrentUser();
         AppLogger.info('ProfileProvider: API call result type: ${result.runtimeType}');
 
-        if (result is Success<UserModel>) {
+        if (result is Success<User>) {
           _currentUser = result.data;
           AppLogger.info('ProfileProvider: User data refreshed successfully');
           AppLogger.info('ProfileProvider: User ID: ${_currentUser?.id}');
@@ -100,17 +93,14 @@ class ProfileProvider extends BaseProvider {
           AppLogger.info('ProfileProvider: User Phone: ${_currentUser?.phone}');
           AppLogger.info('ProfileProvider: User Age: ${_currentUser?.age}');
           AppLogger.info('ProfileProvider: User Gender: ${_currentUser?.gender}');
-          AppLogger.info('ProfileProvider: User Username: ${_currentUser?.username}');
           AppLogger.info('ProfileProvider: User Avatar: ${_currentUser?.avatar}');
-          AppLogger.info('ProfileProvider: User Created At: ${_currentUser?.createdAt}');
-          AppLogger.info('ProfileProvider: User Updated At: ${_currentUser?.updatedAt}');
 
           // Update stored user data
           await _userRepository.storeUserData(result.data);
 
           // Refresh stats after getting updated user data
           _loadMockStats();
-        } else if (result is Error<UserModel>) {
+        } else if (result is Error<User>) {
           AppLogger.error('ProfileProvider: Failed to refresh user data: ${result.failure.message}');
           AppLogger.error('ProfileProvider: Failure type: ${result.failure.runtimeType}');
           AppLogger.error('ProfileProvider: Failure code: ${result.failure.code}');
@@ -144,9 +134,8 @@ class ProfileProvider extends BaseProvider {
 
   /// Load mock user data
   void _loadMockUserData() {
-    _currentUser = UserModel(
-      id: 'mock_user_001',
-      username: 'nguyenvana',
+    _currentUser = User(
+      id: 1,
       email: 'nguyenvana@example.com',
       firstName: 'Nguyễn',
       lastName: 'Văn A',
@@ -154,8 +143,6 @@ class ProfileProvider extends BaseProvider {
       age: 30,
       gender: Gender.male,
       avatar: null, // Will use default avatar
-      createdAt: DateTime(2024, 1, 1),
-      updatedAt: DateTime.now(),
     );
 
     AppLogger.info('ProfileProvider: Mock user data loaded: ${_currentUser?.displayName}');

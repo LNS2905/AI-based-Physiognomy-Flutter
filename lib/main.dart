@@ -7,7 +7,7 @@ import 'core/theme/app_theme.dart';
 import 'core/navigation/app_router.dart';
 import 'core/utils/logger.dart';
 import 'core/services/google_sign_in_service.dart';
-import 'features/auth/presentation/providers/auth_provider.dart';
+import 'features/auth/presentation/providers/enhanced_auth_provider.dart';
 import 'features/survey/presentation/providers/survey_provider.dart';
 import 'features/face_scan/presentation/providers/face_scan_provider.dart';
 import 'features/ai_conversation/presentation/providers/chat_provider.dart';
@@ -67,9 +67,10 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        // Authentication Provider
+        // Enhanced Authentication Provider
         ChangeNotifierProvider(
-          create: (context) => AuthProvider()..initialize(),
+          create: (context) => EnhancedAuthProvider(),
+          lazy: false, // Ensure provider is created immediately
         ),
 
         // Survey Provider
@@ -78,8 +79,11 @@ class MyApp extends StatelessWidget {
         ),
 
         // Face Scan Provider
-        ChangeNotifierProvider(
+        ChangeNotifierProxyProvider<EnhancedAuthProvider, FaceScanProvider>(
           create: (context) => FaceScanProvider(),
+          update: (context, authProvider, previous) => FaceScanProvider(
+            authProvider: authProvider,
+          ),
         ),
 
         // AI Chat Provider
@@ -88,8 +92,16 @@ class MyApp extends StatelessWidget {
         ),
 
         // History Provider
-        ChangeNotifierProvider(
-          create: (context) => HistoryProvider(),
+        ChangeNotifierProxyProvider<EnhancedAuthProvider, HistoryProvider>(
+          create: (context) {
+            final authProvider = context.read<EnhancedAuthProvider>();
+            return HistoryProvider(authProvider: authProvider);
+          },
+          update: (context, authProvider, previous) {
+            // Dispose previous provider if it exists
+            previous?.dispose();
+            return HistoryProvider(authProvider: authProvider);
+          },
         ),
 
         // Profile Provider
@@ -116,9 +128,19 @@ class MyApp extends StatelessWidget {
           // Handle global errors
           ErrorWidget.builder = (FlutterErrorDetails details) {
             AppLogger.error('Flutter Error', details.exception, details.stack);
+
+            // Filter out MouseTracker assertions in debug mode
+            if (details.exception.toString().contains('MouseTracker') ||
+                details.exception.toString().contains('PointerAddedEvent') ||
+                details.exception.toString().contains('PointerRemovedEvent')) {
+              AppLogger.warning('MouseTracker assertion ignored in debug mode');
+              // Return a minimal widget instead of error widget
+              return const SizedBox.shrink();
+            }
+
             return _buildErrorWidget(details);
           };
-          
+
           return child ?? const SizedBox.shrink();
         },
       ),

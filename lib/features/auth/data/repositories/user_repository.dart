@@ -1,3 +1,4 @@
+import 'dart:convert';
 import '../../../../core/network/api_result.dart';
 import '../../../../core/network/http_service.dart';
 import '../../../../core/storage/storage_service.dart';
@@ -5,8 +6,7 @@ import '../../../../core/constants/app_constants.dart';
 import '../../../../core/errors/exceptions.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/utils/logger.dart';
-import '../models/user_model.dart';
-import '../models/update_user_dto.dart';
+import '../models/auth_models.dart';
 import '../models/general_response_model.dart';
 
 /// User management repository
@@ -17,7 +17,7 @@ class UserRepository {
       : _httpService = httpService ?? HttpService();
 
   /// Update current user profile
-  Future<ApiResult<UserModel>> updateProfile({
+  Future<ApiResult<User>> updateProfile({
     required UpdateUserDTO updateUserDto,
   }) async {
     try {
@@ -42,7 +42,7 @@ class UserRepository {
         (json) => json as Map<String, dynamic>,
       );
 
-      final user = UserModel.fromJson(generalResponse.data);
+      final user = User.fromJson(generalResponse.data);
       
       // Update stored user data
       await StorageService.store(
@@ -78,7 +78,7 @@ class UserRepository {
   }
 
   /// Get current user from storage
-  Future<ApiResult<UserModel>> getCurrentUserFromStorage() async {
+  Future<ApiResult<User>> getCurrentUserFromStorage() async {
     try {
       final userData = await StorageService.get(AppConstants.userDataKey);
       if (userData == null) {
@@ -88,7 +88,21 @@ class UserRepository {
         );
       }
 
-      final user = UserModel.fromJson(userData);
+      // Handle both String and Map cases
+      User user;
+      if (userData is String) {
+        // Parse JSON string to Map
+        final Map<String, dynamic> userMap = jsonDecode(userData);
+        user = User.fromJson(userMap);
+      } else if (userData is Map<String, dynamic>) {
+        user = User.fromJson(userData);
+      } else {
+        throw const CacheException(
+          message: 'Invalid user data format in storage',
+          details: 'INVALID_USER_DATA_FORMAT',
+        );
+      }
+
       AppLogger.info('User data retrieved from storage');
       return Success(user);
     } on CacheException catch (e) {
@@ -104,7 +118,7 @@ class UserRepository {
   }
 
   /// Store user data to storage
-  Future<void> storeUserData(UserModel user) async {
+  Future<void> storeUserData(User user) async {
     try {
       await StorageService.store(AppConstants.userDataKey, user.toJson());
       AppLogger.info('User data stored to storage');

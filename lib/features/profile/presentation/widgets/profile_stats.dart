@@ -134,7 +134,7 @@ class ProfileStats extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(width: 12),
+        const SizedBox(height: 12),
         Row(
           children: [
             Expanded(

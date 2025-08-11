@@ -1,7 +1,6 @@
 import '../storage/storage_service.dart';
 import '../constants/app_constants.dart';
 import '../utils/logger.dart';
-import '../../features/auth/presentation/providers/auth_provider.dart';
 import 'google_sign_in_service.dart';
 
 /// Service for handling complete logout process

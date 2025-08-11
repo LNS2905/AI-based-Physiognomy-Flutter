@@ -7,7 +7,7 @@ import '../../data/models/survey_response_model.dart';
 class SurveyProvider extends BaseProvider {
   // Survey data
   List<SurveyQuestionModel> _questions = [];
-  Map<String, SurveyResponseModel> _responses = {};
+  final Map<String, SurveyResponseModel> _responses = <String, SurveyResponseModel>{};
   int _currentQuestionIndex = 0;
   DateTime? _surveyStartTime;
   

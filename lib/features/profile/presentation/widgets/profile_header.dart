@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/constants/app_constants.dart';
-import '../../../auth/data/models/user_model.dart';
+import '../../../auth/data/models/auth_models.dart';
 
 /// Profile header widget displaying user avatar and basic info
 class ProfileHeader extends StatelessWidget {
-  final UserModel user;
+  final User user;
   final VoidCallback? onEditPressed;
 
   const ProfileHeader({

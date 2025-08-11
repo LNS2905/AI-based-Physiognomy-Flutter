@@ -1,4 +1,5 @@
 // Enhanced Authentication Repository with new API integration
+import 'dart:convert';
 import 'package:ai_physiognomy_app/core/utils/logger.dart';
 import 'package:ai_physiognomy_app/core/storage/secure_storage_service.dart';
 import 'package:ai_physiognomy_app/core/storage/storage_service.dart';
@@ -228,13 +229,125 @@ class EnhancedAuthRepository {
     try {
       final userData = await StorageService.get(AppConstants.userDataKey);
       if (userData != null) {
-        return User.fromJson(userData);
+        // Handle both String and Map cases
+        Map<String, dynamic> userMap;
+
+        if (userData is String) {
+          // Parse JSON string to Map
+          userMap = jsonDecode(userData);
+        } else if (userData is Map<String, dynamic>) {
+          userMap = userData;
+        } else {
+          AppLogger.warning('EnhancedAuthRepository: Invalid user data format: ${userData.runtimeType}');
+          return null;
+        }
+
+        // Normalize data types to handle inconsistencies
+        userMap = _normalizeUserData(userMap);
+
+        return User.fromJson(userMap);
       }
       return null;
     } catch (e) {
       AppLogger.error('EnhancedAuthRepository: Failed to get stored user', e);
+      // Clear corrupted data
+      try {
+        await StorageService.remove(AppConstants.userDataKey);
+        AppLogger.info('EnhancedAuthRepository: Cleared corrupted user data');
+      } catch (clearError) {
+        AppLogger.error('EnhancedAuthRepository: Failed to clear corrupted data', clearError);
+      }
       return null;
     }
+  }
+
+  /// Normalize user data to handle type inconsistencies
+  Map<String, dynamic> _normalizeUserData(Map<String, dynamic> data) {
+    final normalized = Map<String, dynamic>.from(data);
+
+    AppLogger.info('EnhancedAuthRepository: Normalizing user data: ${data.keys.toList()}');
+
+    // Handle id field - convert string to int if needed
+    if (normalized['id'] != null) {
+      if (normalized['id'] is String) {
+        try {
+          normalized['id'] = int.parse(normalized['id']);
+          AppLogger.info('EnhancedAuthRepository: Converted id from string to int: ${normalized['id']}');
+        } catch (e) {
+          AppLogger.warning('EnhancedAuthRepository: Failed to parse id as int: ${normalized['id']}, error: $e');
+          // Try to extract numeric part if it's a mixed string
+          final idStr = normalized['id'] as String;
+          final numericPart = RegExp(r'\d+').firstMatch(idStr)?.group(0);
+          if (numericPart != null) {
+            try {
+              normalized['id'] = int.parse(numericPart);
+              AppLogger.info('EnhancedAuthRepository: Extracted numeric id: ${normalized['id']}');
+            } catch (e2) {
+              AppLogger.error('EnhancedAuthRepository: Failed to extract numeric id', e2);
+              normalized['id'] = 0; // Default fallback
+            }
+          } else {
+            normalized['id'] = 0; // Default fallback
+          }
+        }
+      } else if (normalized['id'] is double) {
+        normalized['id'] = (normalized['id'] as double).toInt();
+      }
+    }
+
+    // Handle age field - ensure it's a double
+    if (normalized['age'] != null) {
+      if (normalized['age'] is String) {
+        try {
+          normalized['age'] = double.parse(normalized['age']);
+          AppLogger.info('EnhancedAuthRepository: Converted age from string to double: ${normalized['age']}');
+        } catch (e) {
+          AppLogger.warning('EnhancedAuthRepository: Failed to parse age as double: ${normalized['age']}, error: $e');
+          normalized['age'] = 0.0; // Default value
+        }
+      } else if (normalized['age'] is int) {
+        normalized['age'] = (normalized['age'] as int).toDouble();
+      }
+    } else {
+      normalized['age'] = 0.0; // Default if null
+    }
+
+    // Handle string fields that should remain strings
+    final stringFields = ['phone', 'firstName', 'lastName', 'email', 'username', 'avatar'];
+    for (final field in stringFields) {
+      if (normalized[field] != null && normalized[field] is! String) {
+        normalized[field] = normalized[field].toString();
+      }
+    }
+
+    // Handle gender field
+    if (normalized['gender'] != null && normalized['gender'] is String) {
+      final genderStr = (normalized['gender'] as String).toLowerCase();
+      if (!['male', 'female'].contains(genderStr)) {
+        AppLogger.warning('EnhancedAuthRepository: Invalid gender value: ${normalized['gender']}, defaulting to male');
+        normalized['gender'] = 'male';
+      }
+    } else if (normalized['gender'] == null) {
+      normalized['gender'] = 'male'; // Default
+    }
+
+    // Handle date fields
+    final dateFields = ['createdAt', 'updatedAt'];
+    for (final field in dateFields) {
+      if (normalized[field] is String && normalized[field] != null) {
+        try {
+          // Validate that it's a proper date string
+          DateTime.parse(normalized[field]);
+          // Keep as ISO string for JSON serialization
+        } catch (e) {
+          AppLogger.warning('EnhancedAuthRepository: Failed to parse date field $field: ${normalized[field]}, error: $e');
+          normalized[field] = null;
+        }
+      }
+    }
+
+    AppLogger.info('EnhancedAuthRepository: Normalized user data successfully');
+    return normalized;
   }
 
   /// Store authentication tokens
@@ -242,7 +355,8 @@ class EnhancedAuthRepository {
     try {
       await _secureStorage.storeAccessToken(authResponse.accessToken);
       await _secureStorage.storeRefreshToken(authResponse.refreshToken);
-      await StorageService.store(AppConstants.userDataKey, authResponse.user.toJson());
+      // Note: AuthResponse doesn't contain user data, store tokens only
+      // User data should be fetched separately using getCurrentUser()
       
       AppLogger.info('EnhancedAuthRepository: Auth tokens stored successfully');
     } catch (e) {

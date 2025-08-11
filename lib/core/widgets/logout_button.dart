@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../theme/app_colors.dart';
 import '../utils/logger.dart';
-import '../../features/auth/presentation/providers/auth_provider.dart';
+import '../../features/auth/presentation/providers/enhanced_auth_provider.dart';
 
 /// Reusable logout button widget
 class LogoutButton extends StatelessWidget {
@@ -32,11 +32,11 @@ class LogoutButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<AuthProvider>(
+    return Consumer<EnhancedAuthProvider>(
       builder: (context, authProvider, child) {
         return ElevatedButton.icon(
-          onPressed: authProvider.isLoading 
-              ? null 
+          onPressed: authProvider.isLoading
+              ? null
               : () => _handleLogout(context, authProvider),
           icon: authProvider.isLoading
               ? const SizedBox(
@@ -60,7 +60,7 @@ class LogoutButton extends StatelessWidget {
   }
 
   /// Handle logout process
-  Future<void> _handleLogout(BuildContext context, AuthProvider authProvider) async {
+  Future<void> _handleLogout(BuildContext context, EnhancedAuthProvider authProvider) async {
     if (showConfirmation) {
       final confirmed = await _showLogoutConfirmation(context);
       if (!confirmed) return;
@@ -152,7 +152,7 @@ class LogoutListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<AuthProvider>(
+    return Consumer<EnhancedAuthProvider>(
       builder: (context, authProvider, child) {
         return ListTile(
           leading: Icon(
@@ -166,7 +166,7 @@ class LogoutListTile extends StatelessWidget {
               fontWeight: FontWeight.w500,
             ),
           ),
-          subtitle: subtitle != null 
+          subtitle: subtitle != null
               ? Text(subtitle!)
               : null,
           trailing: authProvider.isLoading
@@ -180,8 +180,8 @@ class LogoutListTile extends StatelessWidget {
                   size: 16,
                   color: AppColors.textSecondary,
                 ),
-          onTap: authProvider.isLoading 
-              ? null 
+          onTap: authProvider.isLoading
+              ? null
               : () => _handleLogout(context, authProvider),
         );
       },
@@ -189,7 +189,7 @@ class LogoutListTile extends StatelessWidget {
   }
 
   /// Handle logout process
-  Future<void> _handleLogout(BuildContext context, AuthProvider authProvider) async {
+  Future<void> _handleLogout(BuildContext context, EnhancedAuthProvider authProvider) async {
     if (showConfirmation) {
       final confirmed = await _showLogoutConfirmation(context);
       if (!confirmed) return;

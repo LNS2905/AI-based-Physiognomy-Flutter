@@ -24,7 +24,7 @@ class CameraScreen extends StatefulWidget {
 class _CameraScreenState extends State<CameraScreen>
     with WidgetsBindingObserver {
   final CameraService _cameraService = CameraService.instance;
-  bool _isProcessing = false; // Prevent multiple operations
+  // bool _isProcessing = false; // Currently unused // Prevent multiple operations
   bool _isInitializing = true;
   bool _isCapturing = false;
   String? _errorMessage;

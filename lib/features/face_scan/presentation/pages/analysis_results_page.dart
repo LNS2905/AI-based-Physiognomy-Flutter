@@ -161,8 +161,8 @@ class AnalysisResultsPage extends StatelessWidget {
   }
 
   Widget _buildMainResultsCard() {
-    final faceShape = _getPrimaryFaceShape();
-    final harmonyScore = _getHarmonyScoreForDisplay();
+    // final faceShape = _getPrimaryFaceShape(); // Currently unused
+    // final harmonyScore = _getHarmonyScoreForDisplay(); // Currently unused
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),

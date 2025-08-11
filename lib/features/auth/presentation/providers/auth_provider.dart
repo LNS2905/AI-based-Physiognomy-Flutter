@@ -1,9 +1,9 @@
 import '../../../../core/providers/base_provider.dart';
 import '../../../../core/network/api_result.dart';
 import '../../../../core/utils/logger.dart';
-import '../../data/models/auth_response_model.dart';
 import '../../data/models/user_model.dart';
 import '../../data/models/create_user_dto.dart';
+import '../../data/models/auth_models.dart' show User, Gender;
 import '../../data/repositories/auth_repository.dart';
 
 /// Authentication provider
@@ -13,11 +13,14 @@ class AuthProvider extends BaseProvider {
   AuthProvider({AuthRepository? authRepository})
       : _authRepository = authRepository ?? AuthRepository();
 
-  UserModel? _currentUser;
+  User? _currentUser;
   bool _isAuthenticated = false;
 
   /// Current authenticated user
-  UserModel? get currentUser => _currentUser;
+  User? get currentUser => _currentUser;
+
+  /// Current user ID
+  int? get userId => _currentUser?.id;
 
   /// Authentication status
   bool get isAuthenticated => _isAuthenticated;
@@ -34,11 +37,11 @@ class AuthProvider extends BaseProvider {
           final result = await _authRepository.getCurrentUser();
           AppLogger.info('AuthProvider: Get current user result: ${result.runtimeType}');
 
-          if (result is Success<UserModel>) {
+          if (result is Success<User>) {
             _currentUser = result.data;
             _isAuthenticated = true;
             AppLogger.info('AuthProvider: User authentication restored: ${result.data.displayName}');
-          } else if (result is Error<UserModel>) {
+          } else if (result is Error<User>) {
             AppLogger.warning('AuthProvider: Failed to restore user session: ${result.failure.message}');
             _clearAuthState();
           }
@@ -199,23 +202,23 @@ class AuthProvider extends BaseProvider {
     String? firstName,
     String? lastName,
     String? phone,
-    double? age,
+    int? age,
     Gender? gender,
   }) async {
     if (_currentUser == null) return false;
 
     // This would typically call an API endpoint to update the user
-    // For now, we'll just update the local state
-    final updatedUser = _currentUser!.copyWith(
+    // For now, we'll just create a new User instance with updated values
+    _currentUser = User(
+      id: _currentUser!.id,
       firstName: firstName ?? _currentUser!.firstName,
       lastName: lastName ?? _currentUser!.lastName,
+      email: _currentUser!.email,
       phone: phone ?? _currentUser!.phone,
       age: age ?? _currentUser!.age,
       gender: gender ?? _currentUser!.gender,
-      updatedAt: DateTime.now(),
+      avatar: _currentUser!.avatar,
     );
-
-    _currentUser = updatedUser;
     AppLogger.logStateChange(runtimeType.toString(), 'updateProfile', 'success');
     notifyListeners();
     return true;
@@ -249,8 +252,8 @@ class AuthProvider extends BaseProvider {
   /// Get user initials for avatar
   String get userInitials {
     if (_currentUser == null) return 'G';
-    final firstName = _currentUser!.firstName ?? '';
-    final lastName = _currentUser!.lastName ?? '';
+    final firstName = _currentUser!.firstName;
+    final lastName = _currentUser!.lastName;
 
     if (firstName.isNotEmpty && lastName.isNotEmpty) {
       return '${firstName[0]}${lastName[0]}'.toUpperCase();

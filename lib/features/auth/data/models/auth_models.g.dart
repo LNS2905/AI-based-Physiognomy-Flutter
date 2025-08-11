@@ -110,25 +110,17 @@ Map<String, dynamic> _$GoogleLoginRequestToJson(GoogleLoginRequest instance) =>
 
 User _$UserFromJson(Map<String, dynamic> json) => User(
   id: (json['id'] as num).toInt(),
-  username: json['username'] as String?,
   firstName: json['firstName'] as String,
   lastName: json['lastName'] as String,
   email: json['email'] as String,
   phone: json['phone'] as String,
-  age: (json['age'] as num).toDouble(),
+  age: (json['age'] as num).toInt(),
   gender: $enumDecode(_$GenderEnumMap, json['gender']),
   avatar: json['avatar'] as String?,
-  createdAt: json['createdAt'] == null
-      ? null
-      : DateTime.parse(json['createdAt'] as String),
-  updatedAt: json['updatedAt'] == null
-      ? null
-      : DateTime.parse(json['updatedAt'] as String),
 );
 
 Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
   'id': instance.id,
-  'username': instance.username,
   'firstName': instance.firstName,
   'lastName': instance.lastName,
   'email': instance.email,
@@ -136,8 +128,6 @@ Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
   'age': instance.age,
   'gender': _$GenderEnumMap[instance.gender]!,
   'avatar': instance.avatar,
-  'createdAt': instance.createdAt?.toIso8601String(),
-  'updatedAt': instance.updatedAt?.toIso8601String(),
 };
 
 AuthResponse _$AuthResponseFromJson(Map<String, dynamic> json) => AuthResponse(

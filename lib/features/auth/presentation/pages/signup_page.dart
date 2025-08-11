@@ -5,7 +5,8 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../core/widgets/bagua_logo.dart';
 import '../../data/models/create_user_dto.dart';
-import '../providers/auth_provider.dart';
+import '../../data/models/auth_models.dart' as auth_models;
+import '../providers/enhanced_auth_provider.dart';
 
 /// Sign Up page that matches the Figma design
 class SignUpPage extends StatefulWidget {
@@ -28,7 +29,7 @@ class _SignUpPageState extends State<SignUpPage> {
   bool _isPasswordVisible = false;
   bool _isConfirmPasswordVisible = false;
   bool _agreeToTerms = false;
-  Gender _selectedGender = Gender.male;
+  auth_models.Gender _selectedGender = auth_models.Gender.male;
 
   @override
   void dispose() {
@@ -759,7 +760,7 @@ class _SignUpPageState extends State<SignUpPage> {
     _usernameController.text = _emailController.text.trim();
 
     if (_formKey.currentState?.validate() ?? false) {
-      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final enhancedAuthProvider = Provider.of<EnhancedAuthProvider>(context, listen: false);
 
       // Parse age
       final age = double.tryParse(_ageController.text);
@@ -785,9 +786,20 @@ class _SignUpPageState extends State<SignUpPage> {
         gender: _selectedGender,
       );
 
-      final success = await authProvider.signup(createUserDto: createUserDto);
+      await enhancedAuthProvider.register(
+        username: createUserDto.username,
+        password: createUserDto.password,
+        confirmPassword: createUserDto.confirmPassword ?? createUserDto.password,
+        firstName: createUserDto.firstName,
+        lastName: createUserDto.lastName,
+        email: createUserDto.email,
+        phone: createUserDto.phone,
+        age: createUserDto.age,
+        gender: createUserDto.gender,
+        avatar: createUserDto.avatar,
+      );
 
-      if (success && mounted) {
+      if (mounted && enhancedAuthProvider.isAuthenticated) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Đăng ký thành công!'),
@@ -797,7 +809,7 @@ class _SignUpPageState extends State<SignUpPage> {
         // Navigate to survey after successful signup
         context.push('/survey');
       } else if (mounted) {
-        String errorMessage = authProvider.errorMessage ?? 'Đăng ký thất bại';
+        String errorMessage = enhancedAuthProvider.errorMessage ?? 'Đăng ký thất bại';
 
         // Check if it's a server error and provide helpful message
         if (errorMessage.contains('Internal server error') ||
@@ -820,12 +832,12 @@ class _SignUpPageState extends State<SignUpPage> {
   }
 
   void _handleGoogleSignup(BuildContext context) async {
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final enhancedAuthProvider = Provider.of<EnhancedAuthProvider>(context, listen: false);
 
     try {
-      final success = await authProvider.registerWithGoogle();
+      await enhancedAuthProvider.loginWithGoogle();
 
-      if (success && mounted) {
+      if (mounted && enhancedAuthProvider.isAuthenticated) {
         // Navigate to survey for new users or home for existing users
         context.go('/survey');
 
@@ -868,11 +880,11 @@ class _SignUpPageState extends State<SignUpPage> {
       child: Row(
         children: [
           Expanded(
-            child: RadioListTile<Gender>(
+            child: RadioListTile<auth_models.Gender>(
               title: const Text('Nam'),
-              value: Gender.male,
+              value: auth_models.Gender.male,
               groupValue: _selectedGender,
-              onChanged: (Gender? value) {
+              onChanged: (auth_models.Gender? value) {
                 setState(() {
                   _selectedGender = value!;
                 });
@@ -880,11 +892,11 @@ class _SignUpPageState extends State<SignUpPage> {
             ),
           ),
           Expanded(
-            child: RadioListTile<Gender>(
+            child: RadioListTile<auth_models.Gender>(
               title: const Text('Nữ'),
-              value: Gender.female,
+              value: auth_models.Gender.female,
               groupValue: _selectedGender,
-              onChanged: (Gender? value) {
+              onChanged: (auth_models.Gender? value) {
                 setState(() {
                   _selectedGender = value!;
                 });

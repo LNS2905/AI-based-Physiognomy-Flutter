@@ -1,15 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'auth_models.dart';
 
 part 'create_user_dto.g.dart';
-
-/// Gender enum
-enum Gender {
-  @JsonValue('male')
-  male,
-  @JsonValue('female')
-  female,
-}
 
 /// Create user DTO model
 @JsonSerializable()

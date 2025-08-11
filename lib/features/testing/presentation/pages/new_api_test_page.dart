@@ -20,7 +20,7 @@ class _NewApiTestPageState extends State<NewApiTestPage> {
 
   bool _isLoading = false;
   String _status = 'Ready to test new APIs';
-  List<String> _logs = [];
+  final List<String> _logs = <String>[];
 
   @override
   void initState() {

@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../providers/survey_provider.dart';
-import '../../data/models/survey_question_model.dart';
 import '../widgets/survey_option_widget.dart';
 
 /// Survey page that matches the Figma design

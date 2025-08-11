@@ -169,20 +169,16 @@ class GoogleLoginRequest {
 @JsonSerializable()
 class User {
   final int id;
-  final String? username;
   final String firstName;
   final String lastName;
   final String email;
   final String phone;
-  final double age;
+  final int age;
   final Gender gender;
   final String? avatar;
-  final DateTime? createdAt;
-  final DateTime? updatedAt;
 
   const User({
     required this.id,
-    this.username,
     required this.firstName,
     required this.lastName,
     required this.email,
@@ -190,13 +186,19 @@ class User {
     required this.age,
     required this.gender,
     this.avatar,
-    this.createdAt,
-    this.updatedAt,
   });
 
   factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
 
   Map<String, dynamic> toJson() => _$UserToJson(this);
+
+  /// Get display name (firstName + lastName)
+  String get displayName {
+    if (firstName.isEmpty && lastName.isEmpty) {
+      return email;
+    }
+    return '${firstName.trim()} ${lastName.trim()}'.trim();
+  }
 
   String get fullName => '$firstName $lastName';
 }

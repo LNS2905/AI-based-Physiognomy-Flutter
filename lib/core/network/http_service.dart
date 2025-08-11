@@ -6,12 +6,17 @@ import '../constants/app_constants.dart';
 import '../errors/exceptions.dart';
 import '../errors/failures.dart';
 import '../utils/logger.dart';
+import '../storage/secure_storage_service.dart';
 import 'api_result.dart';
 
 /// HTTP service for making API calls
 class HttpService {
   final http.Client _client;
   final String _baseUrl;
+  final SecureStorageService _secureStorage = SecureStorageService();
+
+  // Flag to prevent infinite refresh loops
+  bool _isRefreshing = false;
 
   HttpService({
     http.Client? client,
@@ -27,15 +32,18 @@ class HttpService {
   }) async {
     try {
       final uri = _buildUri(endpoint, queryParameters);
-      final requestHeaders = _buildHeaders(headers);
-
       AppLogger.logRequest('GET', uri.toString(), queryParameters);
 
-      final response = await _client
-          .get(uri, headers: requestHeaders)
-          .timeout(AppConstants.requestTimeout);
-
-      return _handleResponse(response, 'GET', uri.toString());
+      return await _executeWithRetry(
+        () async {
+          final requestHeaders = await _buildHeaders(headers);
+          return _client
+              .get(uri, headers: requestHeaders)
+              .timeout(AppConstants.requestTimeout);
+        },
+        'GET',
+        uri.toString(),
+      );
     } on SocketException {
       throw const NetworkException(
         message: AppConstants.networkErrorMessage,
@@ -47,6 +55,7 @@ class HttpService {
         code: 'HTTP_ERROR',
       );
     } catch (e) {
+      if (e is AuthException) rethrow;
       AppLogger.error('GET request failed', e);
       throw ServerException(
         message: AppConstants.unknownErrorMessage,
@@ -65,16 +74,19 @@ class HttpService {
   }) async {
     try {
       final uri = _buildUri(endpoint, queryParameters);
-      final requestHeaders = _buildHeaders(headers);
-      final requestBody = body != null ? jsonEncode(body) : null;
-
       AppLogger.logRequest('POST', uri.toString(), body);
 
-      final response = await _client
-          .post(uri, headers: requestHeaders, body: requestBody)
-          .timeout(AppConstants.requestTimeout);
-
-      return _handleResponse(response, 'POST', uri.toString());
+      return await _executeWithRetry(
+        () async {
+          final requestHeaders = await _buildHeaders(headers);
+          final requestBody = body != null ? jsonEncode(body) : null;
+          return _client
+              .post(uri, headers: requestHeaders, body: requestBody)
+              .timeout(AppConstants.requestTimeout);
+        },
+        'POST',
+        uri.toString(),
+      );
     } on SocketException {
       throw const NetworkException(
         message: AppConstants.networkErrorMessage,
@@ -86,6 +98,7 @@ class HttpService {
         code: 'HTTP_ERROR',
       );
     } catch (e) {
+      if (e is AuthException) rethrow;
       AppLogger.error('POST request failed', e);
       throw ServerException(
         message: AppConstants.unknownErrorMessage,
@@ -104,16 +117,19 @@ class HttpService {
   }) async {
     try {
       final uri = _buildUri(endpoint, queryParameters);
-      final requestHeaders = _buildHeaders(headers);
-      final requestBody = body != null ? jsonEncode(body) : null;
-
       AppLogger.logRequest('PUT', uri.toString(), body);
 
-      final response = await _client
-          .put(uri, headers: requestHeaders, body: requestBody)
-          .timeout(AppConstants.requestTimeout);
-
-      return _handleResponse(response, 'PUT', uri.toString());
+      return await _executeWithRetry(
+        () async {
+          final requestHeaders = await _buildHeaders(headers);
+          final requestBody = body != null ? jsonEncode(body) : null;
+          return _client
+              .put(uri, headers: requestHeaders, body: requestBody)
+              .timeout(AppConstants.requestTimeout);
+        },
+        'PUT',
+        uri.toString(),
+      );
     } on SocketException {
       throw const NetworkException(
         message: AppConstants.networkErrorMessage,
@@ -125,6 +141,7 @@ class HttpService {
         code: 'HTTP_ERROR',
       );
     } catch (e) {
+      if (e is AuthException) rethrow;
       AppLogger.error('PUT request failed', e);
       throw ServerException(
         message: AppConstants.unknownErrorMessage,
@@ -142,15 +159,18 @@ class HttpService {
   }) async {
     try {
       final uri = _buildUri(endpoint, queryParameters);
-      final requestHeaders = _buildHeaders(headers);
-
       AppLogger.logRequest('DELETE', uri.toString(), queryParameters);
 
-      final response = await _client
-          .delete(uri, headers: requestHeaders)
-          .timeout(AppConstants.requestTimeout);
-
-      return _handleResponse(response, 'DELETE', uri.toString());
+      return await _executeWithRetry(
+        () async {
+          final requestHeaders = await _buildHeaders(headers);
+          return _client
+              .delete(uri, headers: requestHeaders)
+              .timeout(AppConstants.requestTimeout);
+        },
+        'DELETE',
+        uri.toString(),
+      );
     } on SocketException {
       throw const NetworkException(
         message: AppConstants.networkErrorMessage,
@@ -162,6 +182,7 @@ class HttpService {
         code: 'HTTP_ERROR',
       );
     } catch (e) {
+      if (e is AuthException) rethrow;
       AppLogger.error('DELETE request failed', e);
       throw ServerException(
         message: AppConstants.unknownErrorMessage,
@@ -195,7 +216,7 @@ class HttpService {
       final request = http.MultipartRequest('POST', uri);
 
       // Add headers
-      final requestHeaders = _buildHeaders(headers);
+      final requestHeaders = await _buildHeaders(headers);
       request.headers.addAll(requestHeaders);
 
       // Add fields
@@ -265,12 +286,22 @@ class HttpService {
     );
   }
 
-  /// Build request headers
-  Map<String, String> _buildHeaders(Map<String, String>? additionalHeaders) {
+  /// Build request headers with automatic authorization
+  Future<Map<String, String>> _buildHeaders(Map<String, String>? additionalHeaders) async {
     final headers = <String, String>{
       'Content-Type': 'application/json',
       'Accept': 'application/json',
     };
+
+    // Add authorization header if available
+    try {
+      final accessToken = await _secureStorage.getAccessToken();
+      if (accessToken != null) {
+        headers['Authorization'] = 'Bearer $accessToken';
+      }
+    } catch (e) {
+      AppLogger.warning('HttpService: Failed to get access token for headers', e);
+    }
 
     if (additionalHeaders != null) {
       headers.addAll(additionalHeaders);
@@ -349,6 +380,89 @@ class HttpService {
       code: 'SERVER_ERROR',
       details: errorBody,
     );
+  }
+
+  /// Attempt to refresh access token
+  Future<bool> _attemptTokenRefresh() async {
+    if (_isRefreshing) {
+      AppLogger.info('HttpService: Token refresh already in progress');
+      return false;
+    }
+
+    try {
+      _isRefreshing = true;
+      AppLogger.info('HttpService: Attempting to refresh access token');
+
+      final refreshToken = await _secureStorage.getRefreshToken();
+      if (refreshToken == null) {
+        AppLogger.warning('HttpService: No refresh token available');
+        return false;
+      }
+
+      // Call refresh token endpoint
+      final response = await _client.post(
+        Uri.parse('$_baseUrl/auth/refresh-token'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: jsonEncode({'refreshToken': refreshToken}),
+      ).timeout(AppConstants.requestTimeout);
+
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
+        if (responseData['code'] == 'OPERATION_SUCCESS') {
+          final data = responseData['data'];
+          final newAccessToken = data['accessToken'] as String;
+          final newRefreshToken = data['refreshToken'] as String;
+
+          // Store new tokens
+          await _secureStorage.storeAccessToken(newAccessToken);
+          await _secureStorage.storeRefreshToken(newRefreshToken);
+
+          AppLogger.info('HttpService: Token refreshed successfully');
+          return true;
+        }
+      }
+
+      AppLogger.warning('HttpService: Token refresh failed with status ${response.statusCode}');
+      return false;
+    } catch (e) {
+      AppLogger.error('HttpService: Token refresh error', e);
+      return false;
+    } finally {
+      _isRefreshing = false;
+    }
+  }
+
+  /// Execute request with automatic token refresh on 401
+  Future<Map<String, dynamic>> _executeWithRetry(
+    Future<http.Response> Function() request,
+    String method,
+    String url,
+  ) async {
+    try {
+      final response = await request();
+      return _handleResponse(response, method, url);
+    } on AuthException catch (e) {
+      if (e.code == 'UNAUTHORIZED' && !_isRefreshing) {
+        AppLogger.info('HttpService: Received 401, attempting token refresh');
+
+        final refreshSuccess = await _attemptTokenRefresh();
+        if (refreshSuccess) {
+          AppLogger.info('HttpService: Retrying request after token refresh');
+          // Retry the original request with new token
+          final retryResponse = await request();
+          return _handleResponse(retryResponse, method, url);
+        } else {
+          AppLogger.warning('HttpService: Token refresh failed, clearing auth state');
+          // Clear tokens if refresh failed
+          await _secureStorage.clearAccessToken();
+          await _secureStorage.clearRefreshToken();
+        }
+      }
+      rethrow;
+    }
   }
 
   /// Dispose resources

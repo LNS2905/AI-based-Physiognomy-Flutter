@@ -8,7 +8,7 @@ import '../../../../core/utils/logger.dart';
 import '../../../../core/services/google_sign_in_service.dart';
 import '../../../../core/services/logout_service.dart';
 import '../models/auth_response_model.dart';
-import '../models/user_model.dart';
+import '../models/auth_models.dart';
 
 /// Authentication repository
 class AuthRepository {
@@ -179,7 +179,7 @@ class AuthRepository {
   }
 
   /// Get current user
-  Future<ApiResult<UserModel>> getCurrentUser() async {
+  Future<ApiResult<User>> getCurrentUser() async {
     try {
       final accessToken = await StorageService.getSecure(AppConstants.accessTokenKey);
       if (accessToken == null) {
@@ -196,7 +196,7 @@ class AuthRepository {
         },
       );
 
-      final user = UserModel.fromJson(response['data']);
+      final user = User.fromJson(response['data']);
       AppLogger.info('Current user retrieved successfully');
       return Success(user);
     } on AuthException catch (e) {

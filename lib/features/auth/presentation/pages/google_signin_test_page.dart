@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/logout_button.dart';
-import '../providers/auth_provider.dart';
+import '../providers/enhanced_auth_provider.dart';
 
 /// Test page for Google Sign-In functionality
 class GoogleSignInTestPage extends StatefulWidget {
@@ -60,7 +60,7 @@ class _GoogleSignInTestPageState extends State<GoogleSignInTestPage> {
             const SizedBox(height: 24),
 
             // Current User Info
-            Consumer<AuthProvider>(
+            Consumer<EnhancedAuthProvider>(
               builder: (context, authProvider, child) {
                 if (authProvider.isAuthenticated) {
                   return Card(
@@ -136,7 +136,7 @@ class _GoogleSignInTestPageState extends State<GoogleSignInTestPage> {
 
             const SizedBox(height: 12),
 
-            Consumer<AuthProvider>(
+            Consumer<EnhancedAuthProvider>(
               builder: (context, authProvider, child) {
                 if (authProvider.isAuthenticated) {
                   return LogoutButton(
@@ -175,12 +175,12 @@ class _GoogleSignInTestPageState extends State<GoogleSignInTestPage> {
     });
 
     try {
-      final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      final success = await authProvider.loginWithGoogle(googleToken: 'dummy_token');
+      final enhancedAuthProvider = Provider.of<EnhancedAuthProvider>(context, listen: false);
+      await enhancedAuthProvider.loginWithGoogle();
 
       setState(() {
-        _statusMessage = success 
-            ? 'Google Login successful!' 
+        _statusMessage = enhancedAuthProvider.isAuthenticated
+            ? 'Google Login successful!'
             : 'Google Login failed';
       });
     } catch (e) {
@@ -201,12 +201,12 @@ class _GoogleSignInTestPageState extends State<GoogleSignInTestPage> {
     });
 
     try {
-      final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      final success = await authProvider.registerWithGoogle();
+      final enhancedAuthProvider = Provider.of<EnhancedAuthProvider>(context, listen: false);
+      await enhancedAuthProvider.loginWithGoogle();
 
       setState(() {
-        _statusMessage = success 
-            ? 'Google Register successful!' 
+        _statusMessage = enhancedAuthProvider.isAuthenticated
+            ? 'Google Register successful!'
             : 'Google Register failed';
       });
     } catch (e) {
@@ -227,12 +227,12 @@ class _GoogleSignInTestPageState extends State<GoogleSignInTestPage> {
     });
 
     try {
-      final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      final success = await authProvider.silentGoogleSignIn();
+      final enhancedAuthProvider = Provider.of<EnhancedAuthProvider>(context, listen: false);
+      final success = await enhancedAuthProvider.silentGoogleSignIn();
 
       setState(() {
-        _statusMessage = success 
-            ? 'Silent Sign-In successful!' 
+        _statusMessage = success
+            ? 'Silent Sign-In successful!'
             : 'Silent Sign-In failed (no previous session)';
       });
     } catch (e) {

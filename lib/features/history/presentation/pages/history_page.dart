@@ -29,10 +29,13 @@ class _HistoryPageState extends State<HistoryPage> with TickerProviderStateMixin
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
     _scrollController = ScrollController();
-    
-    // Initialize history provider
+
+    // Initialize history provider - but it will wait for auth to be ready
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<HistoryProvider>().initialize();
+      final historyProvider = context.read<HistoryProvider>();
+      // The provider will automatically handle auth state changes
+      // No need to call initialize() immediately
+      AppLogger.info('HistoryPage: Initialized, waiting for auth state');
     });
   }
 

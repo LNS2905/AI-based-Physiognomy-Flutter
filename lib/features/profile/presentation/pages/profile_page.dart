@@ -3,10 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/error_handler.dart';
-import '../../../auth/presentation/providers/auth_provider.dart';
-import '../../../auth/data/models/user_model.dart';
+import '../../../auth/presentation/providers/enhanced_auth_provider.dart';
+import '../../../auth/data/models/auth_models.dart';
 import '../providers/profile_provider.dart';
 import '../widgets/profile_header.dart';
 import '../widgets/profile_stats.dart';
@@ -22,42 +21,49 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   late ProfileProvider _profileProvider;
-  late AuthProvider _authProvider;
+  late EnhancedAuthProvider _authProvider;
 
   @override
   void initState() {
     super.initState();
     _profileProvider = context.read<ProfileProvider>();
+    _authProvider = context.read<EnhancedAuthProvider>();
 
-    _authProvider = context.read<AuthProvider>();
-
-    // Initialize profile data
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _profileProvider.setContext(context);
-      _profileProvider.initializeProfile();
-      _initializeProfileData();
-    });
+    // Initialize profile data asynchronously
+    Future.microtask(() => _initializeProfileData());
   }
 
-  /// Initialize profile data with priority: API > AuthProvider > Storage > Mock
+  /// Initialize profile data with priority: EnhancedAuthProvider > API > Storage > Mock
   Future<void> _initializeProfileData() async {
     try {
-      // First, try to refresh user data from API /auth/me
-      if (_authProvider.isAuthenticated) {
-        await _profileProvider.refreshUserData();
+      // First, try to load user from EnhancedAuthProvider if available
+      final currentUser = _authProvider.currentUser;
+      if (currentUser != null && _profileProvider.currentUser == null) {
+        // Use a microtask to avoid setState during build
+        await Future.microtask(() => _profileProvider.loadUserFromAuthProvider(currentUser));
         return;
       }
-    } catch (e) {
-      // If API call fails, fallback to other methods
-      print('Failed to refresh from API, falling back: $e');
-    }
 
-    // Fallback: Try to load user from AuthProvider first
-    final currentUser = _authProvider.currentUser;
-    if (currentUser != null) {
-      _profileProvider.loadUserFromAuthProvider(currentUser);
-    } else {
+      // If no user in AuthProvider but still authenticated, try API
+      if (_authProvider.isAuthenticated) {
+        try {
+          await _profileProvider.refreshUserData();
+          return;
+        } catch (e) {
+          // If API call fails due to auth issues, clear auth state
+          if (e.toString().contains('Authentication') || e.toString().contains('token')) {
+            if (kDebugMode) print('Authentication failed, clearing auth state: $e');
+            // Don't clear auth state here, let the auth provider handle it
+          }
+          if (kDebugMode) print('Failed to refresh from API, falling back: $e');
+        }
+      }
+
       // Final fallback: Load from storage or use mock data
+      await _profileProvider.initializeProfile();
+    } catch (e) {
+      if (kDebugMode) print('Profile initialization failed: $e');
+      // Ensure we have some data to show
       await _profileProvider.initializeProfile();
     }
   }
@@ -66,13 +72,31 @@ class _ProfilePageState extends State<ProfilePage> {
   Future<void> _handleRefresh() async {
     try {
       if (_authProvider.isAuthenticated) {
-        await _profileProvider.refreshUserData();
+        // Synchronize ProfileProvider with current user from AuthProvider
+        if (_profileProvider.currentUser == null && _authProvider.currentUser != null) {
+          await Future.microtask(() => _profileProvider.loadUserFromAuthProvider(_authProvider.currentUser));
+        }
+
+        try {
+          await _profileProvider.refreshUserData();
+        } catch (e) {
+          // If refresh fails due to auth issues, fall back to current user data
+          if (e.toString().contains('Authentication') || e.toString().contains('token')) {
+            if (_authProvider.currentUser != null) {
+              await Future.microtask(() => _profileProvider.loadUserFromAuthProvider(_authProvider.currentUser));
+            } else {
+              await _initializeProfileData();
+            }
+          } else {
+            rethrow;
+          }
+        }
       } else {
         await _initializeProfileData();
       }
     } catch (e) {
-      // Show error message to user
-      if (mounted) {
+      // Show error message to user only for non-auth errors
+      if (mounted && !e.toString().contains('Authentication') && !e.toString().contains('token')) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Không thể cập nhật thông tin: ${e.toString()}'),
@@ -88,36 +112,39 @@ class _ProfilePageState extends State<ProfilePage> {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
-        child: Consumer2<AuthProvider, ProfileProvider>(
+        child: Consumer2<EnhancedAuthProvider, ProfileProvider>(
           builder: (context, authProvider, profileProvider, child) {
-            // Check if user is authenticated
-            if (!authProvider.isAuthenticated) {
-              return _buildUnauthenticatedState();
-            }
+            try {
+              // Check if user is authenticated
+              if (!authProvider.isAuthenticated) {
+                return _buildUnauthenticatedState();
+              }
 
-            // Use user from AuthProvider if available, otherwise from ProfileProvider
-            final currentUser = authProvider.currentUser ?? profileProvider.currentUser;
+              // Use user from EnhancedAuthProvider if available, otherwise from ProfileProvider
+              final User? currentUser = authProvider.currentUser ?? profileProvider.currentUser;
 
-            if (profileProvider.isLoading) {
-              return _buildLoadingState();
-            }
+              if (profileProvider.isLoading) {
+                return _buildLoadingState();
+              }
 
-            if (currentUser == null) {
+              if (currentUser == null) {
+                return _buildErrorState();
+              }
+
+              return RefreshIndicator(
+                onRefresh: _handleRefresh,
+                color: AppColors.primary,
+                child: _buildProfileContent(profileProvider, currentUser),
+              );
+            } catch (e, stackTrace) {
+              // Log the error for debugging
+              if (kDebugMode) {
+                print('ProfilePage build error: $e');
+                print('Stack trace: $stackTrace');
+              }
+              // Catch any rendering errors and show error state
               return _buildErrorState();
             }
-
-            // Update ProfileProvider with current user if needed
-            if (profileProvider.currentUser == null && authProvider.currentUser != null) {
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                profileProvider.loadUserFromAuthProvider(authProvider.currentUser);
-              });
-            }
-
-            return RefreshIndicator(
-              onRefresh: _handleRefresh,
-              color: AppColors.primary,
-              child: _buildProfileContent(profileProvider, currentUser),
-            );
           },
         ),
       ),
@@ -211,7 +238,7 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   /// Build main profile content
-  Widget _buildProfileContent(ProfileProvider provider, UserModel currentUser) {
+  Widget _buildProfileContent(ProfileProvider provider, User currentUser) {
     final screenWidth = MediaQuery.of(context).size.width;
     final isTablet = screenWidth > 600;
 
@@ -232,15 +259,9 @@ class _ProfilePageState extends State<ProfilePage> {
               
               const SizedBox(height: 8),
               
-              // Quick actions
-              ProfileQuickActions(
-                onEditProfile: () => _showEditProfileDialog(),
-                onViewHistory: () => _navigateToHistory(),
-                onSettings: () => _navigateToSettings(),
-              ),
-              
               // Profile statistics
-              if (provider.profileStats != null)
+              if (provider.profileStats != null &&
+                  provider.memberSinceText.isNotEmpty)
                 ProfileStats(
                   stats: provider.profileStats!,
                   memberSinceText: provider.memberSinceText,

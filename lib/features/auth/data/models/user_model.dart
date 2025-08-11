@@ -1,12 +1,12 @@
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'create_user_dto.dart'; // Import for Gender enum
+import 'auth_models.dart'; // Import for Gender enum
 
 part 'user_model.g.dart';
 
 /// Helper function to convert id from JSON (can be int or String)
 String _idFromJson(dynamic value) {
-  print('DEBUG: _idFromJson received value: $value (type: ${value.runtimeType})');
+  // Debug: Converting ID from JSON
   if (value is int) {
     return value.toString();
   } else if (value is String) {

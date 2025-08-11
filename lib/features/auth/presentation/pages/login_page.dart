@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/bagua_logo.dart';
-import '../providers/auth_provider.dart';
+import '../providers/enhanced_auth_provider.dart';
 
 /// Login page that matches the Figma design
 class LoginPage extends StatefulWidget {
@@ -539,12 +539,12 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _handleGoogleLogin(BuildContext context) async {
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final enhancedAuthProvider = Provider.of<EnhancedAuthProvider>(context, listen: false);
 
     try {
-      final success = await authProvider.loginWithGoogle(googleToken: 'dummy_token');
+      await enhancedAuthProvider.loginWithGoogle();
 
-      if (success && mounted) {
+      if (mounted && enhancedAuthProvider.isAuthenticated) {
         // Navigate to home after successful login
         context.go('/home');
 
@@ -579,9 +579,9 @@ class _LoginPageState extends State<LoginPage> {
 
   void _handleLogin() async {
     if (_formKey.currentState?.validate() ?? false) {
-      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final enhancedAuthProvider = Provider.of<EnhancedAuthProvider>(context, listen: false);
 
-      final success = await authProvider.login(
+      final success = await enhancedAuthProvider.login(
         username: _usernameController.text.trim(),
         password: _passwordController.text,
       );
@@ -598,7 +598,7 @@ class _LoginPageState extends State<LoginPage> {
       } else if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(authProvider.errorMessage ?? 'Đăng nhập thất bại'),
+            content: Text(enhancedAuthProvider.errorMessage ?? 'Đăng nhập thất bại'),
             backgroundColor: AppColors.error,
           ),
         );

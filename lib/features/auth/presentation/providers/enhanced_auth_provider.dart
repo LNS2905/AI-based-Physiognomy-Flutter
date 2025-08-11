@@ -1,7 +1,7 @@
 // Enhanced Authentication Provider
-import 'package:flutter/foundation.dart';
 import 'package:ai_physiognomy_app/core/providers/base_provider.dart';
 import 'package:ai_physiognomy_app/core/utils/logger.dart';
+import 'package:ai_physiognomy_app/core/network/api_result.dart';
 import 'package:ai_physiognomy_app/features/auth/data/repositories/enhanced_auth_repository.dart';
 import 'package:ai_physiognomy_app/features/auth/data/models/auth_models.dart';
 
@@ -10,15 +10,29 @@ class EnhancedAuthProvider extends BaseProvider {
 
   EnhancedAuthProvider({
     EnhancedAuthRepository? authRepository,
-  }) : _authRepository = authRepository ?? EnhancedAuthRepository();
+  }) : _authRepository = authRepository ?? EnhancedAuthRepository() {
+    // Initialize auth state when provider is created
+    _initializeOnCreate();
+  }
+
+  /// Initialize auth state when provider is created (only once)
+  void _initializeOnCreate() {
+    if (!_hasInitialized) {
+      _hasInitialized = true;
+      // Use Future.microtask to avoid calling during constructor
+      Future.microtask(() => initializeAuth());
+    }
+  }
 
   // Authentication state
   User? _currentUser;
   bool _isAuthenticated = false;
+  bool _hasInitialized = false;
 
   // Getters
   User? get currentUser => _currentUser;
   bool get isAuthenticated => _isAuthenticated;
+  bool get hasInitialized => _hasInitialized;
   String get userDisplayName => _currentUser?.fullName ?? 'User';
   String? get userEmail => _currentUser?.email;
   String? get userAvatar => _currentUser?.avatar;
@@ -26,7 +40,7 @@ class EnhancedAuthProvider extends BaseProvider {
   /// Initialize authentication state
   Future<void> initializeAuth() async {
     await executeApiOperation(
-      operation: () async {
+      () async {
         AppLogger.info('EnhancedAuthProvider: Initializing authentication state');
         
         // Check if user is logged in
@@ -47,16 +61,32 @@ class EnhancedAuthProvider extends BaseProvider {
               _isAuthenticated = true;
               AppLogger.info('EnhancedAuthProvider: Loaded user data from API');
             } catch (e) {
-              AppLogger.warning('EnhancedAuthProvider: Failed to load user from API, clearing auth state');
-              await _clearAuthState();
+              AppLogger.warning('EnhancedAuthProvider: Failed to load user from API: $e');
+
+              // Try to refresh token if it's an auth error
+              if (e.toString().contains('401') || e.toString().contains('UNAUTHORIZED')) {
+                AppLogger.info('EnhancedAuthProvider: Attempting token refresh');
+                try {
+                  await _authRepository.refreshToken();
+                  // Retry getting current user after refresh
+                  _currentUser = await _authRepository.getCurrentUser();
+                  _isAuthenticated = true;
+                  AppLogger.info('EnhancedAuthProvider: Successfully refreshed token and loaded user');
+                } catch (refreshError) {
+                  AppLogger.warning('EnhancedAuthProvider: Token refresh failed, clearing auth state');
+                  await _clearAuthState();
+                }
+              } else {
+                await _clearAuthState();
+              }
             }
           }
         } else {
           await _clearAuthState();
         }
-        
+
         AppLogger.info('EnhancedAuthProvider: Authentication state initialized');
-        return _isAuthenticated;
+        return Success(_isAuthenticated);
       },
       operationName: 'initialize_auth',
     );
@@ -76,7 +106,7 @@ class EnhancedAuthProvider extends BaseProvider {
     String? avatar,
   }) async {
     await executeApiOperation(
-      operation: () async {
+      () async {
         AppLogger.info('EnhancedAuthProvider: Registering new user');
         
         final createUserDto = CreateUserDTO(
@@ -93,56 +123,61 @@ class EnhancedAuthProvider extends BaseProvider {
         );
         
         final authResponse = await _authRepository.register(createUserDto);
-        
-        _currentUser = authResponse.user;
+
+        // Get user data after successful registration
+        _currentUser = await _authRepository.getCurrentUser();
         _isAuthenticated = true;
-        
+
         AppLogger.info('EnhancedAuthProvider: User registered successfully');
-        return authResponse;
+        return Success(authResponse);
       },
       operationName: 'register',
     );
   }
 
   /// Login user
-  Future<void> login({
+  Future<bool> login({
     required String username,
     required String password,
   }) async {
-    await executeApiOperation(
-      operation: () async {
+    final result = await executeApiOperation(
+      () async {
         AppLogger.info('EnhancedAuthProvider: Logging in user');
-        
+
         final authRequest = AuthRequest(
           username: username,
           password: password,
         );
-        
+
         final authResponse = await _authRepository.login(authRequest);
-        
-        _currentUser = authResponse.user;
+
+        // Get user data after successful login
+        _currentUser = await _authRepository.getCurrentUser();
         _isAuthenticated = true;
-        
+
         AppLogger.info('EnhancedAuthProvider: User logged in successfully');
-        return authResponse;
+        return Success(authResponse);
       },
       operationName: 'login',
     );
+
+    return result != null;
   }
 
   /// Login with Google
   Future<void> loginWithGoogle() async {
     await executeApiOperation(
-      operation: () async {
+      () async {
         AppLogger.info('EnhancedAuthProvider: Starting Google Sign-In');
         
         final authResponse = await _authRepository.loginWithGoogle();
-        
-        _currentUser = authResponse.user;
+
+        // Get user data after successful Google login
+        _currentUser = await _authRepository.getCurrentUser();
         _isAuthenticated = true;
-        
+
         AppLogger.info('EnhancedAuthProvider: Google Sign-In completed successfully');
-        return authResponse;
+        return Success(authResponse);
       },
       operationName: 'google_login',
     );
@@ -159,7 +194,7 @@ class EnhancedAuthProvider extends BaseProvider {
     String? avatar,
   }) async {
     await executeApiOperation(
-      operation: () async {
+      () async {
         AppLogger.info('EnhancedAuthProvider: Updating user profile');
         
         final updateUserDto = UpdateUserDTO(
@@ -177,7 +212,7 @@ class EnhancedAuthProvider extends BaseProvider {
         _currentUser = updatedUser;
         
         AppLogger.info('EnhancedAuthProvider: Profile updated successfully');
-        return updatedUser;
+        return Success(updatedUser);
       },
       operationName: 'update_profile',
     );
@@ -189,7 +224,7 @@ class EnhancedAuthProvider extends BaseProvider {
     required String newPassword,
   }) async {
     await executeApiOperation(
-      operation: () async {
+      () async {
         AppLogger.info('EnhancedAuthProvider: Changing password');
         
         final changePasswordDto = ChangePasswordDTO(
@@ -200,7 +235,7 @@ class EnhancedAuthProvider extends BaseProvider {
         await _authRepository.changePassword(changePasswordDto);
         
         AppLogger.info('EnhancedAuthProvider: Password changed successfully');
-        return true;
+        return Success(true);
       },
       operationName: 'change_password',
     );
@@ -209,13 +244,13 @@ class EnhancedAuthProvider extends BaseProvider {
   /// Request password reset
   Future<void> requestPasswordReset(String email) async {
     await executeApiOperation(
-      operation: () async {
+      () async {
         AppLogger.info('EnhancedAuthProvider: Requesting password reset');
         
         await _authRepository.requestPasswordReset(email);
         
         AppLogger.info('EnhancedAuthProvider: Password reset requested successfully');
-        return true;
+        return Success(true);
       },
       operationName: 'request_password_reset',
     );
@@ -227,13 +262,13 @@ class EnhancedAuthProvider extends BaseProvider {
     required String newPassword,
   }) async {
     await executeApiOperation(
-      operation: () async {
+      () async {
         AppLogger.info('EnhancedAuthProvider: Resetting password');
         
         await _authRepository.resetPassword(token, newPassword);
         
         AppLogger.info('EnhancedAuthProvider: Password reset successfully');
-        return true;
+        return Success(true);
       },
       operationName: 'reset_password',
     );
@@ -242,7 +277,7 @@ class EnhancedAuthProvider extends BaseProvider {
   /// Refresh current user data
   Future<void> refreshUserData() async {
     await executeApiOperation(
-      operation: () async {
+      () async {
         AppLogger.info('EnhancedAuthProvider: Refreshing user data');
         
         final user = await _authRepository.getCurrentUser();
@@ -250,7 +285,7 @@ class EnhancedAuthProvider extends BaseProvider {
         _currentUser = user;
         
         AppLogger.info('EnhancedAuthProvider: User data refreshed successfully');
-        return user;
+        return Success(user);
       },
       operationName: 'refresh_user_data',
     );
@@ -259,7 +294,7 @@ class EnhancedAuthProvider extends BaseProvider {
   /// Logout user
   Future<void> logout() async {
     await executeApiOperation(
-      operation: () async {
+      () async {
         AppLogger.info('EnhancedAuthProvider: Logging out user');
         
         await _authRepository.logout();
@@ -267,7 +302,7 @@ class EnhancedAuthProvider extends BaseProvider {
         await _clearAuthState();
         
         AppLogger.info('EnhancedAuthProvider: User logged out successfully');
-        return true;
+        return Success(true);
       },
       operationName: 'logout',
     );
@@ -281,10 +316,11 @@ class EnhancedAuthProvider extends BaseProvider {
       final authResponse = await _authRepository.silentGoogleSignIn();
       
       if (authResponse != null) {
-        _currentUser = authResponse.user;
+        // Get user data after successful silent login
+        _currentUser = await _authRepository.getCurrentUser();
         _isAuthenticated = true;
         notifyListeners();
-        
+
         AppLogger.info('EnhancedAuthProvider: Silent Google Sign-In successful');
         return true;
       } else {

@@ -18,7 +18,9 @@ import '../models/face_scan_request_model.dart';
 import '../models/face_scan_response_model.dart';
 import '../models/cloudinary_analysis_request_model.dart';
 import '../models/cloudinary_analysis_response_model.dart';
+import '../models/facial_analysis_dto.dart';
 import '../../../palm_scan/data/models/palm_analysis_response_model.dart';
+import '../../../palm_scan/data/models/palm_analysis_dto.dart';
 
 /// Repository for face scanning operations
 class FaceScanRepository {
@@ -559,6 +561,74 @@ class FaceScanRepository {
           code: 'CLOUDINARY_PALM_ANALYSIS_ERROR',
         ),
       );
+    }
+  }
+
+  /// Save palm analysis result to backend
+  Future<ApiResult<Map<String, dynamic>>> savePalmAnalysis(PalmAnalysisDto palmAnalysisDto) async {
+    try {
+      AppLogger.info('Saving palm analysis to backend');
+
+      final response = await _httpService.post(
+        'palm-analysis',
+        body: palmAnalysisDto.toJson(),
+      );
+
+      AppLogger.info('Palm analysis saved successfully');
+      return Success(response);
+    } on AuthException catch (e) {
+      AppLogger.error('Authentication error in savePalmAnalysis', e);
+      return Error(AuthFailure(message: e.message, code: e.code));
+    } on NetworkException catch (e) {
+      AppLogger.error('Network error in savePalmAnalysis', e);
+      return Error(NetworkFailure(message: e.message, code: e.code));
+    } on ServerException catch (e) {
+      AppLogger.error('Server error in savePalmAnalysis', e);
+      return Error(ServerFailure(
+        message: e.message,
+        statusCode: e.statusCode,
+        code: e.code,
+      ));
+    } catch (e) {
+      AppLogger.error('Exception in savePalmAnalysis', e);
+      return Error(UnknownFailure(
+        message: 'Failed to save palm analysis: ${e.toString()}',
+        code: 'SAVE_PALM_ANALYSIS_ERROR',
+      ));
+    }
+  }
+
+  /// Save facial analysis result to backend
+  Future<ApiResult<Map<String, dynamic>>> saveFacialAnalysis(FacialAnalysisDto facialAnalysisDto) async {
+    try {
+      AppLogger.info('Saving facial analysis to backend');
+
+      final response = await _httpService.post(
+        'facial-analysis',
+        body: facialAnalysisDto.toJson(),
+      );
+
+      AppLogger.info('Facial analysis saved successfully');
+      return Success(response);
+    } on AuthException catch (e) {
+      AppLogger.error('Authentication error in saveFacialAnalysis', e);
+      return Error(AuthFailure(message: e.message, code: e.code));
+    } on NetworkException catch (e) {
+      AppLogger.error('Network error in saveFacialAnalysis', e);
+      return Error(NetworkFailure(message: e.message, code: e.code));
+    } on ServerException catch (e) {
+      AppLogger.error('Server error in saveFacialAnalysis', e);
+      return Error(ServerFailure(
+        message: e.message,
+        statusCode: e.statusCode,
+        code: e.code,
+      ));
+    } catch (e) {
+      AppLogger.error('Exception in saveFacialAnalysis', e);
+      return Error(UnknownFailure(
+        message: 'Failed to save facial analysis: ${e.toString()}',
+        code: 'SAVE_FACIAL_ANALYSIS_ERROR',
+      ));
     }
   }
 }

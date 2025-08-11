@@ -50,7 +50,8 @@
 			"CreateUserDTO": {
 				"properties": {
 					"username": {
-						"type": "string"
+						"type": "string",
+						"nullable": true
 					},
 					"password": {
 						"type": "string"
@@ -83,7 +84,6 @@
 					}
 				},
 				"required": [
-					"username",
 					"password",
 					"firstName",
 					"lastName",
@@ -131,6 +131,231 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"_36_Enums.LineType": {
+				"type": "string",
+				"enum": [
+					"heart",
+					"head",
+					"life",
+					"fate",
+					"sun",
+					"unknown"
+				]
+			},
+			"LineType": {
+				"$ref": "#/components/schemas/_36_Enums.LineType"
+			},
+			"InterpretationDto": {
+				"properties": {
+					"lineType": {
+						"$ref": "#/components/schemas/LineType"
+					},
+					"pattern": {
+						"type": "string"
+					},
+					"meaning": {
+						"type": "string"
+					},
+					"lengthPx": {
+						"type": "number",
+						"format": "double"
+					},
+					"confidence": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"lineType",
+					"pattern",
+					"meaning",
+					"lengthPx",
+					"confidence"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"_36_Enums.LifeAspectType": {
+				"type": "string",
+				"enum": [
+					"health",
+					"career",
+					"relationships",
+					"personality"
+				]
+			},
+			"LifeAspectType": {
+				"$ref": "#/components/schemas/_36_Enums.LifeAspectType"
+			},
+			"LifeAspectDto": {
+				"properties": {
+					"aspect": {
+						"$ref": "#/components/schemas/LifeAspectType"
+					},
+					"content": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"aspect",
+					"content"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"PalmAnalysisDto": {
+				"properties": {
+					"userId": {
+						"type": "number",
+						"format": "double"
+					},
+					"annotatedImage": {
+						"type": "string"
+					},
+					"palmLinesDetected": {
+						"type": "number",
+						"format": "double"
+					},
+					"detectedHeartLine": {
+						"type": "number",
+						"format": "double"
+					},
+					"detectedHeadLine": {
+						"type": "number",
+						"format": "double"
+					},
+					"detectedLifeLine": {
+						"type": "number",
+						"format": "double"
+					},
+					"detectedFateLine": {
+						"type": "number",
+						"format": "double"
+					},
+					"targetLines": {
+						"type": "string"
+					},
+					"imageHeight": {
+						"type": "number",
+						"format": "double"
+					},
+					"imageWidth": {
+						"type": "number",
+						"format": "double"
+					},
+					"imageChannels": {
+						"type": "number",
+						"format": "double"
+					},
+					"summaryText": {
+						"type": "string"
+					},
+					"interpretations": {
+						"items": {
+							"$ref": "#/components/schemas/InterpretationDto"
+						},
+						"type": "array"
+					},
+					"lifeAspects": {
+						"items": {
+							"$ref": "#/components/schemas/LifeAspectDto"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"userId",
+					"annotatedImage",
+					"targetLines",
+					"imageHeight",
+					"imageWidth",
+					"imageChannels",
+					"summaryText",
+					"interpretations",
+					"lifeAspects"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Record_string.number_": {
+				"properties": {},
+				"additionalProperties": {
+					"type": "number",
+					"format": "double"
+				},
+				"type": "object",
+				"description": "Construct a type with a set of properties K of type T"
+			},
+			"FacialAnalysisDto": {
+				"properties": {
+					"userId": {
+						"type": "string"
+					},
+					"resultText": {
+						"type": "string"
+					},
+					"faceShape": {
+						"type": "string"
+					},
+					"harmonyScore": {
+						"type": "number",
+						"format": "double"
+					},
+					"probabilities": {
+						"$ref": "#/components/schemas/Record_string.number_"
+					},
+					"harmonyDetails": {
+						"$ref": "#/components/schemas/Record_string.number_"
+					},
+					"metrics": {
+						"items": {
+							"properties": {
+								"orientation": {
+									"type": "string"
+								},
+								"percentage": {
+									"type": "number",
+									"format": "double"
+								},
+								"pixels": {
+									"type": "number",
+									"format": "double"
+								},
+								"label": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"orientation",
+								"percentage",
+								"pixels",
+								"label"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"annotatedImage": {
+						"type": "string"
+					},
+					"processedAt": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"userId",
+					"resultText",
+					"faceShape",
+					"harmonyScore",
+					"probabilities",
+					"harmonyDetails",
+					"metrics",
+					"annotatedImage",
+					"processedAt"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"AuthRequest": {
 				"properties": {
 					"username": {
@@ -143,6 +368,58 @@
 				"required": [
 					"username",
 					"password"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ChangePasswordDTO": {
+				"properties": {
+					"oldPassword": {
+						"type": "string"
+					},
+					"password": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"oldPassword",
+					"password"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"RequestResetPassword": {
+				"properties": {
+					"email": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"email"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResetPassword": {
+				"properties": {
+					"password": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"password"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"RefreshTokenRequest": {
+				"properties": {
+					"refreshToken": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"refreshToken"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -686,6 +963,356 @@
 				}
 			}
 		},
+		"/palm-analysis": {
+			"post": {
+				"operationId": "SavePalmAnalysis",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Palm Analysis"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/PalmAnalysisDto"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/palm-analysis/user/{userId}": {
+			"get": {
+				"operationId": "GetPalmAnalysisByUser",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Palm Analysis"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "userId",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			}
+		},
+		"/palm-analysis/all": {
+			"get": {
+				"operationId": "GetAllPalmAnalyses",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Palm Analysis"
+				],
+				"security": [
+					{
+						"jwt": [
+							"ADMIN"
+						]
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/palm-analysis/{id}": {
+			"delete": {
+				"operationId": "DeletePalmAnalysis",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Palm Analysis"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			},
+			"put": {
+				"operationId": "UpdatePalmAnalysis",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Palm Analysis"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/PalmAnalysisDto"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/facial-analysis": {
+			"post": {
+				"operationId": "SaveFacialAnalysis",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/GeneralResponse"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Facial Analysis"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/FacialAnalysisDto"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/facial-analysis/user/{userId}": {
+			"get": {
+				"operationId": "GetFacialAnalysesByUser",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/GeneralResponse"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Facial Analysis"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "userId",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			}
+		},
+		"/facial-analysis/all": {
+			"get": {
+				"operationId": "GetAllFacialAnalyses",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/GeneralResponse"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Facial Analysis"
+				],
+				"security": [
+					{
+						"jwt": [
+							"ADMIN"
+						]
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/facial-analysis/{id}": {
+			"delete": {
+				"operationId": "DeleteFacialAnalysis",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/GeneralResponse"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Facial Analysis"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			},
+			"put": {
+				"operationId": "UpdateFacialAnalysis",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/GeneralResponse"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Facial Analysis"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/FacialAnalysisDto"
+							}
+						}
+					}
+				}
+			}
+		},
 		"/auth/user": {
 			"post": {
 				"operationId": "Login",
@@ -746,6 +1373,160 @@
 					}
 				],
 				"parameters": []
+			}
+		},
+		"/auth/me/change-password": {
+			"post": {
+				"operationId": "ChangePassword",
+				"responses": {
+					"200": {
+						"description": "Kết quả thay đổi mật khẩu.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/GeneralResponse"
+								}
+							}
+						}
+					}
+				},
+				"description": "Thay đổi mật khẩu của bản thân.",
+				"tags": [
+					"Authentication"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"description": "Dữ liệu thay đổi mật khẩu.",
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/ChangePasswordDTO",
+								"description": "Dữ liệu thay đổi mật khẩu."
+							}
+						}
+					}
+				}
+			}
+		},
+		"/auth/request-forgot-pass": {
+			"post": {
+				"operationId": "RequestForgotPassword",
+				"responses": {
+					"200": {
+						"description": "Kết quả yêu cầu đặt lại mật khẩu.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/GeneralResponse"
+								}
+							}
+						}
+					}
+				},
+				"description": "Yêu cầu đặt lại mật khẩu.",
+				"tags": [
+					"Authentication"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"description": "Dữ liệu yêu cầu đặt lại mật khẩu.",
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/RequestResetPassword",
+								"description": "Dữ liệu yêu cầu đặt lại mật khẩu."
+							}
+						}
+					}
+				}
+			}
+		},
+		"/auth/reset-pass": {
+			"post": {
+				"operationId": "ResetPassword",
+				"responses": {
+					"200": {
+						"description": "Kết quả đặt lại mật khẩu.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/GeneralResponse"
+								}
+							}
+						}
+					}
+				},
+				"description": "Đặt lại mật khẩu.",
+				"tags": [
+					"Authentication"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"description": "Token đặt lại mật khẩu.",
+						"in": "query",
+						"name": "token",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"description": "Dữ liệu mật khẩu mới.",
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/ResetPassword",
+								"description": "Dữ liệu mật khẩu mới."
+							}
+						}
+					}
+				}
+			}
+		},
+		"/auth/refresh-token": {
+			"post": {
+				"operationId": "RefreshToken",
+				"responses": {
+					"200": {
+						"description": "Token xác thực mới.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/GeneralResponse"
+								}
+							}
+						}
+					}
+				},
+				"description": "Làm mới token xác thực.",
+				"tags": [
+					"Authentication"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"description": "Dữ liệu refresh token.",
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/RefreshTokenRequest",
+								"description": "Dữ liệu refresh token."
+							}
+						}
+					}
+				}
 			}
 		},
 		"/auth/google": {

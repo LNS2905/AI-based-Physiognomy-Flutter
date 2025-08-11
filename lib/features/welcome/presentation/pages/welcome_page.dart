@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/bagua_logo.dart';
-import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../auth/presentation/providers/enhanced_auth_provider.dart';
 
 /// Welcome page that matches the Figma design
 class WelcomePage extends StatelessWidget {
@@ -300,12 +300,12 @@ class WelcomePage extends StatelessWidget {
   }
 
   void _handleGoogleLogin(BuildContext context) async {
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final enhancedAuthProvider = Provider.of<EnhancedAuthProvider>(context, listen: false);
 
     try {
-      final success = await authProvider.loginWithGoogle(googleToken: 'dummy_token');
+      await enhancedAuthProvider.loginWithGoogle();
 
-      if (success) {
+      if (enhancedAuthProvider.isAuthenticated) {
         // Navigate to home after successful login
         context.go('/home');
 

@@ -23,6 +23,7 @@ import '../../features/history/presentation/pages/palm_analysis_history_detail_p
 import '../../features/profile/presentation/pages/profile_page.dart';
 import '../../features/history/presentation/pages/chat_history_detail_page.dart';
 import '../../features/testing/presentation/pages/new_api_test_page.dart';
+import '../widgets/auth_guard.dart';
 
 /// Application router configuration using GoRouter
 class AppRouter {
@@ -199,11 +200,13 @@ class AppRouter {
         builder: (context, state) => const ProfilePage(),
       ),
 
-      // History Route
+      // History Route (Protected)
       GoRoute(
         path: AppConstants.historyRoute,
         name: 'history',
-        builder: (context, state) => const HistoryPage(),
+        builder: (context, state) => const HistoryPage().withAuthGuard(
+          loadingMessage: 'Đang tải lịch sử...',
+        ),
       ),
 
       // History Detail Routes

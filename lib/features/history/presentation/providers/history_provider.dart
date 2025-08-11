@@ -1,21 +1,38 @@
 import 'dart:async';
 import '../../../../core/providers/base_provider.dart';
 import '../../../../core/utils/logger.dart';
+import '../../../../core/network/api_result.dart';
+import '../../../auth/data/models/user_model.dart';
+import '../../../auth/presentation/providers/enhanced_auth_provider.dart';
 import '../../data/models/history_item_model.dart';
 import '../../data/models/chat_history_model.dart';
 import '../../data/services/mock_history_service.dart';
+import '../../data/repositories/history_repository.dart';
 
 /// Provider for managing history state and operations
 class HistoryProvider extends BaseProvider {
+  final HistoryRepository _historyRepository;
+  final EnhancedAuthProvider _authProvider;
+
   // History data
   List<HistoryItemModel> _allHistoryItems = [];
   List<HistoryItemModel> _filteredHistoryItems = [];
   HistoryFilterConfig _filterConfig = const HistoryFilterConfig();
-  
+
   // UI state
   bool _isSearching = false;
   String _searchQuery = '';
   Timer? _searchDebounceTimer;
+
+  // Auth state tracking
+  bool _hasInitialized = false;
+  StreamSubscription? _authStateSubscription;
+
+  HistoryProvider({required EnhancedAuthProvider authProvider})
+      : _authProvider = authProvider,
+        _historyRepository = HistoryRepository(authProvider: authProvider) {
+    _setupAuthListener();
+  }
 
   // Getters
   List<HistoryItemModel> get allHistoryItems => _allHistoryItems;
@@ -51,34 +68,104 @@ class HistoryProvider extends BaseProvider {
   int get chatConversationCount => _allHistoryItems.where((item) => item.type == HistoryItemType.chatConversation).length;
   int get favoriteCount => _allHistoryItems.where((item) => item.isFavorite).length;
 
-  /// Initialize history provider
-  Future<void> initialize() async {
-    AppLogger.info('Initializing history provider');
-    await loadHistory();
+  /// Setup authentication state listener
+  void _setupAuthListener() {
+    // Listen to auth provider changes
+    _authProvider.addListener(_onAuthStateChanged);
+
+    // Check initial auth state
+    _onAuthStateChanged();
   }
 
-  /// Load history items
-  Future<void> loadHistory() async {
+  /// Handle authentication state changes
+  void _onAuthStateChanged() {
+    AppLogger.info('HistoryProvider: Auth state changed - authenticated: ${_authProvider.isAuthenticated}, hasInitialized: $_hasInitialized');
+
+    if (_authProvider.isAuthenticated && !_hasInitialized) {
+      AppLogger.info('HistoryProvider: Auth state ready, initializing history');
+      _hasInitialized = true;
+      _initializeHistory();
+    } else if (_authProvider.isAuthenticated && _hasInitialized && _allHistoryItems.isEmpty) {
+      // Retry loading if auth is ready but we have no data (could be from previous failure)
+      AppLogger.info('HistoryProvider: Auth ready and no data, retrying history load');
+      _initializeHistory();
+    } else if (!_authProvider.isAuthenticated && _hasInitialized) {
+      AppLogger.info('HistoryProvider: Auth state lost, clearing history');
+      _hasInitialized = false;
+      _clearHistory();
+    }
+  }
+
+  /// Initialize history data when auth is ready
+  Future<void> _initializeHistory() async {
     try {
-      setLoading(true);
-      AppLogger.info('Loading history items');
+      await loadHistory();
+      AppLogger.info('HistoryProvider: History initialized successfully');
+    } catch (e) {
+      AppLogger.error('HistoryProvider: Failed to initialize history', e);
+    }
+  }
 
-      // Simulate network delay
-      await Future.delayed(const Duration(milliseconds: 800));
+  /// Clear history data when auth is lost
+  void _clearHistory() {
+    _allHistoryItems.clear();
+    _filteredHistoryItems.clear();
+    notifyListeners();
+    AppLogger.info('HistoryProvider: History cleared');
+  }
 
-      // Load mock data
-      _allHistoryItems = MockHistoryService.generateAllMockHistory();
-      
+  /// Initialize history provider (legacy method for backward compatibility)
+  Future<void> initialize() async {
+    AppLogger.info('HistoryProvider: Initialize called');
+
+    // Wait for auth to be ready if it's still initializing
+    if (!_authProvider.hasInitialized) {
+      AppLogger.info('HistoryProvider: Auth still initializing, waiting...');
+      // Wait up to 5 seconds for auth to initialize
+      int attempts = 0;
+      while (!_authProvider.hasInitialized && attempts < 50) {
+        await Future.delayed(const Duration(milliseconds: 100));
+        attempts++;
+      }
+    }
+
+    if (_authProvider.isAuthenticated) {
+      AppLogger.info('HistoryProvider: Auth ready, loading history');
+      await _initializeHistory();
+    } else {
+      AppLogger.info('HistoryProvider: Auth not ready, waiting for auth state');
+      // Will be handled by _onAuthStateChanged when auth becomes ready
+    }
+  }
+
+  /// Load history items with authentication check
+  Future<void> loadHistory() async {
+    // Check authentication before making API call
+    if (!_authProvider.isAuthenticated) {
+      AppLogger.warning('HistoryProvider: Cannot load history - user not authenticated');
+      setError('Vui lòng đăng nhập để xem lịch sử');
+      return;
+    }
+
+    final result = await executeApiOperation(
+      () => _historyRepository.getAllHistory(),
+      operationName: 'loadHistory',
+    );
+
+    if (result != null) {
+      _allHistoryItems = result;
+
       // Apply current filters
       _applyFilters();
 
-      AppLogger.info('Loaded ${_allHistoryItems.length} history items');
-      setLoading(false);
+      AppLogger.info('Loaded ${_allHistoryItems.length} history items from API');
       notifyListeners();
-    } catch (e) {
-      AppLogger.error('Failed to load history', e);
-      setError('Không thể tải lịch sử. Vui lòng thử lại.');
-      setLoading(false);
+    } else {
+      // Don't use mock data - show real error to user
+      AppLogger.error('Failed to load history from API');
+      _allHistoryItems = [];
+      _applyFilters();
+      notifyListeners();
     }
   }
 
@@ -301,6 +388,8 @@ class HistoryProvider extends BaseProvider {
   @override
   void dispose() {
     _searchDebounceTimer?.cancel();
+    _authStateSubscription?.cancel();
+    _authProvider.removeListener(_onAuthStateChanged);
     super.dispose();
   }
 }

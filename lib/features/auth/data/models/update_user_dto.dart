@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'create_user_dto.dart'; // Import for Gender enum
+import 'auth_models.dart'; // Import for Gender enum
 
 part 'update_user_dto.g.dart';
 
