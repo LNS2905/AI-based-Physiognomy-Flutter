@@ -62,41 +62,53 @@ class _PalmScanPageState extends State<PalmScanPage> {
                 ),
               ),
               child: SafeArea(
-                child: SingleChildScrollView(
-                  physics: const BouncingScrollPhysics(),
-                  child: Column(
-                    children: [
-                      // Header Section
-                      _buildHeader(context),
+                child: Stack(
+                  children: [
+                    // Main scrollable content
+                    SingleChildScrollView(
+                      physics: const BouncingScrollPhysics(),
+                      child: Column(
+                        children: [
+                          // Header Section
+                          _buildHeader(context),
 
-                      const SizedBox(height: 12),
+                          const SizedBox(height: 12),
 
-                      // Main Content Section
-                      _buildMainContent(),
+                          // Main Content Section
+                          _buildMainContent(),
 
-                      const SizedBox(height: 16),
+                          const SizedBox(height: 16),
 
-                      // Call-to-Action Text
-                      _buildCallToActionText(),
+                          // Call-to-Action Text
+                          _buildCallToActionText(),
 
-                      const SizedBox(height: 16),
+                          const SizedBox(height: 16),
 
-                      // Tab Navigation
-                      _buildTabNavigation(),
+                          // Tab Navigation
+                          _buildTabNavigation(),
 
-                      const SizedBox(height: 12),
+                          const SizedBox(height: 12),
 
-                      // Tab Content
-                      _buildTabContent(),
+                          // Tab Content
+                          _buildTabContent(),
 
-                      const SizedBox(height: 20),
-
-                      // Bottom Navigation Placeholder
-                      _buildBottomNavigation(),
-
-                      const SizedBox(height: 16),
-                    ],
-                  ),
+                          // Add bottom padding to avoid footer overlap
+                          const SizedBox(height: 100),
+                        ],
+                      ),
+                    ),
+                    
+                    // Fixed Bottom Navigation
+                    Positioned(
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      child: Container(
+                        padding: const EdgeInsets.only(bottom: 16),
+                        child: _buildBottomNavigation(),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),

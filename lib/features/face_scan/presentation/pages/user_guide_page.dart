@@ -77,7 +77,6 @@ class _UserGuidePageState extends State<UserGuidePage>
                 left: 0,
                 right: 0,
                 child: Container(
-                  color: Colors.white,
                   padding: const EdgeInsets.only(bottom: 20),
                   child: _buildBottomNavigation(),
                 ),
