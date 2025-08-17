@@ -169,22 +169,22 @@ class GoogleLoginRequest {
 @JsonSerializable()
 class User {
   final int id;
-  final String firstName;
-  final String lastName;
+  final String? firstName;
+  final String? lastName;
   final String email;
-  final String phone;
-  final int age;
-  final Gender gender;
+  final String? phone;
+  final int? age;
+  final Gender? gender;
   final String? avatar;
 
   const User({
     required this.id,
-    required this.firstName,
-    required this.lastName,
+    this.firstName,
+    this.lastName,
     required this.email,
-    required this.phone,
-    required this.age,
-    required this.gender,
+    this.phone,
+    this.age,
+    this.gender,
     this.avatar,
   });
 
@@ -194,13 +194,16 @@ class User {
 
   /// Get display name (firstName + lastName)
   String get displayName {
-    if (firstName.isEmpty && lastName.isEmpty) {
+    final first = firstName?.trim() ?? '';
+    final last = lastName?.trim() ?? '';
+    
+    if (first.isEmpty && last.isEmpty) {
       return email;
     }
-    return '${firstName.trim()} ${lastName.trim()}'.trim();
+    return '${first} ${last}'.trim();
   }
 
-  String get fullName => '$firstName $lastName';
+  String get fullName => '${firstName ?? ''} ${lastName ?? ''}'.trim();
 }
 
 /// Auth Response (login response) - only contains tokens

@@ -659,10 +659,19 @@ class _HistoryPageState extends State<HistoryPage> with TickerProviderStateMixin
     // Use summary text from metadata if available, otherwise use message
     final summaryText = metadata?['summaryText'] ?? item.analysisResult?.message ?? '';
     
+    // Calculate actual palm lines detected from the palm lines data
+    final palmLines = item.analysisResult?.analysis?.palmLines ?? {};
+    final activeLinesCount = [
+      if ((palmLines['heart'] ?? 0) > 0) 'heart',
+      if ((palmLines['head'] ?? 0) > 0) 'head',
+      if ((palmLines['life'] ?? 0) > 0) 'life',
+      if ((palmLines['fate'] ?? 0) > 0) 'fate',
+    ].length;
+    
     return PalmAnalysisServerModel(
       id: serverId is int ? serverId : int.tryParse(serverId.toString()) ?? 0,
       userId: int.tryParse(item.analysisResult?.userId ?? '0') ?? 0,
-      palmLinesDetected: item.analysisResult?.handsDetected ?? 0,
+      palmLinesDetected: activeLinesCount, // Use actual count of detected lines
       detectedHeartLine: (item.analysisResult?.analysis?.palmLines?['heart'] ?? 0).toInt(),
       detectedHeadLine: (item.analysisResult?.analysis?.palmLines?['head'] ?? 0).toInt(),
       detectedLifeLine: (item.analysisResult?.analysis?.palmLines?['life'] ?? 0).toInt(),

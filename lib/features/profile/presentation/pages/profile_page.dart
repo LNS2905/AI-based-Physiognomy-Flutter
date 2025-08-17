@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/error_handler.dart';
+import '../../../../core/utils/logger.dart';
 import '../../../auth/presentation/providers/enhanced_auth_provider.dart';
 import '../../../auth/data/models/auth_models.dart';
 import '../providers/profile_provider.dart';
@@ -44,9 +45,10 @@ class _ProfilePageState extends State<ProfilePage> {
     try {
       // First, try to load user from EnhancedAuthProvider if available
       final currentUser = _authProvider.currentUser;
-      if (currentUser != null && _profileProvider.currentUser == null) {
+      if (currentUser != null) {
         // Use a microtask to avoid setState during build
-        await Future.microtask(() => _profileProvider.loadUserFromAuthProvider(currentUser));
+        // This will now also load stats and menu items
+        await Future.microtask(() async => await _profileProvider.loadUserFromAuthProvider(currentUser));
         return;
       }
 
@@ -77,7 +79,7 @@ class _ProfilePageState extends State<ProfilePage> {
       if (_authProvider.isAuthenticated) {
         // Synchronize ProfileProvider with current user from AuthProvider
         if (_profileProvider.currentUser == null && _authProvider.currentUser != null) {
-          await Future.microtask(() => _profileProvider.loadUserFromAuthProvider(_authProvider.currentUser));
+          await Future.microtask(() async => await _profileProvider.loadUserFromAuthProvider(_authProvider.currentUser));
         }
 
         try {
@@ -86,7 +88,7 @@ class _ProfilePageState extends State<ProfilePage> {
           // If refresh fails due to auth issues, fall back to current user data
           if (e.toString().contains('Authentication') || e.toString().contains('token')) {
             if (_authProvider.currentUser != null) {
-              await Future.microtask(() => _profileProvider.loadUserFromAuthProvider(_authProvider.currentUser));
+              await Future.microtask(() async => await _profileProvider.loadUserFromAuthProvider(_authProvider.currentUser));
             } else {
               await _initializeProfileData();
             }
@@ -340,6 +342,15 @@ class _ProfilePageState extends State<ProfilePage> {
         ),
         IconButton(
           icon: Icon(
+            Icons.logout,
+            color: AppColors.error,
+            size: isTablet ? 28 : 24,
+          ),
+          onPressed: () => _showLogoutConfirmation(),
+          tooltip: 'Đăng xuất',
+        ),
+        IconButton(
+          icon: Icon(
             Icons.more_vert,
             color: AppColors.textPrimary,
             size: isTablet ? 28 : 24,
@@ -387,6 +398,53 @@ class _ProfilePageState extends State<ProfilePage> {
         ],
       ),
     );
+  }
+
+  /// Show logout confirmation dialog
+  void _showLogoutConfirmation() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Xác nhận đăng xuất'),
+        content: const Text('Bạn có chắc chắn muốn đăng xuất khỏi ứng dụng?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Hủy'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.of(context).pop();
+              await _performLogout();
+            },
+            child: Text(
+              'Đăng xuất',
+              style: TextStyle(color: AppColors.error),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Perform logout operation
+  Future<void> _performLogout() async {
+    try {
+      // Call logout method from ProfileProvider
+      await _profileProvider.logout();
+    } catch (e) {
+      AppLogger.error('ProfilePage: Logout failed', e);
+      
+      // Show error message
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Đăng xuất thất bại: ${e.toString()}'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
   }
 
   /// Show more options

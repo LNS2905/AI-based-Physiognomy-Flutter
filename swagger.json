@@ -1318,7 +1318,7 @@
 				"operationId": "Login",
 				"responses": {
 					"200": {
-						"description": "Thông tin xác thực và token.",
+						"description": "Ok",
 						"content": {
 							"application/json": {
 								"schema": {
@@ -1328,20 +1328,17 @@
 						}
 					}
 				},
-				"description": "Đăng nhập người dùng.",
 				"tags": [
 					"Authentication"
 				],
 				"security": [],
 				"parameters": [],
 				"requestBody": {
-					"description": "Thông tin đăng nhập.",
 					"required": true,
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/AuthRequest",
-								"description": "Thông tin đăng nhập."
+								"$ref": "#/components/schemas/AuthRequest"
 							}
 						}
 					}
@@ -1353,7 +1350,7 @@
 				"operationId": "GetCurrentLogin",
 				"responses": {
 					"200": {
-						"description": "Thông tin người dùng.",
+						"description": "Ok",
 						"content": {
 							"application/json": {
 								"schema": {
@@ -1363,7 +1360,6 @@
 						}
 					}
 				},
-				"description": "Lấy thông tin người dùng hiện tại.",
 				"tags": [
 					"Authentication"
 				],
@@ -1380,7 +1376,7 @@
 				"operationId": "ChangePassword",
 				"responses": {
 					"200": {
-						"description": "Kết quả thay đổi mật khẩu.",
+						"description": "Ok",
 						"content": {
 							"application/json": {
 								"schema": {
@@ -1390,7 +1386,6 @@
 						}
 					}
 				},
-				"description": "Thay đổi mật khẩu của bản thân.",
 				"tags": [
 					"Authentication"
 				],
@@ -1401,13 +1396,11 @@
 				],
 				"parameters": [],
 				"requestBody": {
-					"description": "Dữ liệu thay đổi mật khẩu.",
 					"required": true,
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/ChangePasswordDTO",
-								"description": "Dữ liệu thay đổi mật khẩu."
+								"$ref": "#/components/schemas/ChangePasswordDTO"
 							}
 						}
 					}
@@ -1419,7 +1412,7 @@
 				"operationId": "RequestForgotPassword",
 				"responses": {
 					"200": {
-						"description": "Kết quả yêu cầu đặt lại mật khẩu.",
+						"description": "Ok",
 						"content": {
 							"application/json": {
 								"schema": {
@@ -1429,20 +1422,17 @@
 						}
 					}
 				},
-				"description": "Yêu cầu đặt lại mật khẩu.",
 				"tags": [
 					"Authentication"
 				],
 				"security": [],
 				"parameters": [],
 				"requestBody": {
-					"description": "Dữ liệu yêu cầu đặt lại mật khẩu.",
 					"required": true,
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/RequestResetPassword",
-								"description": "Dữ liệu yêu cầu đặt lại mật khẩu."
+								"$ref": "#/components/schemas/RequestResetPassword"
 							}
 						}
 					}
@@ -1454,7 +1444,7 @@
 				"operationId": "ResetPassword",
 				"responses": {
 					"200": {
-						"description": "Kết quả đặt lại mật khẩu.",
+						"description": "Ok",
 						"content": {
 							"application/json": {
 								"schema": {
@@ -1464,14 +1454,12 @@
 						}
 					}
 				},
-				"description": "Đặt lại mật khẩu.",
 				"tags": [
 					"Authentication"
 				],
 				"security": [],
 				"parameters": [
 					{
-						"description": "Token đặt lại mật khẩu.",
 						"in": "query",
 						"name": "token",
 						"required": true,
@@ -1481,13 +1469,11 @@
 					}
 				],
 				"requestBody": {
-					"description": "Dữ liệu mật khẩu mới.",
 					"required": true,
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/ResetPassword",
-								"description": "Dữ liệu mật khẩu mới."
+								"$ref": "#/components/schemas/ResetPassword"
 							}
 						}
 					}
@@ -1499,7 +1485,7 @@
 				"operationId": "RefreshToken",
 				"responses": {
 					"200": {
-						"description": "Token xác thực mới.",
+						"description": "Ok",
 						"content": {
 							"application/json": {
 								"schema": {
@@ -1509,29 +1495,26 @@
 						}
 					}
 				},
-				"description": "Làm mới token xác thực.",
 				"tags": [
 					"Authentication"
 				],
 				"security": [],
 				"parameters": [],
 				"requestBody": {
-					"description": "Dữ liệu refresh token.",
 					"required": true,
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/RefreshTokenRequest",
-								"description": "Dữ liệu refresh token."
+								"$ref": "#/components/schemas/RefreshTokenRequest"
 							}
 						}
 					}
 				}
 			}
 		},
-		"/auth/google": {
+		"/auth/google/mobile": {
 			"post": {
-				"operationId": "LoginWithGoogle",
+				"operationId": "LoginWithGoogleMobile",
 				"responses": {
 					"200": {
 						"description": "Ok",
@@ -1561,6 +1544,46 @@
 								},
 								"required": [
 									"token"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/auth/google/web": {
+			"post": {
+				"operationId": "LoginWithGoogleWeb",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/GeneralResponse"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Authentication"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"code": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"code"
 								],
 								"type": "object"
 							}

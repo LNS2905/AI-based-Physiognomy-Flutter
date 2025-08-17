@@ -198,18 +198,21 @@ class HistoryRepository {
 
   /// Convert PalmAnalysisServerModel to PalmAnalysisResponseModel for display
   PalmAnalysisResponseModel _convertServerModelToResponseModel(PalmAnalysisServerModel serverModel) {
+    // Assume 1 hand for palm analysis (server doesn't track actual hands)
+    const assumedHandsDetected = 1;
+    
     return PalmAnalysisResponseModel(
       status: 'success',
       message: 'Palm analysis completed',
       userId: serverModel.userId.toString(),
       processedAt: serverModel.createdAt,
-      handsDetected: serverModel.palmLinesDetected,
+      handsDetected: assumedHandsDetected, // Use fixed value instead of palmLinesDetected
       processingTime: 0.0,
       analysisType: 'palm_analysis',
       annotatedImageUrl: serverModel.annotatedImage,
       comparisonImageUrl: null,
       analysis: PalmAnalysisDataModel(
-        handsDetected: serverModel.palmLinesDetected,
+        handsDetected: assumedHandsDetected, // Use fixed value
         handsData: [],
         measurements: {},
         palmLines: {
@@ -223,9 +226,9 @@ class HistoryRepository {
       measurementsSummary: MeasurementsSummaryModel(
         averagePalmWidth: serverModel.imageWidth,
         averageHandLength: serverModel.imageHeight,
-        totalHands: serverModel.palmLinesDetected,
+        totalHands: assumedHandsDetected, // Use fixed value
         leftHands: 0,
-        rightHands: 0,
+        rightHands: 1, // Assume right hand
         palmTypes: [],
         confidenceScores: {
           'overall': 0.8,

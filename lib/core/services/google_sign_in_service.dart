@@ -22,7 +22,7 @@ class GoogleSignInService {
       _googleSignIn = GoogleSignIn(
         scopes: ['email', 'profile'],
         // Use the web client ID for cross-platform compatibility
-        serverClientId: '353105233475-web.apps.googleusercontent.com',
+        serverClientId: '353105233475-8a2d1sjj6o5lv5vokol8jaua879pnppk.apps.googleusercontent.com',
       );
       _firebaseAuth = FirebaseAuth.instance;
       _isInitialized = true;

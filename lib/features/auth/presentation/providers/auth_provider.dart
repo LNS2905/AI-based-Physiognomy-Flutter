@@ -240,7 +240,7 @@ class AuthProvider extends BaseProvider {
     if (_currentUser == null) return false;
     return _currentUser!.firstName.isNotEmpty &&
            _currentUser!.lastName.isNotEmpty &&
-           _currentUser!.phone.isNotEmpty;
+           (_currentUser!.phone?.isNotEmpty ?? false);
   }
 
   /// Get user display name

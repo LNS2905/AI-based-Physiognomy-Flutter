@@ -62,6 +62,12 @@
 				<string>com.physiognomy.app.aiPhysiognomy</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.353105233475-l34ucf28ulmrmlk1emv53fgbts5agma2</string>
+			</array>
+		</dict>
 	</array>
 </dict>
 </plist>

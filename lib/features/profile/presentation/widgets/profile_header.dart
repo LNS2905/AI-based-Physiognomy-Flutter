@@ -75,10 +75,10 @@ class ProfileHeader extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
           
-          if (user.phone.isNotEmpty) ...[
+          if (user.phone?.isNotEmpty ?? false) ...[
             SizedBox(height: isTablet ? 6 : 4),
             Text(
-              user.phone,
+              user.phone ?? '',
               style: TextStyle(
                 fontSize: isTablet ? 16 : 14,
                 color: AppColors.textSecondary,

@@ -257,10 +257,12 @@ class AuthRepository {
       // Send Google auth data to backend
       final response = await _httpService.post(
         'auth/google',
-        body: googleResult.toApiMap(),
+        body: {
+          'token': googleResult.idToken,
+        },
       );
 
-      final authResponse = AuthResponseModel.fromJson(response);
+      final authResponse = AuthResponseModel.fromJson(response['data']);
 
       // Store tokens securely
       await _storeAuthTokens(authResponse);
@@ -301,10 +303,12 @@ class AuthRepository {
       // Send Google auth data to backend (same endpoint as login)
       final response = await _httpService.post(
         'auth/google',
-        body: googleResult.toApiMap(),
+        body: {
+          'token': googleResult.idToken,
+        },
       );
 
-      final authResponse = AuthResponseModel.fromJson(response);
+      final authResponse = AuthResponseModel.fromJson(response['data']);
 
       // Store tokens securely
       await _storeAuthTokens(authResponse);

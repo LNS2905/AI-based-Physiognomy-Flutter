@@ -1,16 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import '../../../../core/providers/base_provider.dart';
 import '../../../../core/network/api_result.dart';
 import '../../../../core/utils/logger.dart';
+import '../../../../core/services/logout_service.dart';
 import '../../../auth/data/models/auth_models.dart';
 import '../../../auth/data/repositories/user_repository.dart';
 import '../../../auth/data/repositories/auth_repository.dart';
+import '../../../auth/presentation/providers/enhanced_auth_provider.dart';
+import '../../data/services/analysis_statistics_service.dart';
 
 /// Profile provider for managing user profile state
 class ProfileProvider extends BaseProvider {
   final UserRepository _userRepository;
   final AuthRepository _authRepository;
+  AnalysisStatisticsService? _statisticsService;
 
   ProfileProvider({
     UserRepository? userRepository,
@@ -35,6 +40,11 @@ class ProfileProvider extends BaseProvider {
   /// Set context for navigation and dialogs
   void setContext(BuildContext context) {
     _context = context;
+    // Initialize statistics service with auth provider from context
+    if (_statisticsService == null) {
+      final authProvider = Provider.of<EnhancedAuthProvider>(context, listen: false);
+      _statisticsService = AnalysisStatisticsService(authProvider: authProvider);
+    }
   }
 
   /// Initialize profile with user data
@@ -43,8 +53,10 @@ class ProfileProvider extends BaseProvider {
     await executeOperation(
       () async {
         await _loadUserFromStorage();
-        _loadMockStats();
-        _loadMenuItems();
+        // Menu items should always be loaded regardless of user data source
+        if (_menuItems.isEmpty) {
+          _loadMenuItems();
+        }
       },
       operationName: 'initializeProfile',
       showLoading: false,
@@ -57,22 +69,33 @@ class ProfileProvider extends BaseProvider {
     if (result is Success<User>) {
       _currentUser = result.data;
       AppLogger.info('ProfileProvider: User data loaded from storage: ${_currentUser?.displayName}');
+      // Load real stats when user is loaded from storage
+      await _loadRealStats();
     } else {
       AppLogger.warning('ProfileProvider: Failed to load user from storage: ${result is Error ? (result as Error).failure.message : 'Unknown error'}');
       AppLogger.warning('ProfileProvider: Using mock data for demonstration');
       _loadMockUserData();
+      await _loadRealStats();
     }
   }
 
   /// Load user data from AuthProvider (alternative method)
-  void loadUserFromAuthProvider(User? user) {
+  Future<void> loadUserFromAuthProvider(User? user) async {
     if (user != null) {
       _currentUser = user;
       AppLogger.info('ProfileProvider: User data loaded from AuthProvider: ${_currentUser?.displayName}');
+      // Load real stats when user is loaded from AuthProvider
+      await _loadRealStats();
+      // Load menu items if not already loaded
+      if (_menuItems.isEmpty) {
+        _loadMenuItems();
+      }
       notifyListeners();
     } else {
       AppLogger.warning('ProfileProvider: No user data from AuthProvider, using mock data');
       _loadMockUserData();
+      await _loadRealStats();
+      _loadMenuItems();
       notifyListeners();
     }
   }
@@ -99,8 +122,8 @@ class ProfileProvider extends BaseProvider {
           // Update stored user data
           await _userRepository.storeUserData(result.data);
 
-          // Refresh stats after getting updated user data
-          _loadMockStats();
+          // Refresh real stats after getting updated user data
+          await _loadRealStats();
         } else if (result is Error<User>) {
           AppLogger.error('ProfileProvider: Failed to refresh user data: ${result.failure.message}');
           AppLogger.error('ProfileProvider: Failure type: ${result.failure.runtimeType}');
@@ -135,7 +158,7 @@ class ProfileProvider extends BaseProvider {
 
   /// Load mock user data
   void _loadMockUserData() {
-    _currentUser = User(
+    _currentUser = const User(
       id: 1,
       email: 'nguyenvana@example.com',
       firstName: 'Nguyễn',
@@ -149,18 +172,45 @@ class ProfileProvider extends BaseProvider {
     AppLogger.info('ProfileProvider: Mock user data loaded: ${_currentUser?.displayName}');
   }
 
-  /// Load mock profile statistics
+  /// Load real profile statistics from API
+  Future<void> _loadRealStats() async {
+    if (_statisticsService == null) {
+      AppLogger.warning('ProfileProvider: Statistics service not initialized, loading mock stats');
+      _loadMockStats();
+      return;
+    }
+
+    try {
+      AppLogger.info('ProfileProvider: Loading real statistics from API...');
+      final result = await _statisticsService!.getUserStatistics();
+      
+      if (result is Success<Map<String, dynamic>>) {
+        _profileStats = result.data;
+        AppLogger.info('ProfileProvider: Real stats loaded: ${_profileStats?['totalAnalyses']} total analyses');
+      } else if (result is Error) {
+        AppLogger.error('ProfileProvider: Failed to load real stats: ${result.failure?.message ?? 'Unknown error'}');
+        // Fallback to mock stats if API fails
+        _loadMockStats();
+      }
+    } catch (e) {
+      AppLogger.error('ProfileProvider: Exception loading real stats: $e');
+      // Fallback to mock stats on error
+      _loadMockStats();
+    }
+  }
+
+  /// Load mock profile statistics (fallback)
   void _loadMockStats() {
     _profileStats = {
-      'totalAnalyses': 15,
-      'faceAnalyses': 8,
-      'palmAnalyses': 7,
-      'lastAnalysisDate': DateTime.now().subtract(const Duration(days: 2)),
-      'memberSince': DateTime(2024, 1, 1),
-      'accuracyScore': 92.5,
+      'totalAnalyses': 0,
+      'faceAnalyses': 0,
+      'palmAnalyses': 0,
+      'lastAnalysisDate': null,
+      'memberSince': DateTime.now(),
+      'accuracyScore': 0.0,
     };
     
-    AppLogger.info('ProfileProvider: Mock stats loaded: ${_profileStats?['totalAnalyses']} total analyses');
+    AppLogger.info('ProfileProvider: Mock stats loaded (fallback): ${_profileStats?['totalAnalyses']} total analyses');
   }
 
   /// Load profile menu items
@@ -258,9 +308,54 @@ class ProfileProvider extends BaseProvider {
     // TODO: Implement navigation
   }
 
-  void _logout() {
+  /// Public method to perform logout
+  Future<void> logout() async {
+    await _logout();
+  }
+
+  Future<void> _logout() async {
     AppLogger.info('ProfileProvider: Logout requested');
-    // Logout will be handled by LogoutButton/LogoutListTile widget
+    
+    if (_context == null) {
+      AppLogger.error('ProfileProvider: Context not available for logout');
+      return;
+    }
+
+    try {
+      // Show loading indicator
+      setLoading(true);
+      
+      // Perform complete logout
+      await LogoutService.performCompleteLogout();
+      
+      // Clear auth provider state
+      if (_context != null) {
+        final authProvider = Provider.of<EnhancedAuthProvider>(_context!, listen: false);
+        await authProvider.logout();
+      }
+      
+      // Clear local profile data
+      _currentUser = null;
+      _profileStats = null;
+      _menuItems.clear();
+      
+      AppLogger.info('ProfileProvider: Logout completed successfully');
+      
+      // Navigate to login screen
+      if (_context != null && _context!.mounted) {
+        _context!.go('/login');
+      }
+      
+    } catch (e) {
+      AppLogger.error('ProfileProvider: Logout failed', e);
+      
+      // Still navigate to login even if logout partially failed
+      if (_context != null && _context!.mounted) {
+        _context!.go('/login');
+      }
+    } finally {
+      setLoading(false);
+    }
   }
 
   /// Get formatted member since text

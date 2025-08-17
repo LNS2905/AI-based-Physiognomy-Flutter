@@ -437,6 +437,6 @@ class NewAuthManager {
     return _currentUser!.firstName.isNotEmpty &&
            _currentUser!.lastName.isNotEmpty &&
            _currentUser!.email.isNotEmpty &&
-           _currentUser!.phone.isNotEmpty;
+           (_currentUser!.phone?.isNotEmpty ?? false);
   }
 }

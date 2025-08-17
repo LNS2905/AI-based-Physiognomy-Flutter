@@ -113,9 +113,9 @@ User _$UserFromJson(Map<String, dynamic> json) => User(
   firstName: json['firstName'] as String,
   lastName: json['lastName'] as String,
   email: json['email'] as String,
-  phone: json['phone'] as String,
-  age: (json['age'] as num).toInt(),
-  gender: $enumDecode(_$GenderEnumMap, json['gender']),
+  phone: json['phone'] as String?,
+  age: (json['age'] as num?)?.toInt(),
+  gender: $enumDecodeNullable(_$GenderEnumMap, json['gender']),
   avatar: json['avatar'] as String?,
 );
 
@@ -126,7 +126,7 @@ Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
   'email': instance.email,
   'phone': instance.phone,
   'age': instance.age,
-  'gender': _$GenderEnumMap[instance.gender]!,
+  'gender': _$GenderEnumMap[instance.gender],
   'avatar': instance.avatar,
 };
 

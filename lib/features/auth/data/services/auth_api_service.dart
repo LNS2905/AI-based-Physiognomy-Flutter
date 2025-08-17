@@ -86,7 +86,7 @@ class AuthApiService {
     
     try {
       final response = await http.post(
-        Uri.parse('$_baseUrl/auth/google'),
+        Uri.parse('$_baseUrl/auth/google/mobile'),
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
@@ -95,6 +95,11 @@ class AuthApiService {
       );
 
       AppLogger.info('AuthApiService: Google login response status: ${response.statusCode}');
+      
+      // Log response body for debugging
+      if (response.statusCode != 200) {
+        AppLogger.error('AuthApiService: Response body: ${response.body}');
+      }
 
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
@@ -105,9 +110,17 @@ class AuthApiService {
         } else {
           throw Exception(responseData['message'] ?? 'Google login failed');
         }
+      } else if (response.statusCode == 500) {
+        // Specific handling for server error
+        AppLogger.error('AuthApiService: Internal server error - backend may have issues');
+        throw Exception('Internal server error - Please check backend logs');
       } else {
-        final errorData = jsonDecode(response.body);
-        throw Exception(errorData['message'] ?? 'Google login failed');
+        try {
+          final errorData = jsonDecode(response.body);
+          throw Exception(errorData['message'] ?? 'Google login failed');
+        } catch (e) {
+          throw Exception('Google login failed with status: ${response.statusCode}');
+        }
       }
     } catch (e) {
       AppLogger.error('AuthApiService: Google login error: $e');

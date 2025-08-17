@@ -387,9 +387,9 @@ class _PalmAnalysisHistoryDetailPageState extends State<PalmAnalysisHistoryDetai
           const SizedBox(height: 12),
           
           _buildAnalysisItem(
-            'Số bàn tay phát hiện',
-            '${analysis.handsDetected}',
-            'Số lượng bàn tay được phát hiện trong ảnh',
+            'Bàn tay phân tích',
+            '1 bàn tay',
+            'Phân tích được thực hiện trên 1 bàn tay',
           ),
           const SizedBox(height: 8),
           

@@ -26,6 +26,7 @@ class AuthGuard extends StatefulWidget {
 class _AuthGuardState extends State<AuthGuard> {
   bool _hasCheckedAuth = false;
   bool _isListenerAdded = false;
+  EnhancedAuthProvider? _authProvider;
 
   @override
   void initState() {
@@ -37,10 +38,10 @@ class _AuthGuardState extends State<AuthGuard> {
 
   void _checkAuthState() {
     if (!_isListenerAdded) {
-      final authProvider = context.read<EnhancedAuthProvider>();
+      _authProvider = context.read<EnhancedAuthProvider>();
       
       // Listen to auth state changes only once
-      authProvider.addListener(_onAuthStateChanged);
+      _authProvider!.addListener(_onAuthStateChanged);
       _isListenerAdded = true;
       
       // Check current state
@@ -80,10 +81,9 @@ class _AuthGuardState extends State<AuthGuard> {
 
   @override
   void dispose() {
-    if (_isListenerAdded) {
+    if (_isListenerAdded && _authProvider != null) {
       try {
-        final authProvider = context.read<EnhancedAuthProvider>();
-        authProvider.removeListener(_onAuthStateChanged);
+        _authProvider!.removeListener(_onAuthStateChanged);
       } catch (e) {
         AppLogger.error('Error removing auth listener: $e');
       }
