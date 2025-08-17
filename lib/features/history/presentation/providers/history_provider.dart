@@ -1,8 +1,6 @@
 import 'dart:async';
 import '../../../../core/providers/base_provider.dart';
 import '../../../../core/utils/logger.dart';
-import '../../../../core/network/api_result.dart';
-import '../../../auth/data/models/user_model.dart';
 import '../../../auth/presentation/providers/enhanced_auth_provider.dart';
 import '../../../palm_scan/data/models/palm_analysis_server_model.dart';
 import '../../../palm_scan/data/services/palm_analysis_history_service.dart';
@@ -10,7 +8,6 @@ import '../../../face_scan/data/models/facial_analysis_server_model.dart';
 import '../../../face_scan/data/services/facial_analysis_history_service.dart';
 import '../../data/models/history_item_model.dart';
 import '../../data/models/chat_history_model.dart';
-import '../../data/services/mock_history_service.dart';
 import '../../data/repositories/history_repository.dart';
 
 /// Provider for managing history state and operations
@@ -33,6 +30,9 @@ class HistoryProvider extends BaseProvider {
   // Auth state tracking
   bool _hasInitialized = false;
   StreamSubscription? _authStateSubscription;
+  
+  // Disposal tracking
+  bool _isDisposed = false;
 
   HistoryProvider({required EnhancedAuthProvider authProvider})
       : _authProvider = authProvider,
@@ -60,13 +60,17 @@ class HistoryProvider extends BaseProvider {
   void setError(String message) {
     _errorMessage = message;
     setLoading(false);
-    notifyListeners();
+    if (!_isDisposed) {
+      notifyListeners();
+    }
   }
 
   @override
   void clearError() {
     _errorMessage = null;
-    notifyListeners();
+    if (!_isDisposed) {
+      notifyListeners();
+    }
   }
 
   // Statistics
@@ -107,8 +111,11 @@ class HistoryProvider extends BaseProvider {
   /// Initialize history data when auth is ready
   Future<void> _initializeHistory() async {
     try {
-      await loadHistory();
-      AppLogger.info('HistoryProvider: History initialized successfully');
+      // Check if provider is disposed before proceeding
+      if (!_isDisposed) {
+        await loadHistory();
+        AppLogger.info('HistoryProvider: History initialized successfully');
+      }
     } catch (e) {
       AppLogger.error('HistoryProvider: Failed to initialize history', e);
     }
@@ -118,7 +125,9 @@ class HistoryProvider extends BaseProvider {
   void _clearHistory() {
     _allHistoryItems.clear();
     _filteredHistoryItems.clear();
-    notifyListeners();
+    if (!_isDisposed) {
+      notifyListeners();
+    }
     AppLogger.info('HistoryProvider: History cleared');
   }
 
@@ -167,13 +176,17 @@ class HistoryProvider extends BaseProvider {
       _applyFilters();
 
       AppLogger.info('Loaded ${_allHistoryItems.length} history items from API');
-      notifyListeners();
+      if (!_isDisposed) {
+        notifyListeners();
+      }
     } else {
       // Don't use mock data - show real error to user
       AppLogger.error('Failed to load history from API');
       _allHistoryItems = [];
       _applyFilters();
-      notifyListeners();
+      if (!_isDisposed) {
+        notifyListeners();
+      }
     }
   }
 
@@ -191,8 +204,10 @@ class HistoryProvider extends BaseProvider {
     // Debounce search to avoid excessive filtering
     _searchDebounceTimer?.cancel();
     _searchDebounceTimer = Timer(const Duration(milliseconds: 300), () {
-      _applyFilters();
-      notifyListeners();
+      if (!_isDisposed) {
+        _applyFilters();
+        notifyListeners();
+      }
     });
 
     AppLogger.info('Searching history: "$query"');
@@ -204,7 +219,9 @@ class HistoryProvider extends BaseProvider {
     _isSearching = false;
     _searchDebounceTimer?.cancel();
     _applyFilters();
-    notifyListeners();
+    if (!_isDisposed) {
+      notifyListeners();
+    }
     AppLogger.info('Search cleared');
   }
 
@@ -212,7 +229,9 @@ class HistoryProvider extends BaseProvider {
   void updateFilter(HistoryFilterConfig newConfig) {
     _filterConfig = newConfig;
     _applyFilters();
-    notifyListeners();
+    if (!_isDisposed) {
+      notifyListeners();
+    }
     AppLogger.info('Filter updated: ${newConfig.filterDisplayName}');
   }
 
@@ -220,7 +239,9 @@ class HistoryProvider extends BaseProvider {
   void setFilter(HistoryFilter filter) {
     _filterConfig = _filterConfig.copyWith(filter: filter);
     _applyFilters();
-    notifyListeners();
+    if (!_isDisposed) {
+      notifyListeners();
+    }
     AppLogger.info('Filter set to: ${filter.name}');
   }
 
@@ -228,7 +249,9 @@ class HistoryProvider extends BaseProvider {
   void setSort(HistorySort sort) {
     _filterConfig = _filterConfig.copyWith(sort: sort);
     _applyFilters();
-    notifyListeners();
+    if (!_isDisposed) {
+      notifyListeners();
+    }
     AppLogger.info('Sort set to: ${sort.name}');
   }
 
@@ -243,7 +266,9 @@ class HistoryProvider extends BaseProvider {
       
       _allHistoryItems[itemIndex] = updatedItem;
       _applyFilters();
-      notifyListeners();
+      if (!_isDisposed) {
+        notifyListeners();
+      }
 
       AppLogger.info('Toggled favorite for item: $itemId');
     } catch (e) {
@@ -257,7 +282,9 @@ class HistoryProvider extends BaseProvider {
     try {
       _allHistoryItems.removeWhere((item) => item.id == itemId);
       _applyFilters();
-      notifyListeners();
+      if (!_isDisposed) {
+        notifyListeners();
+      }
 
       AppLogger.info('Deleted history item: $itemId');
     } catch (e) {
@@ -271,7 +298,9 @@ class HistoryProvider extends BaseProvider {
     try {
       _allHistoryItems.clear();
       _filteredHistoryItems.clear();
-      notifyListeners();
+      if (!_isDisposed) {
+        notifyListeners();
+      }
 
       AppLogger.info('Cleared all history');
     } catch (e) {
@@ -464,6 +493,7 @@ class HistoryProvider extends BaseProvider {
 
   @override
   void dispose() {
+    _isDisposed = true;
     _searchDebounceTimer?.cancel();
     _authStateSubscription?.cancel();
     _authProvider.removeListener(_onAuthStateChanged);

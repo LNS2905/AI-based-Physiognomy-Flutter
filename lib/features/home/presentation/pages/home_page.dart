@@ -72,24 +72,6 @@ class HomePage extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // Menu/Navigation Icon
-          Container(
-            width: isTablet ? 48 : 40,
-            height: isTablet ? 48 : 40,
-            decoration: BoxDecoration(
-              color: AppColors.surfaceVariant,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: AppColors.border),
-            ),
-            child: Icon(
-              Icons.menu,
-              color: AppColors.textSecondary,
-              size: isTablet ? 24 : 20,
-            ),
-          ),
-
-          SizedBox(width: isTablet ? 16 : 12),
-
           // Title/Logo Area
           Expanded(
             child: Column(

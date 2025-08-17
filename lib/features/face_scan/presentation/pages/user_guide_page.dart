@@ -50,26 +50,39 @@ class _UserGuidePageState extends State<UserGuidePage>
       body: SafeArea(
         child: FadeTransition(
           opacity: _fadeAnimation,
-          child: SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
-            child: Column(
-              children: [
-                // Header Section
-                _buildHeader(context),
+          child: Stack(
+            children: [
+              // Main scrollable content
+              SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                child: Column(
+                  children: [
+                    // Header Section
+                    _buildHeader(context),
 
-                const SizedBox(height: 20),
+                    const SizedBox(height: 20),
 
-                // Steps Section
-                _buildStepsSection(),
+                    // Steps Section
+                    _buildStepsSection(),
 
-                const SizedBox(height: 40),
-
-                // Bottom Navigation Placeholder
-                _buildBottomNavigation(),
-
-                const SizedBox(height: 20),
-              ],
-            ),
+                    // Add bottom padding to avoid footer overlap
+                    const SizedBox(height: 100),
+                  ],
+                ),
+              ),
+              
+              // Fixed Bottom Navigation
+              Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: Container(
+                  color: Colors.white,
+                  padding: const EdgeInsets.only(bottom: 20),
+                  child: _buildBottomNavigation(),
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -200,15 +213,21 @@ class _UserGuidePageState extends State<UserGuidePage>
 
   Widget _buildBottomNavigation() {
     return Container(
-      width: double.infinity,
-      height: 100,
+      margin: const EdgeInsets.symmetric(horizontal: 32),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border(
-          top: BorderSide(
-            color: AppColors.border,
-            width: 1,
+        borderRadius: BorderRadius.circular(25),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
           ),
+        ],
+        border: Border.all(
+          color: AppColors.primary.withOpacity(0.1),
+          width: 1,
         ),
       ),
       child: Row(
@@ -216,23 +235,22 @@ class _UserGuidePageState extends State<UserGuidePage>
         children: [
           _buildBottomNavItem(
             Icons.home_outlined,
-            'Trang chủ',
+            isActive: false,
             onTap: () => _navigateToHome(),
           ),
           _buildBottomNavItem(
             Icons.search_outlined,
-            'Tìm kiếm',
+            isActive: false,
             onTap: () => _navigateToSearch(),
           ),
           _buildBottomNavItem(
-            Icons.face_retouching_natural,
-            'Quét',
+            Icons.help_outline,
             isActive: true,
-            onTap: () => {}, // Current section, no action needed
+            onTap: () => {}, // Current page, no action needed
           ),
           _buildBottomNavItem(
             Icons.person_outline,
-            'Hồ sơ',
+            isActive: false,
             onTap: () => _navigateToProfile(),
           ),
         ],
@@ -240,35 +258,37 @@ class _UserGuidePageState extends State<UserGuidePage>
     );
   }
 
-  Widget _buildBottomNavItem(IconData icon, String label, {bool isActive = false, required VoidCallback onTap}) {
+  Widget _buildBottomNavItem(IconData icon, {required bool isActive, required VoidCallback onTap}) {
     return GestureDetector(
       onTap: onTap,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            width: 30,
-            height: 30,
-            decoration: BoxDecoration(
-              color: isActive ? AppColors.primary : Colors.transparent,
-              borderRadius: BorderRadius.circular(15),
-            ),
-            child: Icon(
-              icon,
-              size: 20,
-              color: isActive ? Colors.white : AppColors.textSecondary,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.w500,
-              color: isActive ? AppColors.primary : AppColors.textSecondary,
-            ),
-          ),
-        ],
+      child: Container(
+        width: 45,
+        height: 45,
+        decoration: BoxDecoration(
+          gradient: isActive
+              ? LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [AppColors.primary, AppColors.primaryDark],
+                )
+              : null,
+          color: isActive ? null : Colors.transparent,
+          borderRadius: BorderRadius.circular(15),
+          boxShadow: isActive
+              ? [
+                  BoxShadow(
+                    color: AppColors.primary.withOpacity(0.3),
+                    blurRadius: 10,
+                    offset: const Offset(0, 5),
+                  ),
+                ]
+              : null,
+        ),
+        child: Icon(
+          icon,
+          size: isActive ? 22 : 20,
+          color: isActive ? Colors.white : AppColors.textSecondary,
+        ),
       ),
     );
   }

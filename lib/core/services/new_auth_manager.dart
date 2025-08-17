@@ -419,8 +419,8 @@ class NewAuthManager {
   String get userInitials {
     if (_currentUser == null) return 'U';
     
-    final firstName = _currentUser!.firstName;
-    final lastName = _currentUser!.lastName;
+    final firstName = _currentUser!.firstName ?? '';
+    final lastName = _currentUser!.lastName ?? '';
     
     if (firstName.isEmpty && lastName.isEmpty) return 'U';
     
@@ -434,9 +434,9 @@ class NewAuthManager {
   bool get hasCompleteProfile {
     if (_currentUser == null) return false;
     
-    return _currentUser!.firstName.isNotEmpty &&
-           _currentUser!.lastName.isNotEmpty &&
-           _currentUser!.email.isNotEmpty &&
+    return (_currentUser!.firstName?.isNotEmpty ?? false) &&
+           (_currentUser!.lastName?.isNotEmpty ?? false) &&
+           (_currentUser!.email?.isNotEmpty ?? false) &&
            (_currentUser!.phone?.isNotEmpty ?? false);
   }
 }

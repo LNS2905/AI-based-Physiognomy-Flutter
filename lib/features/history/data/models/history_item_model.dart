@@ -280,17 +280,11 @@ class PalmAnalysisHistoryModel extends HistoryItemModel {
     Map<String, dynamic>? metadata,
   }) {
     final now = DateTime.now();
-    final totalLines = analysisResult.analysis?.palmLines.length ?? 0;
-    
-    // Create more accurate title and description
-    final lineText = totalLines > 0 ? '$totalLines đường chỉ tay' : 'phân tích vân tay';
     
     return PalmAnalysisHistoryModel(
       id: id,
-      title: 'Phân tích vân tay - $lineText',
-      description: totalLines > 0 
-          ? 'Kết quả phân tích phát hiện $totalLines đường chỉ tay với độ chính xác cao.'
-          : 'Kết quả phân tích vân tay đã hoàn thành.',
+      title: 'Phân tích vân tay',
+      description: 'Kết quả phân tích vân tay đã hoàn thành.',
       createdAt: now,
       updatedAt: now,
       analysisResult: analysisResult,
@@ -299,7 +293,7 @@ class PalmAnalysisHistoryModel extends HistoryItemModel {
       comparisonImageUrl: comparisonImageUrl ?? analysisResult.comparisonImageUrl,
       metadata: metadata,
       thumbnailUrl: annotatedImageUrl ?? analysisResult.annotatedImageUrl,
-      tags: ['palm', 'analysis', '${totalLines}_lines'],
+      tags: ['palm', 'analysis'],
     );
   }
 

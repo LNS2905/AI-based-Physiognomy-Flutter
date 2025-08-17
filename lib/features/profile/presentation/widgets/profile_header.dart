@@ -192,12 +192,12 @@ class ProfileHeader extends StatelessWidget {
   String _getUserInitials() {
     String initials = '';
 
-    if (user.firstName.isNotEmpty) {
-      initials += user.firstName[0].toUpperCase();
+    if (user.firstName?.isNotEmpty ?? false) {
+      initials += user.firstName![0].toUpperCase();
     }
 
-    if (user.lastName.isNotEmpty) {
-      initials += user.lastName[0].toUpperCase();
+    if (user.lastName?.isNotEmpty ?? false) {
+      initials += user.lastName![0].toUpperCase();
     }
 
     if (initials.isEmpty) {
