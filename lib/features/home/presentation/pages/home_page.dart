@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/fixed_bottom_navigation.dart';
 
 /// Home page that matches the Figma wireframe design
 class HomePage extends StatelessWidget {
@@ -11,49 +12,56 @@ class HomePage extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
-        child: Column(
+        child: Stack(
           children: [
-            // Header Section
-            _buildHeader(context),
+            // Main content
+            Column(
+              children: [
+                // Header Section
+                _buildHeader(context),
 
-            // Search Bar
-            _buildSearchBar(context),
+                // Search Bar
+                _buildSearchBar(context),
 
-            // Main Content
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Column(
-                  children: [
-                    const SizedBox(height: 16),
+                // Main Content
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 16),
 
-                    // Feature Cards Grid
-                    _buildFeatureCardsGrid(context),
+                        // Feature Cards Grid
+                        _buildFeatureCardsGrid(context),
 
-                    const SizedBox(height: 24),
+                        const SizedBox(height: 24),
 
-                    // Banner Section
-                    _buildBannerSection(context),
+                        // Banner Section
+                        _buildBannerSection(context),
 
-                    const SizedBox(height: 24),
+                        const SizedBox(height: 24),
 
-                    // Daily News Carousel
-                    _buildDailyNewsCarousel(context),
+                        // Daily News Carousel
+                        _buildDailyNewsCarousel(context),
 
-                    const SizedBox(height: 24),
+                        const SizedBox(height: 24),
 
-                    // Additional Content
-                    _buildAdditionalContent(context),
+                        // Additional Content
+                        _buildAdditionalContent(context),
 
-                    const SizedBox(height: 100), // Space for bottom navigation
-                  ],
+                        const SizedBox(height: 100), // Space for bottom navigation
+                      ],
+                    ),
+                  ),
                 ),
-              ),
+              ],
             ),
+            
+            // Fixed Bottom Navigation
+            FixedBottomNavigation(currentRoute: '/home'),
           ],
         ),
       ),
-      bottomNavigationBar: _buildBottomNavigation(context),
     );
   }
 
@@ -99,21 +107,22 @@ class HomePage extends StatelessWidget {
           // Profile/Settings Icons
           Row(
             children: [
-              Container(
-                width: isTablet ? 48 : 40,
-                height: isTablet ? 48 : 40,
-                decoration: BoxDecoration(
-                  color: AppColors.surfaceVariant,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: AppColors.border),
-                ),
-                child: Icon(
-                  Icons.notifications_outlined,
-                  color: AppColors.textSecondary,
-                  size: isTablet ? 24 : 20,
-                ),
-              ),
-              SizedBox(width: isTablet ? 12 : 8),
+              // Notifications button - HIDDEN
+              // Container(
+              //   width: isTablet ? 48 : 40,
+              //   height: isTablet ? 48 : 40,
+              //   decoration: BoxDecoration(
+              //     color: AppColors.surfaceVariant,
+              //     borderRadius: BorderRadius.circular(8),
+              //     border: Border.all(color: AppColors.border),
+              //   ),
+              //   child: Icon(
+              //     Icons.notifications_outlined,
+              //     color: AppColors.textSecondary,
+              //     size: isTablet ? 24 : 20,
+              //   ),
+              // ),
+              // SizedBox(width: isTablet ? 12 : 8),
               GestureDetector(
                 onTap: () => context.push('/profile'),
                 child: Container(
@@ -496,69 +505,94 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  /// Build feature cards grid section
+  /// Build feature cards grid section with responsive design
   Widget _buildFeatureCardsGrid(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final isTablet = screenWidth > 600;
+    
+    // Enhanced responsive breakpoints
+    final isLargeTablet = screenWidth > 900;  // Large tablets/Desktop
+    final isTablet = screenWidth > 600;       // Regular tablets
+    final isMobile = screenWidth <= 600;      // Mobile devices
 
-    if (isTablet) {
-      // For tablets, show 6 cards in a 2x3 grid
-      return GridView.count(
+    // Define feature cards data - 4 main features only
+    final featureCards = [
+      {
+        'icon': Icons.face_retouching_natural,
+        'title': 'Quét khuôn mặt',
+        'description': 'Phân tích các nét mặt',
+        'route': '/face-scanning',
+      },
+      {
+        'icon': Icons.back_hand,
+        'title': 'Quét vân tay', 
+        'description': 'Phân tích đường chỉ tay',
+        'route': '/palm-scanning',
+      },
+      {
+        'icon': Icons.chat_bubble_outline,
+        'title': 'AI Chatbot',
+        'description': 'Trò chuyện với trợ lý AI',
+        'route': '/ai-conversation',
+      },
+      {
+        'icon': Icons.history,
+        'title': 'Lịch sử',
+        'description': 'Xem lịch sử phân tích',
+        'route': '/history',
+      },
+    ];
+
+    if (isLargeTablet) {
+      // Large tablets: 4 columns in single row for perfect 4-card layout
+      return GridView.builder(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
-        crossAxisCount: 2,
-        crossAxisSpacing: 16,
-        mainAxisSpacing: 16,
-        childAspectRatio: 1.2,
-        children: [
-          _buildFeatureCard(
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 4,
+          crossAxisSpacing: 24,
+          mainAxisSpacing: 24,
+          childAspectRatio: 0.9, // Slightly taller cards for large screens
+        ),
+        itemCount: featureCards.length,
+        itemBuilder: (context, index) {
+          final card = featureCards[index];
+          return _buildFeatureCard(
             context,
-            icon: Icons.face_retouching_natural,
-            title: 'Quét khuôn mặt',
-            description: 'Phân tích các nét mặt',
-            onTap: () => context.push('/face-scanning'),
-          ),
-          _buildFeatureCard(
+            icon: card['icon'] as IconData,
+            title: card['title'] as String,
+            description: card['description'] as String,
+            onTap: () => context.push(card['route'] as String),
+          );
+        },
+      );
+    } else if (isTablet) {
+      // Regular tablets: 2x2 grid - perfect for 4 cards
+      return GridView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 20,
+          mainAxisSpacing: 20,
+          childAspectRatio: 1.2,
+        ),
+        itemCount: featureCards.length,
+        itemBuilder: (context, index) {
+          final card = featureCards[index];
+          return _buildFeatureCard(
             context,
-            icon: Icons.back_hand,
-            title: 'Quét vân tay',
-            description: 'Phân tích đường chỉ tay',
-            onTap: () => context.push('/palm-scanning'),
-          ),
-          _buildFeatureCard(
-            context,
-            icon: Icons.chat_bubble_outline,
-            title: 'Chatbot AI',
-            description: 'Trò chuyện với trợ lý AI',
-            onTap: () => context.push('/chatbot'),
-          ),
-          _buildFeatureCard(
-            context,
-            icon: Icons.analytics_outlined,
-            title: 'Kết quả',
-            description: 'Xem kết quả phân tích',
-            onTap: () => context.push('/result'),
-          ),
-          _buildFeatureCard(
-            context,
-            icon: Icons.person_outline,
-            title: 'Hồ sơ',
-            description: 'Quản lý hồ sơ của bạn',
-            onTap: () => context.push('/profile'),
-          ),
-          _buildFeatureCard(
-            context,
-            icon: Icons.help_outline,
-            title: 'Hướng dẫn',
-            description: 'Hướng dẫn sử dụng',
-            onTap: () => context.push('/user-guide'),
-          ),
-        ],
+            icon: card['icon'] as IconData,
+            title: card['title'] as String,
+            description: card['description'] as String,
+            onTap: () => context.push(card['route'] as String),
+          );
+        },
       );
     } else {
-      // For mobile, show cards in a 2x2 grid
+      // Mobile: Perfect 2x2 grid layout for 4 main features
       return Column(
         children: [
+          // First row - Analysis features
           Row(
             children: [
               Expanded(
@@ -583,6 +617,8 @@ class HomePage extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
+          
+          // Second row - Support features
           Row(
             children: [
               Expanded(
@@ -747,61 +783,4 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  /// Build bottom navigation bar
-  Widget _buildBottomNavigation(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        color: AppColors.surface,
-        border: Border(
-          top: BorderSide(color: AppColors.border, width: 1),
-        ),
-      ),
-      child: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        backgroundColor: AppColors.surface,
-        selectedItemColor: AppColors.primary,
-        unselectedItemColor: AppColors.textSecondary,
-        currentIndex: 0,
-        elevation: 0,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined),
-            activeIcon: Icon(Icons.home),
-            label: 'Trang chủ',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.face_outlined),
-            activeIcon: Icon(Icons.face),
-            label: 'Quét',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.chat_bubble_outline),
-            activeIcon: Icon(Icons.chat_bubble),
-            label: 'Trò chuyện',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            activeIcon: Icon(Icons.person),
-            label: 'Hồ sơ',
-          ),
-        ],
-        onTap: (index) {
-          switch (index) {
-            case 0:
-              // Already on home
-              break;
-            case 1:
-              context.push('/face-scanning');
-              break;
-            case 2:
-              context.push('/ai-conversation');
-              break;
-            case 3:
-              context.push('/profile');
-              break;
-          }
-        },
-      ),
-    );
-  }
 }

@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/error_handler.dart';
 import '../../../../core/utils/logger.dart';
+import '../../../../core/widgets/fixed_bottom_navigation.dart';
 import '../../../auth/presentation/providers/enhanced_auth_provider.dart';
 import '../../../auth/data/models/auth_models.dart';
 import '../providers/profile_provider.dart';
@@ -117,35 +118,43 @@ class _ProfilePageState extends State<ProfilePage> {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
-        child: Consumer2<EnhancedAuthProvider, ProfileProvider>(
-          builder: (context, authProvider, profileProvider, child) {
-            try {
-              // Check if user is authenticated
-              if (!authProvider.isAuthenticated) {
-                return _buildUnauthenticatedState();
-              }
+        child: Stack(
+          children: [
+            // Main content
+            Consumer2<EnhancedAuthProvider, ProfileProvider>(
+              builder: (context, authProvider, profileProvider, child) {
+                try {
+                  // Check if user is authenticated
+                  if (!authProvider.isAuthenticated) {
+                    return _buildUnauthenticatedState();
+                  }
 
-              // Use user from EnhancedAuthProvider if available, otherwise from ProfileProvider
-              final User? currentUser = authProvider.currentUser ?? profileProvider.currentUser;
+                  // Use user from EnhancedAuthProvider if available, otherwise from ProfileProvider
+                  final User? currentUser = authProvider.currentUser ?? profileProvider.currentUser;
 
-              if (profileProvider.isLoading) {
-                return _buildLoadingState();
-              }
+                  if (profileProvider.isLoading) {
+                    return _buildLoadingState();
+                  }
 
-              if (currentUser == null) {
-                return _buildErrorState();
-              }
+                  if (currentUser == null) {
+                    return _buildErrorState();
+                  }
 
-              return RefreshIndicator(
-                onRefresh: _handleRefresh,
-                color: AppColors.primary,
-                child: _buildProfileContent(profileProvider, currentUser),
-              );
-            } catch (e, stackTrace) {
-              // Catch any rendering errors and show error state
-              return _buildErrorState();
-            }
-          },
+                  return RefreshIndicator(
+                    onRefresh: _handleRefresh,
+                    color: AppColors.primary,
+                    child: _buildProfileContent(profileProvider, currentUser),
+                  );
+                } catch (e, stackTrace) {
+                  // Catch any rendering errors and show error state
+                  return _buildErrorState();
+                }
+              },
+            ),
+            
+            // Fixed Bottom Navigation
+            FixedBottomNavigation(currentRoute: '/profile'),
+          ],
         ),
       ),
     );
@@ -283,8 +292,8 @@ class _ProfilePageState extends State<ProfilePage> {
 
 
               
-              // Bottom spacing
-              SizedBox(height: isTablet ? 32 : 24),
+              // Bottom spacing for fixed navigation
+              SizedBox(height: isTablet ? 132 : 124), // Extra space for fixed footer
             ],
           ),
         ),

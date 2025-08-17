@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/logger.dart';
+import '../../../../core/widgets/fixed_bottom_navigation.dart';
 import '../../../history/presentation/providers/history_provider.dart';
 import '../../data/models/palm_analysis_server_model.dart';
 import 'palm_analysis_results_page.dart';
@@ -76,8 +77,18 @@ class _PalmAnalysisHistoryListPageState extends State<PalmAnalysisHistoryListPag
           ),
         ],
       ),
-      body: SafeArea(
-        child: _buildBody(),
+      body: Stack(
+        children: [
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 100),
+              child: _buildBody(),
+            ),
+          ),
+          FixedBottomNavigation(
+            currentRoute: '/history',
+          ),
+        ],
       ),
     );
   }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/logger.dart';
+import '../../../../core/widgets/fixed_bottom_navigation.dart';
 import '../../data/models/palm_analysis_response_model.dart';
 
 /// Page to display palm analysis results
@@ -62,15 +63,25 @@ class _PalmAnalysisResultsPageState extends State<PalmAnalysisResultsPage>
           ],
         ),
       ),
-      body: SafeArea(
-        bottom: true,
-        child: TabBarView(
-          controller: _tabController,
-          children: [
-            _buildInterpretationTab(),
-            _buildImagesTab(),
-          ],
-        ),
+      body: Stack(
+        children: [
+          SafeArea(
+            bottom: true,
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 100),
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  _buildInterpretationTab(),
+                  _buildImagesTab(),
+                ],
+              ),
+            ),
+          ),
+          FixedBottomNavigation(
+            currentRoute: '/palm-analysis-results',
+          ),
+        ],
       ),
     );
   }
@@ -102,7 +113,7 @@ class _PalmAnalysisResultsPageState extends State<PalmAnalysisResultsPage>
     }
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -473,7 +484,7 @@ class _PalmAnalysisResultsPageState extends State<PalmAnalysisResultsPage>
 
   Widget _buildImagesTab() {
     return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24), // Giảm padding bottom
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
       child: Column(
         children: [
           if (widget.annotatedImagePath != null)

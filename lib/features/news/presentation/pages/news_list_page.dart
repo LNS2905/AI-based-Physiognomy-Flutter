@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/bagua_logo.dart';
+import '../../../../core/widgets/fixed_bottom_navigation.dart';
 import '../../data/models/news_article_model.dart';
 
 /// News list page showing all available articles
@@ -53,40 +54,47 @@ class _NewsListPageState extends State<NewsListPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: CustomScrollView(
-        slivers: [
-          _buildSliverAppBar(),
-          SliverToBoxAdapter(
-            child: Column(
-              children: [
-                _buildCategoryFilter(),
-                const SizedBox(height: 16),
-              ],
-            ),
+      body: Stack(
+        children: [
+          CustomScrollView(
+            slivers: [
+              _buildSliverAppBar(),
+              SliverToBoxAdapter(
+                child: Column(
+                  children: [
+                    _buildCategoryFilter(),
+                    const SizedBox(height: 16),
+                  ],
+                ),
+              ),
+              if (_isLoading)
+                const SliverFillRemaining(
+                  child: Center(
+                    child: CircularProgressIndicator(
+                      color: AppColors.primary,
+                    ),
+                  ),
+                )
+              else
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  sliver: SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) {
+                        final article = _filteredArticles[index];
+                        return _buildArticleCard(article);
+                      },
+                      childCount: _filteredArticles.length,
+                    ),
+                  ),
+                ),
+              const SliverToBoxAdapter(
+                child: SizedBox(height: 132),
+              ),
+            ],
           ),
-          if (_isLoading)
-            const SliverFillRemaining(
-              child: Center(
-                child: CircularProgressIndicator(
-                  color: AppColors.primary,
-                ),
-              ),
-            )
-          else
-            SliverPadding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              sliver: SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    final article = _filteredArticles[index];
-                    return _buildArticleCard(article);
-                  },
-                  childCount: _filteredArticles.length,
-                ),
-              ),
-            ),
-          const SliverToBoxAdapter(
-            child: SizedBox(height: 32),
+          FixedBottomNavigation(
+            currentRoute: '/news',
           ),
         ],
       ),

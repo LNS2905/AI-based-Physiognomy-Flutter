@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
+import '../../../../core/widgets/fixed_bottom_navigation.dart';
 import '../widgets/user_guide_step_card.dart';
 
 /// User Guide screen for face scanning feature
@@ -72,15 +73,7 @@ class _UserGuidePageState extends State<UserGuidePage>
               ),
               
               // Fixed Bottom Navigation
-              Positioned(
-                bottom: 0,
-                left: 0,
-                right: 0,
-                child: Container(
-                  padding: const EdgeInsets.only(bottom: 20),
-                  child: _buildBottomNavigation(),
-                ),
-              ),
+              FixedBottomNavigation(currentRoute: '/user-guide'),
             ],
           ),
         ),
@@ -210,101 +203,6 @@ class _UserGuidePageState extends State<UserGuidePage>
     );
   }
 
-  Widget _buildBottomNavigation() {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 32),
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(25),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
-        border: Border.all(
-          color: AppColors.primary.withOpacity(0.1),
-          width: 1,
-        ),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          _buildBottomNavItem(
-            Icons.home_outlined,
-            isActive: false,
-            onTap: () => _navigateToHome(),
-          ),
-          _buildBottomNavItem(
-            Icons.search_outlined,
-            isActive: false,
-            onTap: () => _navigateToSearch(),
-          ),
-          _buildBottomNavItem(
-            Icons.help_outline,
-            isActive: true,
-            onTap: () => {}, // Current page, no action needed
-          ),
-          _buildBottomNavItem(
-            Icons.person_outline,
-            isActive: false,
-            onTap: () => _navigateToProfile(),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBottomNavItem(IconData icon, {required bool isActive, required VoidCallback onTap}) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 45,
-        height: 45,
-        decoration: BoxDecoration(
-          gradient: isActive
-              ? LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [AppColors.primary, AppColors.primaryDark],
-                )
-              : null,
-          color: isActive ? null : Colors.transparent,
-          borderRadius: BorderRadius.circular(15),
-          boxShadow: isActive
-              ? [
-                  BoxShadow(
-                    color: AppColors.primary.withOpacity(0.3),
-                    blurRadius: 10,
-                    offset: const Offset(0, 5),
-                  ),
-                ]
-              : null,
-        ),
-        child: Icon(
-          icon,
-          size: isActive ? 22 : 20,
-          color: isActive ? Colors.white : AppColors.textSecondary,
-        ),
-      ),
-    );
-  }
-
-  // Navigation methods
-  void _navigateToHome() {
-    context.go('/home');
-  }
-
-  void _navigateToSearch() {
-    // Navigate to search/history page
-    context.push('/history');
-  }
-
-  void _navigateToProfile() {
-    context.push('/profile');
-  }
 
   void _showStepDetails(BuildContext context, int stepNumber) {
     final stepDetails = _getStepDetails(stepNumber);

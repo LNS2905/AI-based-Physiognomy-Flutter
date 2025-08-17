@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/logger.dart';
+import '../../../../core/widgets/fixed_bottom_navigation.dart';
 import '../../data/models/chart_data_models.dart';
 import '../../data/models/cloudinary_analysis_response_model.dart';
 import '../widgets/face_shape_probability_chart.dart';
@@ -25,54 +26,64 @@ class AnalysisResultsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Custom Header
-            _buildHeader(context),
+      body: Stack(
+        children: [
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 100),
+              child: Column(
+                children: [
+                  // Custom Header
+                  _buildHeader(context),
 
-            // Scrollable Content
-            Expanded(
-              child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                child: Column(
-                  children: [
-                    const SizedBox(height: 20),
+                  // Scrollable Content
+                  Expanded(
+                    child: SingleChildScrollView(
+                      physics: const BouncingScrollPhysics(),
+                      child: Column(
+                        children: [
+                          const SizedBox(height: 20),
 
-                    // Main Results Card
-                    _buildMainResultsCard(),
+                          // Main Results Card
+                          _buildMainResultsCard(),
 
-                    const SizedBox(height: 20),
+                          const SizedBox(height: 20),
 
-                    // Analysis Details
-                    _buildAnalysisDetails(),
+                          // Analysis Details
+                          _buildAnalysisDetails(),
 
-                    const SizedBox(height: 20),
+                          const SizedBox(height: 20),
 
-                    // Face Shape Probability Chart
-                    if (_getFaceShapeProbabilities().isNotEmpty) ...[
-                      FaceShapeProbabilityChart(
-                        data: _getFaceShapeProbabilities(),
+                          // Face Shape Probability Chart
+                          if (_getFaceShapeProbabilities().isNotEmpty) ...[
+                            FaceShapeProbabilityChart(
+                              data: _getFaceShapeProbabilities(),
+                            ),
+                            const SizedBox(height: 20),
+                          ],
+
+                          // Images Section - chỉ hiển thị khi có ảnh đánh dấu đặc điểm
+                          if (annotatedImagePath != null)
+                            _buildImagesSection(),
+
+                          const SizedBox(height: 20),
+
+                          // Action Buttons
+                          _buildActionButtons(context),
+
+                          const SizedBox(height: 30),
+                        ],
                       ),
-                      const SizedBox(height: 20),
-                    ],
-
-                    // Images Section - chỉ hiển thị khi có ảnh đánh dấu đặc điểm
-                    if (annotatedImagePath != null)
-                      _buildImagesSection(),
-
-                    const SizedBox(height: 20),
-
-                    // Action Buttons
-                    _buildActionButtons(context),
-
-                    const SizedBox(height: 30),
-                  ],
-                ),
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
+          ),
+          FixedBottomNavigation(
+            currentRoute: '/face-analysis-results',
+          ),
+        ],
       ),
     );
   }

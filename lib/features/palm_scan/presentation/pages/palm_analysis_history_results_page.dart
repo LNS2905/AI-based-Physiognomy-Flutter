@@ -3,6 +3,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/logger.dart';
+import '../../../../core/widgets/fixed_bottom_navigation.dart';
 import '../../data/models/palm_analysis_server_model.dart';
 
 /// Page to display palm analysis results from history (server data)
@@ -62,15 +63,25 @@ class _PalmAnalysisHistoryResultsPageState extends State<PalmAnalysisHistoryResu
           ],
         ),
       ),
-      body: SafeArea(
-        bottom: true,
-        child: TabBarView(
-          controller: _tabController,
-          children: [
-            _buildInterpretationTab(),
-            _buildImagesTab(),
-          ],
-        ),
+      body: Stack(
+        children: [
+          SafeArea(
+            bottom: true,
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 100),
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  _buildInterpretationTab(),
+                  _buildImagesTab(),
+                ],
+              ),
+            ),
+          ),
+          FixedBottomNavigation(
+            currentRoute: '/history',
+          ),
+        ],
       ),
     );
   }

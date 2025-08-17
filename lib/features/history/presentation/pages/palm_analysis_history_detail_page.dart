@@ -5,6 +5,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/logger.dart';
+import '../../../../core/widgets/fixed_bottom_navigation.dart';
 import '../../../palm_scan/presentation/pages/palm_analysis_results_page.dart';
 import '../../../palm_scan/presentation/pages/palm_analysis_history_results_page.dart';
 
@@ -82,29 +83,39 @@ class _PalmAnalysisHistoryDetailPageState extends State<PalmAnalysisHistoryDetai
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: Column(
-          children: [
-            _buildAppBar(),
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(AppConstants.defaultPadding),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildHeaderCard(),
-                    const SizedBox(height: 16),
-                    _buildImageSection(),
-                    const SizedBox(height: 16),
-                    _buildAnalysisSection(),
-                    const SizedBox(height: 16),
-                    _buildActionButtons(),
-                  ],
-                ),
+      body: Stack(
+        children: [
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 100),
+              child: Column(
+                children: [
+                  _buildAppBar(),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(AppConstants.defaultPadding),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildHeaderCard(),
+                          const SizedBox(height: 16),
+                          _buildImageSection(),
+                          const SizedBox(height: 16),
+                          _buildAnalysisSection(),
+                          const SizedBox(height: 16),
+                          _buildActionButtons(),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
+          ),
+          FixedBottomNavigation(
+            currentRoute: '/history',
+          ),
+        ],
       ),
     );
   }

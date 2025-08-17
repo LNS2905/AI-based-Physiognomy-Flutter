@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/logger.dart';
+import '../../../../core/widgets/fixed_bottom_navigation.dart';
 import '../../data/models/history_item_model.dart';
 import '../../data/models/chat_history_model.dart';
 import '../providers/history_provider.dart';
@@ -55,20 +56,34 @@ class _HistoryPageState extends State<HistoryPage> with TickerProviderStateMixin
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
-        child: Column(
+        child: Stack(
           children: [
-            _buildAppBar(),
-            if (_showSearchBar) _buildSearchBar(),
-            _buildTabBar(),
-            Expanded(
-              child: TabBarView(
-                controller: _tabController,
-                children: [
-                  _buildHistoryList(),
-                  _buildStatisticsView(),
-                ],
-              ),
+            // Main content
+            Column(
+              children: [
+                _buildAppBar(),
+                if (_showSearchBar) _buildSearchBar(),
+                _buildTabBar(),
+                Expanded(
+                  child: TabBarView(
+                    controller: _tabController,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 100),
+                        child: _buildHistoryList(),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 100),
+                        child: _buildStatisticsView(),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
+            
+            // Fixed Bottom Navigation
+            FixedBottomNavigation(currentRoute: '/history'),
           ],
         ),
       ),
@@ -165,16 +180,17 @@ class _HistoryPageState extends State<HistoryPage> with TickerProviderStateMixin
                   ],
                 ),
               ),
-              const PopupMenuItem(
-                value: 'clear_all',
-                child: Row(
-                  children: [
-                    Icon(Icons.delete_sweep, size: 18, color: AppColors.error),
-                    SizedBox(width: 8),
-                    Text('Xóa tất cả', style: TextStyle(color: AppColors.error)),
-                  ],
-                ),
-              ),
+              // Clear all option - HIDDEN
+              // const PopupMenuItem(
+              //   value: 'clear_all',
+              //   child: Row(
+              //     children: [
+              //       Icon(Icons.delete_sweep, size: 18, color: AppColors.error),
+              //       SizedBox(width: 8),
+              //       Text('Xóa tất cả', style: TextStyle(color: AppColors.error)),
+              //     ],
+              //   ),
+              // ),
             ],
           ),
         ],
@@ -696,9 +712,10 @@ class _HistoryPageState extends State<HistoryPage> with TickerProviderStateMixin
       case 'refresh':
         provider.refreshHistory();
         break;
-      case 'clear_all':
-        _showClearAllConfirmation();
-        break;
+      // Clear all action - DISABLED
+      // case 'clear_all':
+      //   _showClearAllConfirmation();
+      //   break;
     }
   }
 

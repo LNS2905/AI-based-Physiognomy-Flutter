@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/bagua_logo.dart';
+import '../../../../core/widgets/fixed_bottom_navigation.dart';
 import '../../data/models/news_article_model.dart';
 import '../widgets/news_content_renderer.dart';
 import '../widgets/news_action_bar.dart';
@@ -101,20 +102,30 @@ class _NewsDetailPageState extends State<NewsDetailPage> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: CustomScrollView(
-        controller: _scrollController,
-        slivers: [
-          _buildSliverAppBar(),
-          SliverToBoxAdapter(
-            child: Column(
-              children: [
-                _buildArticleHeader(),
-                _buildArticleContent(),
-                _buildActionBar(),
-                _buildRelatedArticles(),
-                const SizedBox(height: 32),
-              ],
-            ),
+      body: Stack(
+        children: [
+          CustomScrollView(
+            controller: _scrollController,
+            slivers: [
+              _buildSliverAppBar(),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 100),
+                  child: Column(
+                    children: [
+                      _buildArticleHeader(),
+                      _buildArticleContent(),
+                      _buildActionBar(),
+                      _buildRelatedArticles(),
+                      const SizedBox(height: 32),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          FixedBottomNavigation(
+            currentRoute: '/news',
           ),
         ],
       ),

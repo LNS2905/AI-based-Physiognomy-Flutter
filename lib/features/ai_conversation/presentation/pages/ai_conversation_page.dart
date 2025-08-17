@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/error_handler.dart';
+import '../../../../core/widgets/fixed_bottom_navigation.dart';
 import '../providers/chat_provider.dart';
 import '../../data/models/chat_message_model.dart';
 import '../widgets/message_bubble.dart';
@@ -142,15 +143,31 @@ class _AIConversationPageState extends State<AIConversationPage>
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: _buildAppBar(),
-      body: Column(
+      body: Stack(
         children: [
-          Expanded(
-            child: _buildMessagesList(),
+          // Main chat content
+          Column(
+            children: [
+              Expanded(
+                child: _buildMessagesList(),
+              ),
+              _buildInputArea(),
+              const SizedBox(height: 100), // Space for fixed navigation
+            ],
           ),
-          _buildInputArea(),
+          
+          // Floating action button (if needed)
+          if (_showScrollToBottom)
+            Positioned(
+              right: 16,
+              bottom: 120, // Above the fixed navigation
+              child: _buildScrollToBottomFab(),
+            ),
+          
+          // Fixed Bottom Navigation
+          FixedBottomNavigation(currentRoute: '/ai-conversation'),
         ],
       ),
-      floatingActionButton: _buildScrollToBottomFab(),
     );
   }
 

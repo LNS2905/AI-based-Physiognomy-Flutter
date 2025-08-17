@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/logger.dart';
+import '../../../../core/widgets/fixed_bottom_navigation.dart';
 import '../../../ai_conversation/data/models/chat_message_model.dart';
 import '../../../ai_conversation/presentation/widgets/message_bubble.dart';
 import '../../data/models/chat_history_model.dart';
@@ -86,17 +87,27 @@ class _ChatHistoryDetailPageState extends State<ChatHistoryDetailPage> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: Column(
-          children: [
-            _buildAppBar(),
-            _buildConversationInfo(),
-            Expanded(
-              child: _buildMessagesList(),
+      body: Stack(
+        children: [
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 100),
+              child: Column(
+                children: [
+                  _buildAppBar(),
+                  _buildConversationInfo(),
+                  Expanded(
+                    child: _buildMessagesList(),
+                  ),
+                  _buildActionBar(),
+                ],
+              ),
             ),
-            _buildActionBar(),
-          ],
-        ),
+          ),
+          FixedBottomNavigation(
+            currentRoute: '/history',
+          ),
+        ],
       ),
     );
   }
