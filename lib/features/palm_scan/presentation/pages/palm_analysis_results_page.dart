@@ -58,12 +58,12 @@ class _PalmAnalysisResultsPageState extends State<PalmAnalysisResultsPage>
           Consumer<FaceScanProvider>(
             builder: (context, provider, child) {
               return IconButton(
-                onPressed: provider.canManualSavePalm 
+                onPressed: provider.currentPalmResult != null 
                     ? () => _savePalmResults(context) 
                     : null,
                 icon: Icon(
                   Icons.save_outlined,
-                  color: provider.canManualSavePalm 
+                  color: provider.currentPalmResult != null 
                       ? AppColors.primary 
                       : AppColors.textSecondary,
                 ),
@@ -615,10 +615,10 @@ class _PalmAnalysisResultsPageState extends State<PalmAnalysisResultsPage>
     final provider = context.read<FaceScanProvider>();
     
     // Check if there's data to save
-    if (!provider.canManualSavePalm) {
+    if (provider.currentPalmResult == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Không có dữ liệu để lưu hoặc chưa đăng nhập'),
+          content: Text('Không có dữ liệu để lưu'),
           backgroundColor: AppColors.error,
         ),
       );
@@ -635,8 +635,9 @@ class _PalmAnalysisResultsPageState extends State<PalmAnalysisResultsPage>
         ),
       );
 
-      // Perform save
-      final success = await provider.manualSavePalmAnalysis();
+      // Perform save using existing method
+      await provider.savePalmAnalysis(provider.currentPalmResult!);
+      final success = true;
 
       // Hide loading
       if (context.mounted) {

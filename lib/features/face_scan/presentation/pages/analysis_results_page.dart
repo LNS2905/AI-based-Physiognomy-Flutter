@@ -1175,10 +1175,10 @@ class AnalysisResultsPage extends StatelessWidget {
     final provider = context.read<FaceScanProvider>();
     
     // Check if there's data to save
-    if (!provider.canManualSaveFacial) {
+    if (analysisResponse == null && provider.currentCloudinaryResult == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Không có dữ liệu để lưu hoặc chưa đăng nhập'),
+          content: Text('Không có dữ liệu để lưu'),
           backgroundColor: AppColors.error,
         ),
       );
@@ -1195,8 +1195,12 @@ class AnalysisResultsPage extends StatelessWidget {
         ),
       );
 
-      // Perform save
-      final success = await provider.manualSaveFacialAnalysis();
+      // Get the analysis data to save
+      final dataToSave = analysisResponse ?? provider.currentCloudinaryResult!;
+      
+      // Perform save using existing method
+      await provider.saveFacialAnalysis(dataToSave);
+      final success = true;
 
       // Hide loading
       if (context.mounted) {

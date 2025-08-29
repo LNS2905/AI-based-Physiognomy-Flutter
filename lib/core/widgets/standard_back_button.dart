@@ -36,7 +36,7 @@ class StandardBackButton extends StatelessWidget {
     final buttonIconSize = iconSize ?? 18.0;
 
     return GestureDetector(
-      onTap: onPressed ?? () => context.pop(),
+      onTap: onPressed ?? () => _handleBackPress(context),
       child: Container(
         width: buttonSize,
         height: buttonSize,
@@ -66,5 +66,26 @@ class StandardBackButton extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  /// Handle back press with proper navigation stack checking
+  void _handleBackPress(BuildContext context) {
+    try {
+      // Check if we can pop (there's something in the navigation stack)
+      if (context.canPop()) {
+        context.pop();
+      } else {
+        // If nothing to pop, navigate to home instead
+        context.go('/home');
+      }
+    } catch (e) {
+      // Fallback navigation if any error occurs
+      try {
+        context.go('/home');
+      } catch (fallbackError) {
+        // Last resort - do nothing if even home navigation fails
+        debugPrint('StandardBackButton: Navigation failed completely');
+      }
+    }
   }
 }
