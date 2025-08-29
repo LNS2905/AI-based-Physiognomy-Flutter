@@ -5,6 +5,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/error_handler.dart';
 import '../../../../core/widgets/fixed_bottom_navigation.dart';
+import '../../../../core/widgets/standard_back_button.dart';
 import '../providers/chat_provider.dart';
 import '../../data/models/chat_message_model.dart';
 import '../widgets/message_bubble.dart';
@@ -175,16 +176,9 @@ class _AIConversationPageState extends State<AIConversationPage>
     return AppBar(
       backgroundColor: const Color(0xFFFAFAFA),
       elevation: 0,
-      leading: IconButton(
-        icon: const Text(
-          '←',
-          style: TextStyle(
-            fontSize: 18,
-            color: Color(0xFF333333),
-            fontWeight: FontWeight.w400,
-          ),
-        ),
-        onPressed: () => context.pop(),
+      leading: const Padding(
+        padding: EdgeInsets.all(8.0),
+        child: StandardBackButton(),
       ),
       title: Row(
         children: [

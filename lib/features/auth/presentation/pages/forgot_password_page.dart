@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/bagua_logo.dart';
+import '../../../../core/widgets/standard_back_button.dart';
 import '../providers/enhanced_auth_provider.dart';
 
 /// Forgot Password Page for requesting password reset
@@ -107,22 +108,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
       ),
       child: Row(
         children: [
-          GestureDetector(
-            onTap: () => context.pop(),
-            child: Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: const Color(0xFFF8F9FA),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: const Icon(
-                Icons.arrow_back_ios_new,
-                color: Color(0xFF333333),
-                size: 18,
-              ),
-            ),
-          ),
+          const StandardBackButton(),
           const Expanded(
             child: Center(
               child: Text(
@@ -148,16 +134,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
       children: [
         BaguaLogo(size: 80),
         SizedBox(height: 16),
-        Text(
-          'BaGua AI',
-          style: TextStyle(
-            fontFamily: 'Arial',
-            fontWeight: FontWeight.w700,
-            fontSize: 24,
-            color: Color(0xFF333333),
-            height: 1.2,
-          ),
-        ),
+        
       ],
     );
   }

@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/logger.dart';
 import '../../../../core/widgets/fixed_bottom_navigation.dart';
+import '../../../../core/widgets/standard_back_button.dart';
 import '../../data/models/chart_data_models.dart';
 import '../../data/models/cloudinary_analysis_response_model.dart';
 import '../widgets/face_shape_probability_chart.dart';
+import '../providers/face_scan_provider.dart';
 
 /// Page to display face analysis results
 class AnalysisResultsPage extends StatelessWidget {
@@ -116,15 +119,8 @@ class AnalysisResultsPage extends StatelessWidget {
         children: [
           Row(
             children: [
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: IconButton(
-                  icon: const Icon(Icons.arrow_back, color: Colors.white),
-                  onPressed: () => context.pop(),
-                ),
+              const StandardBackButton(
+                isWhiteVariant: true,
               ),
               const Expanded(
                 child: Text(
@@ -1175,14 +1171,63 @@ class AnalysisResultsPage extends StatelessWidget {
     );
   }
 
-  void _saveResults(BuildContext context) {
-    // TODO: Implement save functionality
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Tính năng lưu kết quả sẽ được cập nhật sớm'),
-        backgroundColor: AppColors.primary,
-      ),
-    );
+  void _saveResults(BuildContext context) async {
+    final provider = context.read<FaceScanProvider>();
+    
+    // Check if there's data to save
+    if (!provider.canManualSaveFacial) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Không có dữ liệu để lưu hoặc chưa đăng nhập'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+      return;
+    }
+
+    try {
+      // Show loading indicator
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+
+      // Perform save
+      final success = await provider.manualSaveFacialAnalysis();
+
+      // Hide loading
+      if (context.mounted) {
+        Navigator.of(context).pop();
+        
+        // Show result
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              success 
+                ? '✅ Đã lưu kết quả phân tích thành công'
+                : '❌ Không thể lưu kết quả. Vui lòng thử lại',
+            ),
+            backgroundColor: success ? AppColors.success : AppColors.error,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    } catch (e) {
+      // Hide loading and show error
+      if (context.mounted) {
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('❌ Lỗi khi lưu: ${e.toString()}'),
+            backgroundColor: AppColors.error,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    }
   }
 
   void _shareResults(BuildContext context) {

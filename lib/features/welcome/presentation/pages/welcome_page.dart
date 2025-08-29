@@ -141,55 +141,50 @@ class WelcomePage extends StatelessWidget {
   }
 
   Widget _buildActionSection(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(28, 0, 28, 32),
-      child: Column(
-        children: [
-          // Google login button
-          _buildSocialButton(
-            context,
-            icon: 'G',
-            text: 'Tiếp tục với Google',
-            backgroundColor: const Color(0xFF333333),
-            textColor: Colors.white,
-            borderColor: const Color(0xFF333333),
-            onTap: () => _handleGoogleLogin(context),
+    return Consumer<EnhancedAuthProvider>(
+      builder: (context, authProvider, child) {
+        return Container(
+          padding: const EdgeInsets.fromLTRB(28, 0, 28, 32),
+          child: Column(
+            children: [
+              // Google login button
+              _buildSocialButton(
+                context,
+                icon: 'G',
+                text: authProvider.isLoading 
+                    ? 'Đang đăng nhập...' 
+                    : 'Tiếp tục với Google',
+                backgroundColor: const Color(0xFF333333),
+                textColor: Colors.white,
+                borderColor: const Color(0xFF333333),
+                onTap: authProvider.isLoading 
+                    ? null 
+                    : () => _handleGoogleLogin(context),
+                isLoading: authProvider.isLoading,
+              ),
+
+              const SizedBox(height: 24),
+
+              // Or continue text
+              const Text(
+                'hoặc tiếp tục đến',
+                style: TextStyle(
+                  fontFamily: 'Arial',
+                  fontWeight: FontWeight.w400,
+                  fontSize: 14,
+                  color: Color(0xFF999999),
+                  height: 1.15,
+                ),
+              ),
+              
+              const SizedBox(height: 16),
+              
+              // Login button
+              _buildLoginButton(context, isDisabled: authProvider.isLoading),
+            ],
           ),
-
-          const SizedBox(height: 16),
-
-          // Apple login button
-          _buildSocialButton(
-            context,
-            icon: '',
-            text: 'Tiếp tục với Apple',
-            backgroundColor: Colors.white,
-            textColor: const Color(0xFF333333),
-            borderColor: const Color(0xFF999999),
-            isApple: true,
-            onTap: () => _handleAppleLogin(context),
-          ),
-
-          const SizedBox(height: 24),
-
-          // Or continue text
-          const Text(
-            'hoặc tiếp tục đến',
-            style: TextStyle(
-              fontFamily: 'Arial',
-              fontWeight: FontWeight.w400,
-              fontSize: 14,
-              color: Color(0xFF999999),
-              height: 1.15,
-            ),
-          ),
-          
-          const SizedBox(height: 16),
-          
-          // Login button
-          _buildLoginButton(context),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -200,8 +195,8 @@ class WelcomePage extends StatelessWidget {
     required Color backgroundColor,
     required Color textColor,
     required Color borderColor,
-    required VoidCallback onTap,
-    bool isApple = false,
+    required VoidCallback? onTap,
+    bool isLoading = false,
   }) {
     return GestureDetector(
       onTap: onTap,
@@ -209,18 +204,24 @@ class WelcomePage extends StatelessWidget {
         width: double.infinity,
         height: 62,
         decoration: BoxDecoration(
-          color: backgroundColor,
-          border: Border.all(color: borderColor, width: 2),
+          color: onTap == null ? backgroundColor.withOpacity(0.6) : backgroundColor,
+          border: Border.all(
+            color: onTap == null ? borderColor.withOpacity(0.6) : borderColor, 
+            width: 2,
+          ),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            if (isApple)
-              Icon(
-                Icons.apple,
-                color: textColor,
-                size: 24,
+            if (isLoading)
+              SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(textColor),
+                ),
               )
             else
               Container(
@@ -237,7 +238,7 @@ class WelcomePage extends StatelessWidget {
                       fontFamily: 'Arial',
                       fontWeight: FontWeight.w400,
                       fontSize: 16,
-                      color: backgroundColor,
+                      color: onTap == null ? backgroundColor.withOpacity(0.6) : backgroundColor,
                     ),
                   ),
                 ),
@@ -249,7 +250,7 @@ class WelcomePage extends StatelessWidget {
                 fontFamily: 'Arial',
                 fontWeight: FontWeight.w700,
                 fontSize: 17,
-                color: textColor,
+                color: onTap == null ? textColor.withOpacity(0.6) : textColor,
                 height: 1.15,
               ),
             ),
@@ -259,24 +260,31 @@ class WelcomePage extends StatelessWidget {
     );
   }
 
-  Widget _buildLoginButton(BuildContext context) {
+  Widget _buildLoginButton(BuildContext context, {bool isDisabled = false}) {
     return GestureDetector(
-      onTap: () => context.push('/login'),
+      onTap: isDisabled ? null : () => context.push('/login'),
       child: Container(
         width: double.infinity,
         height: 53,
         decoration: BoxDecoration(
-          border: Border.all(color: const Color(0xFFCCCCCC), width: 1),
+          border: Border.all(
+            color: isDisabled 
+                ? const Color(0xFFCCCCCC).withOpacity(0.5) 
+                : const Color(0xFFCCCCCC), 
+            width: 1,
+          ),
           borderRadius: BorderRadius.circular(8),
         ),
-        child: const Center(
+        child: Center(
           child: Text(
             'Đăng nhập vào tài khoản',
             style: TextStyle(
               fontFamily: 'Arial',
               fontWeight: FontWeight.w400,
               fontSize: 16,
-              color: Color(0xFF666666),
+              color: isDisabled 
+                  ? const Color(0xFF666666).withOpacity(0.5)
+                  : const Color(0xFF666666),
               height: 1.15,
             ),
           ),
@@ -326,13 +334,4 @@ class WelcomePage extends StatelessWidget {
     }
   }
 
-  void _handleAppleLogin(BuildContext context) {
-    // TODO: Implement Apple login
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Đăng nhập Apple sẽ được triển khai'),
-        backgroundColor: AppColors.info,
-      ),
-    );
-  }
 }

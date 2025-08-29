@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
+import '../../../../core/widgets/standard_back_button.dart';
 import '../providers/survey_provider.dart';
 import '../widgets/survey_option_widget.dart';
 
@@ -73,25 +74,8 @@ class _SurveyPageState extends State<SurveyPage> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               // Back button
-              GestureDetector(
-                onTap: () => _handleBackButton(surveyProvider),
-                child: Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    border: Border.all(color: const Color(0xFFCCCCCC)),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Center(
-                    child: Text(
-                      '←',
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: Color(0xFF666666),
-                      ),
-                    ),
-                  ),
-                ),
+              StandardBackButton(
+                onPressed: () => _handleBackButton(surveyProvider),
               ),
               
               // Close button

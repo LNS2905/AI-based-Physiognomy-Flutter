@@ -6,6 +6,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/logger.dart';
 import '../../../../core/widgets/fixed_bottom_navigation.dart';
+import '../../../../core/widgets/standard_back_button.dart';
 import '../../../face_scan/presentation/pages/analysis_results_page.dart';
 import '../../data/models/history_item_model.dart';
 import '../providers/history_provider.dart';
@@ -53,9 +54,9 @@ class _FaceAnalysisHistoryDetailPageState extends State<FaceAnalysisHistoryDetai
         appBar: AppBar(
           backgroundColor: AppColors.surface,
           elevation: 0,
-          leading: IconButton(
-            onPressed: () => context.pop(),
-            icon: const Icon(Icons.arrow_back_ios, color: AppColors.textPrimary),
+          leading: const Padding(
+            padding: EdgeInsets.all(8.0),
+            child: StandardBackButton(),
           ),
           title: const Text(
             'Chi tiết phân tích',
@@ -130,21 +131,7 @@ class _FaceAnalysisHistoryDetailPageState extends State<FaceAnalysisHistoryDetai
       ),
       child: Row(
         children: [
-          IconButton(
-            onPressed: () => context.pop(),
-            icon: const Icon(
-              Icons.arrow_back_ios,
-              color: AppColors.textPrimary,
-              size: 20,
-            ),
-            style: IconButton.styleFrom(
-              backgroundColor: AppColors.surfaceVariant,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              padding: const EdgeInsets.all(8),
-            ),
-          ),
+          const StandardBackButton(),
           const SizedBox(width: 12),
           
           Expanded(

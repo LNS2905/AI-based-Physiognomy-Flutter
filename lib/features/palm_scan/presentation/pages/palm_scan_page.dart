@@ -6,6 +6,7 @@ import '../../../../core/utils/error_handler.dart';
 import '../../../../core/utils/logger.dart';
 import '../../../../core/widgets/loading_overlay.dart';
 import '../../../../core/widgets/fixed_bottom_navigation.dart';
+import '../../../../core/widgets/standard_back_button.dart';
 import '../../../../core/enums/loading_state.dart';
 import '../../data/models/palm_analysis_response_model.dart';
 import '../../../face_scan/presentation/providers/face_scan_provider.dart';
@@ -125,27 +126,7 @@ class _PalmScanPageState extends State<PalmScanPage> {
             height: 40,
             child: Row(
               children: [
-                GestureDetector(
-                  onTap: () => context.pop(),
-                  child: Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [AppColors.primary.withOpacity(0.1), AppColors.primary.withOpacity(0.2)],
-                      ),
-                      border: Border.all(color: AppColors.primary.withOpacity(0.3)),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Center(
-                      child: Icon(
-                        Icons.arrow_back_ios_new,
-                        size: 18,
-                        color: AppColors.primary,
-                      ),
-                    ),
-                  ),
-                ),
+                const StandardBackButton(),
                 const SizedBox(width: 16),
                 const Expanded(
                   child: Text(

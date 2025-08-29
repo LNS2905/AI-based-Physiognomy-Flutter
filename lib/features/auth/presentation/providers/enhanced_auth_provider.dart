@@ -2,6 +2,8 @@
 import 'package:ai_physiognomy_app/core/providers/base_provider.dart';
 import 'package:ai_physiognomy_app/core/utils/logger.dart';
 import 'package:ai_physiognomy_app/core/network/api_result.dart';
+import 'package:ai_physiognomy_app/core/network/http_service.dart';
+import 'package:ai_physiognomy_app/core/navigation/app_router.dart';
 import 'package:ai_physiognomy_app/features/auth/data/repositories/enhanced_auth_repository.dart';
 import 'package:ai_physiognomy_app/features/auth/data/models/auth_models.dart';
 
@@ -11,6 +13,9 @@ class EnhancedAuthProvider extends BaseProvider {
   EnhancedAuthProvider({
     EnhancedAuthRepository? authRepository,
   }) : _authRepository = authRepository ?? EnhancedAuthRepository() {
+    // Register auth expiry callback with HttpService
+    HttpService.registerAuthExpiredCallback(_handleAuthExpired);
+    
     // Initialize auth state when provider is created
     _initializeOnCreate();
   }
@@ -408,5 +413,29 @@ class EnhancedAuthProvider extends BaseProvider {
     final lastInitial = lastName.isNotEmpty ? lastName[0].toUpperCase() : '';
     
     return '$firstInitial$lastInitial';
+  }
+
+  /// Handle authentication expiry - called by HttpService
+  void _handleAuthExpired() async {
+    AppLogger.warning('🔐 Authentication expired - triggering auto logout');
+    
+    try {
+      // Clear auth state immediately
+      await _clearAuthState();
+      
+      // Navigate to login screen
+      AppRouter.goToLogin();
+      AppLogger.info('✅ User auto-logged out and redirected to login screen');
+    } catch (e) {
+      AppLogger.error('❌ Failed to handle auth expiry: $e');
+    }
+  }
+
+  @override
+  void dispose() {
+    // Unregister callback when provider is disposed
+    HttpService.unregisterAuthExpiredCallback();
+    AppLogger.info('EnhancedAuthProvider: Disposed and unregistered auth callback');
+    super.dispose();
   }
 }

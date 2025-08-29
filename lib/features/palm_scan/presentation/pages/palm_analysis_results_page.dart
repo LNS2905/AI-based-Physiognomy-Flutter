@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:provider/provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/logger.dart';
 import '../../../../core/widgets/fixed_bottom_navigation.dart';
 import '../../data/models/palm_analysis_response_model.dart';
+import '../../../face_scan/presentation/providers/face_scan_provider.dart';
 
 /// Page to display palm analysis results
 class PalmAnalysisResultsPage extends StatefulWidget {
@@ -52,6 +54,32 @@ class _PalmAnalysisResultsPageState extends State<PalmAnalysisResultsPage>
         backgroundColor: AppColors.background,
         elevation: 0,
         iconTheme: const IconThemeData(color: AppColors.textPrimary),
+        actions: [
+          Consumer<FaceScanProvider>(
+            builder: (context, provider, child) {
+              return IconButton(
+                onPressed: provider.canManualSavePalm 
+                    ? () => _savePalmResults(context) 
+                    : null,
+                icon: Icon(
+                  Icons.save_outlined,
+                  color: provider.canManualSavePalm 
+                      ? AppColors.primary 
+                      : AppColors.textSecondary,
+                ),
+                tooltip: 'Lưu kết quả',
+              );
+            },
+          ),
+          IconButton(
+            onPressed: () => _sharePalmResults(context),
+            icon: const Icon(
+              Icons.share_outlined,
+              color: AppColors.primary,
+            ),
+            tooltip: 'Chia sẻ',
+          ),
+        ],
         bottom: TabBar(
           controller: _tabController,
           labelColor: AppColors.primary,
@@ -578,6 +606,77 @@ class _PalmAnalysisResultsPageState extends State<PalmAnalysisResultsPage>
             textAlign: TextAlign.center,
           ),
         ],
+      ),
+    );
+  }
+
+  /// Save palm analysis results manually
+  void _savePalmResults(BuildContext context) async {
+    final provider = context.read<FaceScanProvider>();
+    
+    // Check if there's data to save
+    if (!provider.canManualSavePalm) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Không có dữ liệu để lưu hoặc chưa đăng nhập'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+      return;
+    }
+
+    try {
+      // Show loading indicator
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+
+      // Perform save
+      final success = await provider.manualSavePalmAnalysis();
+
+      // Hide loading
+      if (context.mounted) {
+        Navigator.of(context).pop();
+        
+        // Show result
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              success 
+                ? '✅ Đã lưu kết quả phân tích vân tay thành công'
+                : '❌ Không thể lưu kết quả. Vui lòng thử lại',
+            ),
+            backgroundColor: success ? AppColors.success : AppColors.error,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    } catch (e) {
+      // Hide loading and show error
+      if (context.mounted) {
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('❌ Lỗi khi lưu: ${e.toString()}'),
+            backgroundColor: AppColors.error,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    }
+  }
+
+  /// Share palm analysis results
+  void _sharePalmResults(BuildContext context) {
+    // TODO: Implement share functionality for palm analysis
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Tính năng chia sẻ kết quả vân tay sẽ được cập nhật sớm'),
+        backgroundColor: AppColors.primary,
       ),
     );
   }

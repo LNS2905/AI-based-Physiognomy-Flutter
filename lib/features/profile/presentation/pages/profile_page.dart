@@ -7,6 +7,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/error_handler.dart';
 import '../../../../core/utils/logger.dart';
 import '../../../../core/widgets/fixed_bottom_navigation.dart';
+import '../../../../core/widgets/standard_back_button.dart';
 import '../../../auth/presentation/providers/enhanced_auth_provider.dart';
 import '../../../auth/data/models/auth_models.dart';
 import '../providers/profile_provider.dart';
@@ -309,13 +310,9 @@ class _ProfilePageState extends State<ProfilePage> {
       pinned: false,
       backgroundColor: Colors.transparent,
       elevation: 0,
-      leading: IconButton(
-        icon: Icon(
-          Icons.arrow_back,
-          color: AppColors.textPrimary,
-          size: isTablet ? 28 : 24,
-        ),
-        onPressed: () => context.pop(),
+      leading: const Padding(
+        padding: EdgeInsets.all(8.0),
+        child: StandardBackButton(),
       ),
       title: Text(
         'Hồ sơ',

@@ -5,6 +5,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/logger.dart';
 import '../../../../core/widgets/fixed_bottom_navigation.dart';
+import '../../../../core/widgets/standard_back_button.dart';
 import '../../../ai_conversation/data/models/chat_message_model.dart';
 import '../../../ai_conversation/presentation/widgets/message_bubble.dart';
 import '../../data/models/chat_history_model.dart';
@@ -61,9 +62,9 @@ class _ChatHistoryDetailPageState extends State<ChatHistoryDetailPage> {
         appBar: AppBar(
           backgroundColor: AppColors.surface,
           elevation: 0,
-          leading: IconButton(
-            onPressed: () => context.pop(),
-            icon: const Icon(Icons.arrow_back_ios, color: AppColors.textPrimary),
+          leading: const Padding(
+            padding: EdgeInsets.all(8.0),
+            child: StandardBackButton(),
           ),
           title: const Text(
             'Chi tiết cuộc trò chuyện',
@@ -126,21 +127,7 @@ class _ChatHistoryDetailPageState extends State<ChatHistoryDetailPage> {
       ),
       child: Row(
         children: [
-          IconButton(
-            onPressed: () => context.pop(),
-            icon: const Icon(
-              Icons.arrow_back_ios,
-              color: AppColors.textPrimary,
-              size: 20,
-            ),
-            style: IconButton.styleFrom(
-              backgroundColor: AppColors.surfaceVariant,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              padding: const EdgeInsets.all(8),
-            ),
-          ),
+          const StandardBackButton(),
           const SizedBox(width: 12),
           
           Expanded(

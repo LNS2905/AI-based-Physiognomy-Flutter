@@ -18,11 +18,26 @@ class HttpService {
   // Flag to prevent infinite refresh loops
   bool _isRefreshing = false;
 
+  // Callback for auth expiry handling
+  static void Function()? _onAuthExpired;
+
   HttpService({
     http.Client? client,
     String? baseUrl,
   })  : _client = client ?? http.Client(),
         _baseUrl = baseUrl ?? AppConstants.baseUrl;
+
+  /// Register callback for auth expiry handling
+  static void registerAuthExpiredCallback(void Function() callback) {
+    _onAuthExpired = callback;
+    AppLogger.info('HttpService: Auth expired callback registered');
+  }
+
+  /// Unregister auth expiry callback
+  static void unregisterAuthExpiredCallback() {
+    _onAuthExpired = null;
+    AppLogger.info('HttpService: Auth expired callback unregistered');
+  }
 
   /// GET request
   Future<Map<String, dynamic>> get(
@@ -459,6 +474,12 @@ class HttpService {
           // Clear tokens if refresh failed
           await _secureStorage.clearAccessToken();
           await _secureStorage.clearRefreshToken();
+          
+          // Trigger auto logout if callback is registered
+          if (_onAuthExpired != null) {
+            AppLogger.info('HttpService: Triggering auto logout due to auth expiry');
+            _onAuthExpired!();
+          }
         }
       }
       rethrow;

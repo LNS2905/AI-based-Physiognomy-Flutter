@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/bagua_logo.dart';
+import '../../../../core/widgets/standard_back_button.dart';
 import '../providers/enhanced_auth_provider.dart';
 
 /// Reset Password Page for setting new password with token
@@ -119,22 +120,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
       child: Row(
         children: [
           if (!_isPasswordReset)
-            GestureDetector(
-              onTap: () => context.pop(),
-              child: Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF8F9FA),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: const Icon(
-                  Icons.arrow_back_ios_new,
-                  color: Color(0xFF333333),
-                  size: 18,
-                ),
-              ),
-            )
+            const StandardBackButton()
           else
             const SizedBox(width: 40),
           const Expanded(
@@ -162,16 +148,6 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
       children: [
         BaguaLogo(size: 80),
         SizedBox(height: 16),
-        Text(
-          'BaGua AI',
-          style: TextStyle(
-            fontFamily: 'Arial',
-            fontWeight: FontWeight.w700,
-            fontSize: 24,
-            color: Color(0xFF333333),
-            height: 1.2,
-          ),
-        ),
       ],
     );
   }

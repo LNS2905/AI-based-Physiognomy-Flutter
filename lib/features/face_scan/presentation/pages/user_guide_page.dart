@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/widgets/fixed_bottom_navigation.dart';
+import '../../../../core/widgets/standard_back_button.dart';
 import '../widgets/user_guide_step_card.dart';
 
 /// User Guide screen for face scanning feature
@@ -100,26 +101,7 @@ class _UserGuidePageState extends State<UserGuidePage>
           Row(
             children: [
               // Back button
-              GestureDetector(
-                onTap: () => context.pop(),
-                child: Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: AppColors.border,
-                      width: 1,
-                    ),
-                  ),
-                  child: const Icon(
-                    Icons.arrow_back_ios_new,
-                    size: 18,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-              ),
+              const StandardBackButton(),
               
               const SizedBox(width: 20),
               

@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/bagua_logo.dart';
 import '../../../../core/widgets/fixed_bottom_navigation.dart';
+import '../../../../core/widgets/standard_back_button.dart';
 import '../../data/models/news_article_model.dart';
 
 /// News list page showing all available articles
@@ -108,20 +109,11 @@ class _NewsListPageState extends State<NewsListPage> {
       pinned: true,
       backgroundColor: AppColors.primary,
       foregroundColor: AppColors.textOnPrimary,
-      leading: IconButton(
-        icon: Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: AppColors.textPrimary.withValues(alpha: 0.2),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: const Icon(
-            Icons.arrow_back,
-            color: AppColors.textOnPrimary,
-            size: 20,
-          ),
+      leading: const Padding(
+        padding: EdgeInsets.all(8.0),
+        child: StandardBackButton(
+          isWhiteVariant: true,
         ),
-        onPressed: () => context.pop(),
       ),
       flexibleSpace: FlexibleSpaceBar(
         title: const Text(

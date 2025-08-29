@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../core/widgets/bagua_logo.dart';
+import '../../../../core/widgets/standard_back_button.dart';
 import '../../data/models/create_user_dto.dart';
 import '../../data/models/auth_models.dart' as auth_models;
 import '../providers/enhanced_auth_provider.dart';
@@ -123,28 +124,7 @@ class _SignUpPageState extends State<SignUpPage> {
       child: Row(
         children: [
           // Back button
-          GestureDetector(
-            onTap: () => context.pop(),
-            child: Container(
-              width: 38,
-              height: 38,
-              decoration: BoxDecoration(
-                border: Border.all(color: const Color(0xFFCCCCCC), width: 1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Center(
-                child: Text(
-                  '←',
-                  style: TextStyle(
-                    fontFamily: 'Arial',
-                    fontWeight: FontWeight.w400,
-                    fontSize: 16,
-                    color: Color(0xFF666666),
-                  ),
-                ),
-              ),
-            ),
-          ),
+          const StandardBackButton(),
           
           const Spacer(),
           
@@ -605,37 +585,25 @@ class _SignUpPageState extends State<SignUpPage> {
   }
 
   Widget _buildSocialSignupSection() {
-    return Row(
-      children: [
-        // Google signup button
-        Expanded(
-          child: _buildSocialButton(
-            icon: 'G',
-            text: 'Google',
-            onTap: () => _handleGoogleSignup(context),
-          ),
-        ),
-
-        const SizedBox(width: 16),
-
-        // Apple signup button
-        Expanded(
-          child: _buildSocialButton(
-            icon: '',
-            text: 'Apple',
-            isApple: true,
-            onTap: () => _handleAppleSignup(context),
-          ),
-        ),
-      ],
+    return Consumer<EnhancedAuthProvider>(
+      builder: (context, authProvider, child) {
+        return _buildSocialButton(
+          icon: 'G',
+          text: authProvider.isLoading ? 'Đang đăng ký...' : 'Tiếp tục với Google',
+          onTap: authProvider.isLoading 
+              ? null 
+              : () => _handleGoogleSignup(context),
+          isLoading: authProvider.isLoading,
+        );
+      },
     );
   }
 
   Widget _buildSocialButton({
     required String icon,
     required String text,
-    required VoidCallback onTap,
-    bool isApple = false,
+    required VoidCallback? onTap,
+    bool isLoading = false,
   }) {
     return GestureDetector(
       onTap: onTap,
@@ -643,24 +611,24 @@ class _SignUpPageState extends State<SignUpPage> {
         height: 52,
         decoration: BoxDecoration(
           color: Colors.white,
-          border: Border.all(color: const Color(0xFFDDDDDD), width: 1),
+          border: Border.all(
+            color: onTap == null 
+                ? const Color(0xFFDDDDDD).withOpacity(0.5)
+                : const Color(0xFFDDDDDD), 
+            width: 1,
+          ),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            if (isApple)
-              Container(
-                width: 28,
-                height: 28,
-                decoration: BoxDecoration(
-                  border: Border.all(color: const Color(0xFF999999), width: 1),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: const Icon(
-                  Icons.apple,
-                  color: Color(0xFF333333),
-                  size: 16,
+            if (isLoading)
+              const SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF333333)),
                 ),
               )
             else
@@ -668,17 +636,24 @@ class _SignUpPageState extends State<SignUpPage> {
                 width: 28,
                 height: 28,
                 decoration: BoxDecoration(
-                  border: Border.all(color: const Color(0xFF999999), width: 1),
+                  border: Border.all(
+                    color: onTap == null 
+                        ? const Color(0xFF999999).withOpacity(0.5)
+                        : const Color(0xFF999999), 
+                    width: 1,
+                  ),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Center(
                   child: Text(
                     icon,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontFamily: 'Arial',
                       fontWeight: FontWeight.w400,
                       fontSize: 10,
-                      color: Color(0xFF999999),
+                      color: onTap == null 
+                          ? const Color(0xFF999999).withOpacity(0.5)
+                          : const Color(0xFF999999),
                     ),
                   ),
                 ),
@@ -686,11 +661,13 @@ class _SignUpPageState extends State<SignUpPage> {
             const SizedBox(width: 8),
             Text(
               text,
-              style: const TextStyle(
+              style: TextStyle(
                 fontFamily: 'Arial',
                 fontWeight: FontWeight.w400,
                 fontSize: 14,
-                color: Color(0xFF333333),
+                color: onTap == null 
+                    ? const Color(0xFF333333).withOpacity(0.5)
+                    : const Color(0xFF333333),
                 height: 1.15,
               ),
             ),
@@ -860,15 +837,6 @@ class _SignUpPageState extends State<SignUpPage> {
     }
   }
 
-  void _handleAppleSignup(BuildContext context) {
-    // TODO: Implement Apple signup
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Đăng ký Apple sẽ được triển khai'),
-        backgroundColor: AppColors.info,
-      ),
-    );
-  }
 
   Widget _buildGenderSelector() {
     return Container(

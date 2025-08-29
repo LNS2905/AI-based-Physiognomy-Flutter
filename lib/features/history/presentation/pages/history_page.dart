@@ -5,6 +5,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/logger.dart';
 import '../../../../core/widgets/fixed_bottom_navigation.dart';
+import '../../../../core/widgets/standard_back_button.dart';
 import '../../data/models/history_item_model.dart';
 import '../../data/models/chat_history_model.dart';
 import '../providers/history_provider.dart';
@@ -105,21 +106,7 @@ class _HistoryPageState extends State<HistoryPage> with TickerProviderStateMixin
       child: Row(
         children: [
           // Back button
-          IconButton(
-            onPressed: () => context.pop(),
-            icon: const Icon(
-              Icons.arrow_back_ios,
-              color: AppColors.textPrimary,
-              size: 20,
-            ),
-            style: IconButton.styleFrom(
-              backgroundColor: AppColors.surfaceVariant,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              padding: const EdgeInsets.all(8),
-            ),
-          ),
+          const StandardBackButton(),
           const SizedBox(width: 12),
           
           // Title
