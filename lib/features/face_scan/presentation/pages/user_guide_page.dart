@@ -101,7 +101,10 @@ class _UserGuidePageState extends State<UserGuidePage>
           Row(
             children: [
               // Back button
-              const StandardBackButton(),
+              const Padding(
+                padding: EdgeInsets.all(8.0),
+                child: StandardBackButton(),
+              ),
               
               const SizedBox(width: 20),
               

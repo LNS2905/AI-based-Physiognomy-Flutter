@@ -127,7 +127,10 @@ class _ChatHistoryDetailPageState extends State<ChatHistoryDetailPage> {
       ),
       child: Row(
         children: [
-          const StandardBackButton(),
+          const Padding(
+            padding: EdgeInsets.all(8.0),
+            child: StandardBackButton(),
+          ),
           const SizedBox(width: 12),
           
           Expanded(

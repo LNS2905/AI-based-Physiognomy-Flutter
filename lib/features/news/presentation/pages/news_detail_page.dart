@@ -140,8 +140,11 @@ class _NewsDetailPageState extends State<NewsDetailPage> {
       pinned: true,
       backgroundColor: AppColors.primary,
       foregroundColor: AppColors.textOnPrimary,
-      leading: const StandardBackButton(
-        isWhiteVariant: true,
+      leading: const Padding(
+        padding: EdgeInsets.all(8.0),
+        child: StandardBackButton(
+          isWhiteVariant: true,
+        ),
       ),
       actions: [
         IconButton(

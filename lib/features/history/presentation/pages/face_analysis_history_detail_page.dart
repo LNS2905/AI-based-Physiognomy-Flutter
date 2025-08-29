@@ -131,7 +131,10 @@ class _FaceAnalysisHistoryDetailPageState extends State<FaceAnalysisHistoryDetai
       ),
       child: Row(
         children: [
-          const StandardBackButton(),
+          const Padding(
+            padding: EdgeInsets.all(8.0),
+            child: StandardBackButton(),
+          ),
           const SizedBox(width: 12),
           
           Expanded(

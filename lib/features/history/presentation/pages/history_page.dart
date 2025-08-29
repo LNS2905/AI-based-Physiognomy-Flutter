@@ -106,7 +106,10 @@ class _HistoryPageState extends State<HistoryPage> with TickerProviderStateMixin
       child: Row(
         children: [
           // Back button
-          const StandardBackButton(),
+          const Padding(
+            padding: EdgeInsets.all(8.0),
+            child: StandardBackButton(),
+          ),
           const SizedBox(width: 12),
           
           // Title

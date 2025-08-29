@@ -119,8 +119,11 @@ class AnalysisResultsPage extends StatelessWidget {
         children: [
           Row(
             children: [
-              const StandardBackButton(
-                isWhiteVariant: true,
+              const Padding(
+                padding: EdgeInsets.all(8.0),
+                child: StandardBackButton(
+                  isWhiteVariant: true,
+                ),
               ),
               const Expanded(
                 child: Text(

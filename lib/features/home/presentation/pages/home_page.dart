@@ -20,8 +20,8 @@ class HomePage extends StatelessWidget {
                 // Header Section
                 _buildHeader(context),
 
-                // Search Bar
-                _buildSearchBar(context),
+                // Search Bar - HIDDEN
+                // _buildSearchBar(context),
 
                 // Main Content
                 Expanded(

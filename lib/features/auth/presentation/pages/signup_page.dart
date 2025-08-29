@@ -124,7 +124,10 @@ class _SignUpPageState extends State<SignUpPage> {
       child: Row(
         children: [
           // Back button
-          const StandardBackButton(),
+          const Padding(
+            padding: EdgeInsets.all(8.0),
+            child: StandardBackButton(),
+          ),
           
           const Spacer(),
           

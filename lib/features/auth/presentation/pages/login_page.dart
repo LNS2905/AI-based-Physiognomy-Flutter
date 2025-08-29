@@ -107,7 +107,10 @@ class _LoginPageState extends State<LoginPage> {
       child: Row(
         children: [
           // Back button
-          const StandardBackButton(),
+          const Padding(
+            padding: EdgeInsets.all(8.0),
+            child: StandardBackButton(),
+          ),
 
           const Spacer(),
 

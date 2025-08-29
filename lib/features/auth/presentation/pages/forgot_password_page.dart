@@ -108,7 +108,10 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
       ),
       child: Row(
         children: [
-          const StandardBackButton(),
+          const Padding(
+            padding: EdgeInsets.all(8.0),
+            child: StandardBackButton(),
+          ),
           const Expanded(
             child: Center(
               child: Text(

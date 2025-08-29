@@ -120,9 +120,12 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
       child: Row(
         children: [
           if (!_isPasswordReset)
-            const StandardBackButton()
+            const Padding(
+              padding: EdgeInsets.all(8.0),
+              child: StandardBackButton(),
+            )
           else
-            const SizedBox(width: 40),
+            const SizedBox(width: 56),
           const Expanded(
             child: Center(
               child: Text(
