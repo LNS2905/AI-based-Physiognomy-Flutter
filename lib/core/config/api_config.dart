@@ -2,12 +2,12 @@
 /// This file contains all API-related configuration that can be easily updated
 class ApiConfig {
   // Base API Configuration - Updated with actual backend URL
-  static const String baseUrl = 'https://ai-based-physiognomy-backend.onrender.com';
-  static const String apiVersion = 'v1';
+  static const String baseUrl = 'http://72.60.115.238';
+  // static const String apiVersion = 'v1';
   
   // Face Analysis API Configuration
   // Updated with new ngrok URL
-  static const String faceAnalysisApiUrl = 'https://inspired-bear-emerging.ngrok-free.app/analyze-face-from-cloudinary/';
+  static const String faceAnalysisApiUrl = 'http://72.60.115.238/ai/';
   
   // Alternative URLs for different environments
   static const String faceAnalysisApiUrlLocal = 'http://localhost:8000/analyze-face/';

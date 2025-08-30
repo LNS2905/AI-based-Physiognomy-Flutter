@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 /// Test script to verify facial analysis history API
 /// Run: dart test_facial_history.dart
 void main() async {
-  const String baseUrl = 'https://ai-based-physiognomy-backend.onrender.com';
+  const String baseUrl = 'http://72.60.115.238';
   
   // Step 1: Login to get access token
   print('Step 1: Login...');

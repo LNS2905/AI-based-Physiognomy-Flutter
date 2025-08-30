@@ -5,10 +5,10 @@ class AppConstants {
   static const String appVersion = '1.0.0';
   
   // Old Backend API Configuration (Face/Palm Analysis, Chat)
-  static const String oldBackendBaseUrl = 'https://inspired-bear-emerging.ngrok-free.app';
+  static const String oldBackendBaseUrl = 'http://72.60.115.238/ai';
 
   // New Backend API Configuration (Auth, User Management from OpenAPI docs)
-  static const String baseUrl = 'https://ai-based-physiognomy-backend.onrender.com';
+  static const String baseUrl = 'http://72.60.115.238';
   static const String apiVersion = 'v1';
 
   // Authentication API Endpoints (New Backend - OpenAPI docs)
