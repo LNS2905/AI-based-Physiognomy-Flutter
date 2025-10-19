@@ -15,14 +15,30 @@ class LoginPage extends StatefulWidget {
   State<LoginPage> createState() => _LoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isPasswordVisible = false;
+  late AnimationController _glowController;
+  late Animation<double> _glowAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _glowController = AnimationController(
+      duration: const Duration(milliseconds: 2000),
+      vsync: this,
+    )..repeat(reverse: true);
+    
+    _glowAnimation = Tween<double>(begin: 0.2, end: 0.5).animate(
+      CurvedAnimation(parent: _glowController, curve: Curves.easeInOut),
+    );
+  }
 
   @override
   void dispose() {
+    _glowController.dispose();
     _usernameController.dispose();
     _passwordController.dispose();
     super.dispose();
@@ -136,9 +152,27 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Widget _buildLogoSection() {
-    return const BaguaLogo(
-      size: 56,
-      showText: true,
+    return AnimatedBuilder(
+      animation: _glowAnimation,
+      builder: (context, child) {
+        return Container(
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFFFFC107).withOpacity(_glowAnimation.value),
+                blurRadius: 16,
+                spreadRadius: 3,
+              ),
+            ],
+          ),
+          child: child,
+        );
+      },
+      child: const BaguaLogo(
+        size: 56,
+        showText: true,
+      ),
     );
   }
 
@@ -326,24 +360,30 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Widget _buildSignInButton() {
-    return GestureDetector(
-      onTap: _handleLogin,
-      child: Container(
-        width: double.infinity,
-        height: 61,
-        decoration: BoxDecoration(
-          color: const Color(0xFF333333),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: const Center(
-          child: Text(
-            'Đăng nhập',
-            style: TextStyle(
-              fontFamily: 'Arial',
-              fontWeight: FontWeight.w700,
-              fontSize: 17,
-              color: Colors.white,
-              height: 1.15,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: _handleLogin,
+        borderRadius: BorderRadius.circular(8),
+        splashColor: Colors.white.withOpacity(0.2),
+        highlightColor: Colors.white.withOpacity(0.1),
+        child: Container(
+          width: double.infinity,
+          height: 61,
+          decoration: BoxDecoration(
+            color: AppColors.primary,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: const Center(
+            child: Text(
+              'Đăng nhập',
+              style: TextStyle(
+                fontFamily: 'Arial',
+                fontWeight: FontWeight.w700,
+                fontSize: 17,
+                color: Colors.white,
+                height: 1.15,
+              ),
             ),
           ),
         ),
@@ -384,7 +424,11 @@ class _LoginPageState extends State<LoginPage> {
           children: [
             // Google login button
             _buildSocialButton(
-              icon: 'G',
+              iconWidget: Image.asset(
+                'google-icon.png',
+                width: 24,
+                height: 24,
+              ),
               text: authProvider.isLoading 
                   ? 'Đang đăng nhập...' 
                   : 'Tiếp tục với Google',
@@ -401,79 +445,60 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Widget _buildSocialButton({
-    required String icon,
+    Widget? iconWidget,
     required String text,
     required VoidCallback? onTap,
     bool isLoading = false,
   }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: double.infinity,
-        height: 56,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          border: Border.all(
-            color: onTap == null 
-                ? const Color(0xFFDDDDDD).withOpacity(0.5) 
-                : const Color(0xFFDDDDDD), 
-            width: 1,
-          ),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            if (isLoading)
-              const SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF333333)),
-                ),
-              )
-            else
-              Container(
-                width: 28,
-                height: 28,
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: onTap == null 
-                        ? const Color(0xFF999999).withOpacity(0.5)
-                        : const Color(0xFF999999), 
-                    width: 1,
-                  ),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Center(
-                  child: Text(
-                    icon,
-                    style: TextStyle(
-                      fontFamily: 'Arial',
-                      fontWeight: FontWeight.w400,
-                      fontSize: 12,
-                      color: onTap == null 
-                          ? const Color(0xFF999999).withOpacity(0.5)
-                          : const Color(0xFF999999),
-                    ),
-                  ),
-                ),
-              ),
-            const SizedBox(width: 16),
-            Text(
-              text,
-              style: TextStyle(
-                fontFamily: 'Arial',
-                fontWeight: FontWeight.w400,
-                fontSize: 16,
-                color: onTap == null 
-                    ? const Color(0xFF333333).withOpacity(0.5)
-                    : const Color(0xFF333333),
-                height: 1.15,
-              ),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        splashColor: const Color(0xFF333333).withOpacity(0.1),
+        highlightColor: const Color(0xFF333333).withOpacity(0.05),
+        child: Container(
+          width: double.infinity,
+          height: 56,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border.all(
+              color: onTap == null 
+                  ? const Color(0xFFCCCCCC).withOpacity(0.5) 
+                  : const Color(0xFFCCCCCC), 
+              width: 2,
             ),
-          ],
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (isLoading)
+                const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF333333)),
+                  ),
+                )
+              else if (iconWidget != null)
+                iconWidget,
+              if (iconWidget != null && !isLoading) const SizedBox(width: 12),
+              Text(
+                text,
+                style: TextStyle(
+                  fontFamily: 'Arial',
+                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
+                  color: onTap == null 
+                      ? const Color(0xFF333333).withOpacity(0.5)
+                      : const Color(0xFF333333),
+                  height: 1.15,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

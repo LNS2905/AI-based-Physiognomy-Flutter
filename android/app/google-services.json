@@ -1,41 +1,41 @@
 {
   "project_info": {
-    "project_number": "353105233475",
-    "project_id": "eggo123",
-    "storage_bucket": "eggo123.firebasestorage.app"
+    "project_number": "474899214737",
+    "project_id": "ai-based-physiognomy-flutter",
+    "storage_bucket": "ai-based-physiognomy-flutter.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:353105233475:android:d1e41d91fa7230524676f6",
+        "mobilesdk_app_id": "1:474899214737:android:628474a62166c02cb46a30",
         "android_client_info": {
           "package_name": "com.physiognomy.app.ai_physiognomy"
         }
       },
       "oauth_client": [
         {
-          "client_id": "353105233475-40e61a61e9a3f46e.apps.googleusercontent.com",
+          "client_id": "474899214737-d15hrivskcck92piqakl9ugctdsungo6.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.physiognomy.app.ai_physiognomy",
-            "certificate_hash": "40e61a61e9a3f46e232ad5b1cca6babf9c500e25"
+            "certificate_hash": "ba3f4aa79f82373fb72e1dc904fb5689bd73ead9"
           }
         },
         {
-          "client_id": "353105233475-web.apps.googleusercontent.com",
+          "client_id": "474899214737-v83c6o8elkm1d9g9i49shpgun3jmp9h1.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyCOvoMOSYJ9_1lkQtZl7UqNdQ1ZZcxK8kM"
+          "current_key": "AIzaSyB1aHn2vi8bTMyGlyBZrnVY1woAMixGDvM"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "353105233475-web.apps.googleusercontent.com",
+              "client_id": "474899214737-v83c6o8elkm1d9g9i49shpgun3jmp9h1.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

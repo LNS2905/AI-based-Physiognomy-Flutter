@@ -2,18 +2,24 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>CLIENT_ID</key>
+	<string>474899214737-qrp10uoqlj3claf7m336pho3drf957ef.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.474899214737-qrp10uoqlj3claf7m336pho3drf957ef</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>474899214737-d15hrivskcck92piqakl9ugctdsungo6.apps.googleusercontent.com</string>
 	<key>API_KEY</key>
-	<string>AIzaSyBHy7KLY6lORsqdezNyBIwUFfo0mdjW7pA</string>
+	<string>AIzaSyCbxrvQD64kLITfn1PosD63rQvibbRq8bU</string>
 	<key>GCM_SENDER_ID</key>
-	<string>353105233475</string>
+	<string>474899214737</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.physiognomy.app.aiPhysiognomy</string>
+	<string>com.physiognomy.app.ai-physiognomy</string>
 	<key>PROJECT_ID</key>
-	<string>eggo123</string>
+	<string>ai-based-physiognomy-flutter</string>
 	<key>STORAGE_BUCKET</key>
-	<string>eggo123.firebasestorage.app</string>
+	<string>ai-based-physiognomy-flutter.firebasestorage.app</string>
 	<key>IS_ADS_ENABLED</key>
 	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
@@ -25,6 +31,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:353105233475:ios:9649e88f8f323bcb4676f6</string>
+	<string>1:474899214737:ios:d2b1fc2cdc317ab1b46a30</string>
 </dict>
 </plist>

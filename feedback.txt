@@ -1,0 +1,30 @@
+2. Tiêu đề và mô tả
+Tiêu đề “Khám phá những gì Khuôn mặt bạn tiết lộ” nổi bật nhưng chia dòng chưa tự nhiên, gây ngắt ý.
+ → Có thể rút gọn thành: “Khám phá những gì khuôn mặt bạn tiết lộ cùng AI” hoặc bố trí hai dòng cân đối hơn.
+
+
+Đoạn mô tả bên dưới hơi dài
+
+3. Nút hành động (CTA)
+Hai nút “Tiếp tục với Google / Apple” nền đen hơi nặng; nên dùng màu sáng hoặc theo màu gốc của thương hiệu (Google trắng, Apple đen).
+
+
+Có thể thêm animation nhẹ khi nhấn để tăng cảm giác phản hồi.
+
+
+
+4. Liên kết phụ trợ
+Dòng “hoặc tiếp tục đến” nhỏ, dễ bỏ qua; nên dùng chữ xám đậm (#6B7280) và thêm padding trên dưới.
+
+
+Nút “Đăng nhập vào tài khoản” có độ tương phản thấp, không rõ là nút hay text link.
+ → Đổi sang kiểu link có viền hoặc chữ vàng chủ đạo để gợi hành động rõ hơn.
+
+
+
+5. Nhận diện thương hiệu
+Logo “Tướng học AI” nhỏ, mờ, chưa tạo cảm giác là sản phẩm chính.
+ → Tăng kích thước logo nhẹ và thêm slogan ngắn dưới (“AI cho khuôn mặt & tính cách của bạn”).
+
+
+Có thể thêm hiệu ứng nhỏ (glow nhẹ quanh icon) để tạo cảm giác AI động.

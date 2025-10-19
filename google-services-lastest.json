@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "474899214737",
+    "project_id": "ai-based-physiognomy-flutter",
+    "storage_bucket": "ai-based-physiognomy-flutter.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:474899214737:android:628474a62166c02cb46a30",
+        "android_client_info": {
+          "package_name": "com.physiognomy.app.ai_physiognomy"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB1aHn2vi8bTMyGlyBZrnVY1woAMixGDvM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
