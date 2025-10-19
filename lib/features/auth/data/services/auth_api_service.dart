@@ -92,6 +92,12 @@ class AuthApiService {
           'Accept': 'application/json',
         },
         body: jsonEncode(googleRequest.toJson()),
+      ).timeout(
+        const Duration(seconds: 15),
+        onTimeout: () {
+          AppLogger.error('AuthApiService: Google login request timed out after 15 seconds');
+          throw Exception('Request timed out - Backend server may be slow or unavailable');
+        },
       );
 
       AppLogger.info('AuthApiService: Google login response status: ${response.statusCode}');
