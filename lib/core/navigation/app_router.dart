@@ -28,6 +28,9 @@ import '../../features/history/presentation/pages/palm_analysis_history_detail_p
 import '../../features/profile/presentation/pages/profile_page.dart';
 import '../../features/history/presentation/pages/chat_history_detail_page.dart';
 import '../../features/testing/presentation/pages/new_api_test_page.dart';
+import '../../features/testing/presentation/pages/tu_vi_test_page.dart';
+import '../../features/tu_vi/presentation/pages/tu_vi_input_page.dart';
+import '../../features/tu_vi/presentation/pages/tu_vi_result_page.dart';
 import '../widgets/auth_guard.dart';
 
 /// Application router configuration using GoRouter
@@ -103,6 +106,30 @@ class AppRouter {
         path: '/new-api-test',
         name: 'new-api-test',
         builder: (context, state) => const NewApiTestPage(),
+      ),
+
+      // Tu Vi Test Route
+      GoRoute(
+        path: '/tu-vi-test',
+        name: 'tu-vi-test',
+        builder: (context, state) => const TuViTestPage(),
+      ),
+
+      // Tu Vi Input Route (Production)
+      GoRoute(
+        path: '/tu-vi-input',
+        name: 'tu-vi-input',
+        builder: (context, state) => const TuViInputPage(),
+      ),
+
+      // Tu Vi Result Route
+      GoRoute(
+        path: '/tu-vi-result/:chartId',
+        name: 'tu-vi-result',
+        builder: (context, state) {
+          final chartId = state.pathParameters['chartId'] ?? '1';
+          return TuViResultPage(chartId: chartId);
+        },
       ),
 
       // Survey Route
@@ -367,6 +394,8 @@ class AppRouter {
   static void goToForgotPassword() => _router.go('/forgot-password');
   static void goToResetPassword(String token) => _router.go('/reset-password?token=$token');
   static void goToChangePassword() => _router.go('/change-password');
+  static void goToTuViInput() => _router.go('/tu-vi-input');
+  static void goToTuViResult(int chartId) => _router.go('/tu-vi-result/$chartId');
 
   /// Push navigation methods
   static void pushWelcome() => _router.push(AppConstants.introRoute);
@@ -394,6 +423,8 @@ class AppRouter {
   static void pushForgotPassword() => _router.push('/forgot-password');
   static void pushResetPassword(String token) => _router.push('/reset-password?token=$token');
   static void pushChangePassword() => _router.push('/change-password');
+  static void pushTuViInput() => _router.push('/tu-vi-input');
+  static void pushTuViResult(int chartId) => _router.push('/tu-vi-result/$chartId');
 
   /// Go back
   static void goBack() {

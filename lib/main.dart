@@ -13,6 +13,7 @@ import 'features/face_scan/presentation/providers/face_scan_provider.dart';
 import 'features/ai_conversation/presentation/providers/chat_provider.dart';
 import 'features/history/presentation/providers/history_provider.dart';
 import 'features/profile/presentation/providers/profile_provider.dart';
+import 'features/tu_vi/presentation/providers/tu_vi_provider.dart';
 
 void main() async {
   // Ensure Flutter binding is initialized
@@ -107,6 +108,11 @@ class MyApp extends StatelessWidget {
         // Profile Provider
         ChangeNotifierProvider(
           create: (context) => ProfileProvider(),
+        ),
+
+        // Tu Vi Provider
+        ChangeNotifierProvider(
+          create: (context) => TuViProvider(),
         ),
 
         // Add other providers here as needed

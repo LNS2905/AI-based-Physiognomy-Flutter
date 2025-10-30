@@ -131,6 +131,13 @@ class _WelcomePageState extends State<WelcomePage> with SingleTickerProviderStat
             icon: const Icon(Icons.bug_report),
             tooltip: 'Google Sign-In Test',
           ),
+
+          // Production Tu Vi button
+          IconButton(
+            onPressed: () => context.push('/tu-vi-input'),
+            icon: const Icon(Icons.auto_awesome, color: Color(0xFFFFC107)),
+            tooltip: 'Lập Lá Số Tử Vi',
+          ),
         ],
       ),
     );
@@ -182,6 +189,24 @@ class _WelcomePageState extends State<WelcomePage> with SingleTickerProviderStat
           padding: const EdgeInsets.fromLTRB(28, 0, 28, 32),
           child: Column(
             children: [
+              // Tu Vi button - for testing
+              _buildSocialButton(
+                context,
+                iconWidget: const Icon(
+                  Icons.auto_awesome,
+                  color: Color(0xFFFFC107),
+                  size: 24,
+                ),
+                text: 'Lập lá số',
+                backgroundColor: const Color(0xFFFFF8E1),
+                textColor: const Color(0xFF333333),
+                borderColor: const Color(0xFFFFC107),
+                onTap: () => context.push('/tu-vi-input'),
+                isLoading: false,
+              ),
+
+              const SizedBox(height: 16),
+
               // Google login button
               _buildSocialButton(
                 context,
@@ -190,14 +215,14 @@ class _WelcomePageState extends State<WelcomePage> with SingleTickerProviderStat
                   width: 24,
                   height: 24,
                 ),
-                text: authProvider.isLoading 
-                    ? 'Đang đăng nhập...' 
+                text: authProvider.isLoading
+                    ? 'Đang đăng nhập...'
                     : 'Tiếp tục với Google',
                 backgroundColor: Colors.white,
                 textColor: const Color(0xFF333333),
                 borderColor: const Color(0xFFCCCCCC),
-                onTap: authProvider.isLoading 
-                    ? null 
+                onTap: authProvider.isLoading
+                    ? null
                     : () => _handleGoogleLogin(context),
                 isLoading: authProvider.isLoading,
               ),
@@ -218,9 +243,9 @@ class _WelcomePageState extends State<WelcomePage> with SingleTickerProviderStat
                   ),
                 ),
               ),
-              
+
               const SizedBox(height: 8),
-              
+
               // Login button
               _buildLoginButton(context, isDisabled: authProvider.isLoading),
             ],

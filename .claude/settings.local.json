@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Code/lasotuvi/**)",
+      "Bash(python -m uvicorn:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
