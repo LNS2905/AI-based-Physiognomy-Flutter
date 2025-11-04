@@ -501,9 +501,11 @@ class FaceScanRepository {
   Future<ApiResult<PalmAnalysisResponseModel>> analyzePalmFromCloudinary(
     String imagePath, {
     String? userId,
+    String? gender,
   }) async {
     try {
       AppLogger.info('Starting palm analysis via Cloudinary endpoint');
+      AppLogger.info('Gender parameter: $gender');
 
       // Step 1: Upload image to Cloudinary and get signed URL
       final uploadResult = await _cloudinaryService.uploadImageAndGetSignedUrl(
@@ -530,9 +532,16 @@ class FaceScanRepository {
 
       AppLogger.info('Sending palm analysis request to API');
 
-      // Step 3: Call the palm analysis API
+      // Step 3: Build URL with gender query parameter if provided
+      String apiUrl = AppConstants.palmAnalysisApiUrl;
+      if (gender != null && gender.isNotEmpty) {
+        apiUrl = '$apiUrl?gender=$gender';
+        AppLogger.info('API URL with gender: $apiUrl');
+      }
+
+      // Step 4: Call the palm analysis API
       final response = await _httpService.post(
-        AppConstants.palmAnalysisApiUrl,
+        apiUrl,
         body: request.toJson(),
         headers: {
           'Content-Type': 'application/json',
@@ -540,7 +549,7 @@ class FaceScanRepository {
         },
       );
 
-      // Step 4: Parse response
+      // Step 5: Parse response
       final analysisResponse = PalmAnalysisResponseModel.fromJson(response);
       AppLogger.info('Palm analysis completed successfully');
 

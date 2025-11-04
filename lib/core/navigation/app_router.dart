@@ -10,6 +10,7 @@ import '../../features/auth/presentation/pages/forgot_password_page.dart';
 import '../../features/auth/presentation/pages/reset_password_page.dart';
 import '../../features/auth/presentation/pages/change_password_page.dart';
 import '../../features/auth/presentation/pages/google_signin_test_page.dart';
+import '../../features/auth/data/models/auth_models.dart';
 import '../../features/survey/presentation/pages/survey_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/face_scan/presentation/pages/face_scan_page.dart';
@@ -204,9 +205,13 @@ class AppRouter {
       GoRoute(
         path: AppConstants.palmCameraRoute,
         name: 'palm-camera',
-        builder: (context, state) => const PalmCameraScreen().withAuthGuard(
-          redirectRoute: AppConstants.introRoute,
-        ),
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          final gender = extra?['gender'] as Gender?;
+          return PalmCameraScreen(gender: gender).withAuthGuard(
+            redirectRoute: AppConstants.introRoute,
+          );
+        },
       ),
 
       // Palm Analysis History List Route

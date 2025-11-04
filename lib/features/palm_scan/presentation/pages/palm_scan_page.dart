@@ -10,9 +10,12 @@ import '../../../../core/widgets/standard_back_button.dart';
 import '../../../../core/enums/loading_state.dart';
 import '../../data/models/palm_analysis_response_model.dart';
 import '../../../face_scan/presentation/providers/face_scan_provider.dart';
+import '../../../profile/presentation/providers/profile_provider.dart';
+import '../../../auth/data/models/auth_models.dart';
 import '../widgets/palm_analysis_demo.dart';
 import '../widgets/palm_scan_tab_navigation.dart';
 import '../widgets/palm_scan_content.dart';
+import '../widgets/gender_selector_widget.dart';
 
 import 'palm_analysis_results_page.dart';
 
@@ -25,12 +28,18 @@ class PalmScanPage extends StatefulWidget {
 }
 
 class _PalmScanPageState extends State<PalmScanPage> {
+  Gender? _selectedGender;
+
   @override
   void initState() {
     super.initState();
     // Set default tab to palm_scan when entering palm scan screen
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<FaceScanProvider>().setSelectedTab('palm_scan');
+      // Get default gender from user profile
+      final profileProvider = context.read<ProfileProvider>();
+      _selectedGender = profileProvider.currentUser?.gender ?? Gender.male;
+      setState(() {});
     });
   }
 
@@ -85,6 +94,25 @@ class _PalmScanPageState extends State<PalmScanPage> {
                           _buildCallToActionText(),
 
                           const SizedBox(height: 16),
+
+                          // Gender Selector
+                          if (_selectedGender != null)
+                            GenderSelectorWidget(
+                              selectedGender: _selectedGender!,
+                              onGenderChanged: (gender) {
+                                setState(() {
+                                  _selectedGender = gender;
+                                });
+                              },
+                              helpText: 'Chọn giới tính để xác định tay phân tích (có thể xem cho bạn bè)',
+                            ),
+
+                          const SizedBox(height: 12),
+
+                          // AI Disclaimer
+                          _buildAIDisclaimer(),
+
+                          const SizedBox(height: 12),
 
                           // Tab Navigation
                           _buildTabNavigation(),
@@ -286,6 +314,72 @@ class _PalmScanPageState extends State<PalmScanPage> {
               fontSize: 16,
               fontWeight: FontWeight.w600,
               color: AppColors.primary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAIDisclaimer() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 32),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.amber.withOpacity(0.1),
+            Colors.orange.withOpacity(0.05),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Colors.orange.withOpacity(0.3),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            Icons.warning_amber_rounded,
+            color: Colors.orange.shade700,
+            size: 20,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'LƯU Ý QUAN TRỌNG',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.orange.shade900,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'Phân tích vân tay này được tạo bởi AI và chỉ mang tính giải trí, tham khảo. Kết quả không có cơ sở khoa học và không nên được sử dụng để đưa ra các quyết định quan trọng trong cuộc sống.',
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: Colors.orange.shade800,
+                    height: 1.4,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'Theo truyền thống: Nam xem tay trái, Nữ xem tay phải.',
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontStyle: FontStyle.italic,
+                    color: Colors.orange.shade700,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -576,10 +670,14 @@ class _PalmScanPageState extends State<PalmScanPage> {
   Future<void> _handleBeginAnalysis(FaceScanProvider provider) async {
     try {
       AppLogger.info('Begin palm analysis button tapped');
+      AppLogger.info('Selected gender: $_selectedGender');
 
-      // Navigate to camera screen for palm capture
+      // Navigate to camera screen for palm capture with gender parameter
       if (mounted) {
-        final result = await context.push<PalmAnalysisResponseModel>('/palm-camera');
+        final result = await context.push<PalmAnalysisResponseModel>(
+          '/palm-camera',
+          extra: {'gender': _selectedGender},
+        );
 
         if (result != null && mounted) {
           provider.setCurrentPalmResult(result);

@@ -12,10 +12,16 @@ import '../../../../core/widgets/analysis_loading_screen.dart';
 import '../../../../core/enums/loading_state.dart';
 import '../../data/models/palm_analysis_response_model.dart';
 import '../../../face_scan/presentation/providers/face_scan_provider.dart';
+import '../../../auth/data/models/auth_models.dart';
 
 /// Camera screen for palm capture and analysis
 class PalmCameraScreen extends StatefulWidget {
-  const PalmCameraScreen({super.key});
+  final Gender? gender;
+
+  const PalmCameraScreen({
+    super.key,
+    this.gender,
+  });
 
   @override
   State<PalmCameraScreen> createState() => _PalmCameraScreenState();
@@ -32,6 +38,27 @@ class _PalmCameraScreenState extends State<PalmCameraScreen> {
     super.initState();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
     _initializeCamera();
+    AppLogger.info('PalmCameraScreen initialized with gender: ${widget.gender}');
+  }
+
+  String _getHandInstructionText() {
+    if (widget.gender == Gender.male) {
+      return '👈 Đặt BÀN TAY TRÁI vào khung';
+    } else if (widget.gender == Gender.female) {
+      return '👉 Đặt BÀN TAY PHẢI vào khung';
+    }
+    return '🖐️ Đặt bàn tay vào khung';
+  }
+
+  String _getDetailedInstructionText() {
+    String handText = '';
+    if (widget.gender == Gender.male) {
+      handText = '• Chụp BÀN TAY TRÁI (theo truyền thống nam)\n';
+    } else if (widget.gender == Gender.female) {
+      handText = '• Chụp BÀN TAY PHẢI (theo truyền thống nữ)\n';
+    }
+
+    return '${handText}• Đặt bàn tay phẳng trong khung\n• Giữ các ngón tay tách rời\n• Đảm bảo ánh sáng đủ sáng';
   }
 
   Future<void> _initializeCamera() async {
@@ -236,9 +263,9 @@ class _PalmCameraScreenState extends State<PalmCameraScreen> {
                     color: Colors.black.withOpacity(0.7),
                     borderRadius: BorderRadius.circular(25),
                   ),
-                  child: const Text(
-                    '🖐️ Đặt bàn tay vào khung',
-                    style: TextStyle(
+                  child: Text(
+                    _getHandInstructionText(),
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -310,9 +337,9 @@ class _PalmCameraScreenState extends State<PalmCameraScreen> {
             color: Colors.black.withOpacity(0.7),
             borderRadius: BorderRadius.circular(16),
           ),
-          child: const Column(
+          child: Column(
             children: [
-              Text(
+              const Text(
                 'Hướng dẫn chụp vân tay:',
                 style: TextStyle(
                   color: Colors.white,
@@ -320,10 +347,10 @@ class _PalmCameraScreenState extends State<PalmCameraScreen> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              SizedBox(height: 8),
+              const SizedBox(height: 8),
               Text(
-                '• Đặt bàn tay phẳng trong khung\n• Giữ các ngón tay tách rời\n• Đảm bảo ánh sáng đủ sáng',
-                style: TextStyle(
+                _getDetailedInstructionText(),
+                style: const TextStyle(
                   color: Colors.white70,
                   fontSize: 14,
                 ),
@@ -395,6 +422,7 @@ class _PalmCameraScreenState extends State<PalmCameraScreen> {
           builder: (context) => _PalmCameraAnalysisLoadingScreen(
             imagePath: imagePath,
             provider: provider,
+            gender: widget.gender,
           ),
         ),
       );
@@ -440,10 +468,12 @@ class _PalmCameraScreenState extends State<PalmCameraScreen> {
 class _PalmCameraAnalysisLoadingScreen extends StatefulWidget {
   final String imagePath;
   final FaceScanProvider provider;
+  final Gender? gender;
 
   const _PalmCameraAnalysisLoadingScreen({
     required this.imagePath,
     required this.provider,
+    this.gender,
   });
 
   @override
@@ -459,6 +489,14 @@ class _PalmCameraAnalysisLoadingScreenState extends State<_PalmCameraAnalysisLoa
 
   Future<void> _startAnalysis() async {
     try {
+      // Convert Gender enum to string for API
+      String? genderString;
+      if (widget.gender != null) {
+        genderString = widget.gender == Gender.male ? 'male' : 'female';
+      }
+
+      AppLogger.info('Starting palm analysis with gender: $genderString');
+
       final result = await widget.provider.executeMultiStepAnalysis<PalmAnalysisResponseModel>(
         initializeStep: () async {
           // Initialize step
@@ -469,8 +507,11 @@ class _PalmCameraAnalysisLoadingScreenState extends State<_PalmCameraAnalysisLoa
           await Future.delayed(const Duration(seconds: 1));
         },
         analyzeStep: () async {
-          // Analyze step - call actual API
-          final result = await widget.provider.repository.analyzePalmFromCloudinary(widget.imagePath);
+          // Analyze step - call actual API with gender parameter
+          final result = await widget.provider.repository.analyzePalmFromCloudinary(
+            widget.imagePath,
+            gender: genderString,
+          );
           if (result is Success<PalmAnalysisResponseModel>) {
             return result.data;
           } else {

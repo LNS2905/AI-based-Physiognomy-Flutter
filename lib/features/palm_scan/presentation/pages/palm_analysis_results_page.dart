@@ -165,6 +165,10 @@ class _PalmAnalysisResultsPageState extends State<PalmAnalysisResultsPage>
           // if (interpretationData.containsKey('life_aspects') &&
           //     interpretationData['life_aspects'] != null)
           //   _buildLifeAspectsSection(interpretationData['life_aspects'] as Map<String, dynamic>),
+
+          // AI Disclaimer
+          const SizedBox(height: 24),
+          _buildAIDisclaimer(),
         ],
       ),
     );
@@ -604,6 +608,71 @@ class _PalmAnalysisResultsPageState extends State<PalmAnalysisResultsPage>
               color: AppColors.textSecondary,
             ),
             textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAIDisclaimer() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.amber.withOpacity(0.1),
+            Colors.orange.withOpacity(0.05),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Colors.orange.withOpacity(0.3),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            Icons.warning_amber_rounded,
+            color: Colors.orange.shade700,
+            size: 24,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'LƯU Ý QUAN TRỌNG',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.orange.shade900,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Kết quả phân tích vân tay này được tạo bởi trí tuệ nhân tạo (AI) và chỉ mang tính chất giải trí, tham khảo. Các thông tin được cung cấp không có cơ sở khoa học chứng minh và không nên được dùng làm căn cứ để đưa ra các quyết định quan trọng trong cuộc sống.',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.orange.shade800,
+                    height: 1.5,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Vui lòng kiểm tra kỹ và tham khảo ý kiến chuyên gia nếu cần thiết.',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontStyle: FontStyle.italic,
+                    color: Colors.orange.shade700,
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
