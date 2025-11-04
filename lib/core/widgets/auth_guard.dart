@@ -93,20 +93,26 @@ class _AuthGuardState extends State<AuthGuard> {
 
   @override
   Widget build(BuildContext context) {
+    // BYPASS AUTH FOR TESTING UI/UX
+    if (AppConstants.bypassAuthentication) {
+      AppLogger.info('AuthGuard: Authentication bypassed for testing');
+      return widget.child;
+    }
+
     // Don't use Consumer since we're already using manual listener
     // This prevents double listening and rebuild loops
     final authProvider = context.read<EnhancedAuthProvider>();
-    
+
     // Show loading while checking auth state
     if (!_hasCheckedAuth || !authProvider.hasInitialized) {
       return _buildLoadingScreen();
     }
-    
+
     // Show content if authenticated
     if (authProvider.isAuthenticated) {
       return widget.child;
     }
-    
+
     // Show loading if auth state is being determined
     return _buildLoadingScreen();
   }

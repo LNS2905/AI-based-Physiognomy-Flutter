@@ -1,5 +1,8 @@
 /// Application-wide constants
 class AppConstants {
+  // Debug Configuration
+  static const bool bypassAuthentication = true; // Set to true to bypass auth for testing UI/UX
+
   // App Information
   static const String appName = 'Ứng dụng Tướng học AI';
   static const String appVersion = '1.0.0';

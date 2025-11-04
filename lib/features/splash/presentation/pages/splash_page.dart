@@ -29,6 +29,13 @@ class _SplashPageState extends State<SplashPage> {
 
       if (!mounted) return;
 
+      // BYPASS AUTH FOR TESTING UI/UX
+      if (AppConstants.bypassAuthentication) {
+        AppLogger.info('SplashPage: Authentication bypassed, navigating to home');
+        context.go(AppConstants.homeRoute);
+        return;
+      }
+
       // Get auth provider
       final authProvider = Provider.of<EnhancedAuthProvider>(context, listen: false);
 
