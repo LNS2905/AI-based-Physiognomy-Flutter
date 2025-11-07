@@ -13,7 +13,7 @@ class TuViRepository {
   final String baseUrl;
 
   TuViRepository({String? baseUrl})
-      : baseUrl = baseUrl ?? 'http://10.0.2.2:8000';
+      : baseUrl = baseUrl ?? 'http://160.250.180.132:8000';
 
   /// Create a new Tu Vi chart
   Future<ApiResult<TuViChartResponse>> createChart(
