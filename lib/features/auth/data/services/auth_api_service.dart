@@ -29,9 +29,17 @@ class AuthApiService {
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
         if (responseData['code'] == 'OPERATION_SUCCESS') {
-          final authResponse = AuthResponse.fromJson(responseData['data']);
+          // Registration successful, user data is in responseData['data']
           AppLogger.info('AuthApiService: User registered successfully');
-          return authResponse;
+          
+          // Auto-login after successful registration
+          AppLogger.info('AuthApiService: Auto-login after registration');
+          final loginRequest = AuthRequest(
+            username: createUserDto.email,
+            password: createUserDto.password,
+          );
+          
+          return await login(loginRequest);
         } else {
           throw Exception(responseData['message'] ?? 'Registration failed');
         }

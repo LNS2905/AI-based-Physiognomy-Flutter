@@ -2,12 +2,14 @@
 /// This file contains all API-related configuration that can be easily updated
 class ApiConfig {
   // Base API Configuration - Updated with actual backend URL
-  static const String baseUrl = 'http://72.60.115.238';
+  // VPS Production: http://72.60.115.238
+  // Local Development: http://192.168.100.55:3000
+  static const String baseUrl = 'http://192.168.100.55:3000';
   // static const String apiVersion = 'v1';
   
   // Face Analysis API Configuration
   // Updated with new ngrok URL
-  static const String faceAnalysisApiUrl = 'http://72.60.115.238/ai/';
+  static const String faceAnalysisApiUrl = 'http://192.168.100.55:3000/ai/';
   
   // Alternative URLs for different environments
   static const String faceAnalysisApiUrlLocal = 'http://localhost:8000/analyze-face/';
