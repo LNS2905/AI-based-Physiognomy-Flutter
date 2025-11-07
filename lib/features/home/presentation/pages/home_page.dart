@@ -512,9 +512,8 @@ class HomePage extends StatelessWidget {
     // Enhanced responsive breakpoints
     final isLargeTablet = screenWidth > 900;  // Large tablets/Desktop
     final isTablet = screenWidth > 600;       // Regular tablets
-    final isMobile = screenWidth <= 600;      // Mobile devices
 
-    // Define feature cards data - 4 main features only
+    // Define feature cards data - 5 main features
     final featureCards = [
       {
         'icon': Icons.face_retouching_natural,
@@ -527,6 +526,12 @@ class HomePage extends StatelessWidget {
         'title': 'Quét vân tay', 
         'description': 'Phân tích đường chỉ tay',
         'route': '/palm-scanning',
+      },
+      {
+        'icon': Icons.auto_awesome,
+        'title': 'Lá Số Tử Vi',
+        'description': 'Lập lá số tử vi',
+        'route': '/tu-vi-input',
       },
       {
         'icon': Icons.chat_bubble_outline,
@@ -543,15 +548,15 @@ class HomePage extends StatelessWidget {
     ];
 
     if (isLargeTablet) {
-      // Large tablets: 4 columns in single row for perfect 4-card layout
+      // Large tablets: 5 columns in single row
       return GridView.builder(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 4,
-          crossAxisSpacing: 24,
-          mainAxisSpacing: 24,
-          childAspectRatio: 0.9, // Slightly taller cards for large screens
+          crossAxisCount: 5,
+          crossAxisSpacing: 20,
+          mainAxisSpacing: 20,
+          childAspectRatio: 0.85,
         ),
         itemCount: featureCards.length,
         itemBuilder: (context, index) {
@@ -566,15 +571,15 @@ class HomePage extends StatelessWidget {
         },
       );
     } else if (isTablet) {
-      // Regular tablets: 2x2 grid - perfect for 4 cards
+      // Regular tablets: 3x2 grid for 5 cards (3 on first row, 2 on second)
       return GridView.builder(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          crossAxisSpacing: 20,
-          mainAxisSpacing: 20,
-          childAspectRatio: 1.2,
+          crossAxisCount: 3,
+          crossAxisSpacing: 16,
+          mainAxisSpacing: 16,
+          childAspectRatio: 1.1,
         ),
         itemCount: featureCards.length,
         itemBuilder: (context, index) {
@@ -589,10 +594,10 @@ class HomePage extends StatelessWidget {
         },
       );
     } else {
-      // Mobile: Perfect 2x2 grid layout for 4 main features
+      // Mobile: 2x3 grid layout for 5 features (2-2-1 pattern)
       return Column(
         children: [
-          // First row - Analysis features
+          // First row - Face & Palm scanning
           Row(
             children: [
               Expanded(
@@ -618,9 +623,19 @@ class HomePage extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           
-          // Second row - Support features
+          // Second row - Tu Vi & Chatbot
           Row(
             children: [
+              Expanded(
+                child: _buildFeatureCard(
+                  context,
+                  icon: Icons.auto_awesome,
+                  title: 'Lá Số Tử Vi',
+                  description: 'Lập lá số tử vi',
+                  onTap: () => context.push('/tu-vi-input'),
+                ),
+              ),
+              const SizedBox(width: 16),
               Expanded(
                 child: _buildFeatureCard(
                   context,
@@ -630,17 +645,20 @@ class HomePage extends StatelessWidget {
                   onTap: () => context.push('/ai-conversation'),
                 ),
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: _buildFeatureCard(
-                  context,
-                  icon: Icons.history,
-                  title: 'Lịch sử',
-                  description: 'Xem lịch sử phân tích',
-                  onTap: () => context.push('/history'),
-                ),
-              ),
             ],
+          ),
+          const SizedBox(height: 16),
+          
+          // Third row - History (full width)
+          SizedBox(
+            width: double.infinity,
+            child: _buildFeatureCard(
+              context,
+              icon: Icons.history,
+              title: 'Lịch sử',
+              description: 'Xem lịch sử phân tích',
+              onTap: () => context.push('/history'),
+            ),
           ),
         ],
       );
@@ -707,13 +725,6 @@ class HomePage extends StatelessWidget {
       ),
     );
   }
-
-  /// Build content sections with images and text
-  Widget _buildContentSections(BuildContext context) {
-    return const SizedBox.shrink(); // Remove content sections
-  }
-
-
 
   /// Build additional content section
   Widget _buildAdditionalContent(BuildContext context) {

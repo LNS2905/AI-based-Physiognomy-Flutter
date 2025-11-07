@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../auth/data/models/auth_models.dart';
+import '../../../payment/presentation/widgets/credit_display_widget.dart';
 
 /// Profile header widget displaying user avatar and basic info
 class ProfileHeader extends StatelessWidget {
@@ -86,6 +88,14 @@ class ProfileHeader extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
           ],
+          
+          // Credits Display
+          const SizedBox(height: 16),
+          CreditDisplayWidget(
+            credits: user.credits ?? 0,
+            onTap: () => context.go('/payment/packages'),
+            showAddButton: true,
+          ),
         ],
       ),
     );

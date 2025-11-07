@@ -176,6 +176,7 @@ class User {
   final int? age;
   final Gender? gender;
   final String? avatar;
+  final int? credits;
 
   const User({
     required this.id,
@@ -186,6 +187,7 @@ class User {
     this.age,
     this.gender,
     this.avatar,
+    this.credits,
   });
 
   factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);

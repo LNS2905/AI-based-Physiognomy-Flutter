@@ -6,6 +6,7 @@ import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/error_handler.dart';
 import '../../../../core/widgets/fixed_bottom_navigation.dart';
 import '../../../../core/widgets/standard_back_button.dart';
+import '../../../auth/presentation/providers/enhanced_auth_provider.dart';
 import '../providers/chat_provider.dart';
 import '../../data/models/chat_message_model.dart';
 import '../widgets/message_bubble.dart';
@@ -116,6 +117,16 @@ class _AIConversationPageState extends State<AIConversationPage>
     final message = _messageController.text.trim();
     if (message.isEmpty) return;
 
+    // Check if user has enough credits
+    final authProvider = context.read<EnhancedAuthProvider>();
+    final currentUser = authProvider.currentUser;
+    final credits = currentUser?.credits ?? 0;
+
+    if (credits < 1) {
+      _showInsufficientCreditsDialog();
+      return;
+    }
+
     final chatProvider = context.read<ChatProvider>();
     
     // Clear the input field immediately
@@ -126,6 +137,9 @@ class _AIConversationPageState extends State<AIConversationPage>
       if (success) {
         // Scroll to bottom to show new messages
         _scrollToBottom();
+        
+        // Refresh user data to get updated credits
+        authProvider.getCurrentUser();
       } else {
         // Show error if message failed to send
         if (mounted && chatProvider.hasError) {
@@ -595,5 +609,49 @@ class _AIConversationPageState extends State<AIConversationPage>
 
   void _showDeleteChatDialog(ChatProvider chatProvider) {
     // TODO: Implement delete chat dialog
+  }
+
+  /// Show insufficient credits dialog
+  void _showInsufficientCreditsDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.warning_amber_rounded, color: Colors.orange),
+            SizedBox(width: 8),
+            Text('Insufficient Credits'),
+          ],
+        ),
+        content: const Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'You need at least 1 credit to send a message to the AI chatbot.',
+              style: TextStyle(fontSize: 16),
+            ),
+            SizedBox(height: 12),
+            Text(
+              'Would you like to buy more credits?',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              context.go('/payment/packages');
+            },
+            child: const Text('Buy Credits'),
+          ),
+        ],
+      ),
+    );
   }
 }

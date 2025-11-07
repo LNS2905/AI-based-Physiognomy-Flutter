@@ -32,6 +32,7 @@ import '../../features/testing/presentation/pages/new_api_test_page.dart';
 import '../../features/testing/presentation/pages/tu_vi_test_page.dart';
 import '../../features/tu_vi/presentation/pages/tu_vi_input_page.dart';
 import '../../features/tu_vi/presentation/pages/tu_vi_result_page.dart';
+import '../../features/payment/presentation/pages/payment_packages_page.dart';
 import '../widgets/auth_guard.dart';
 
 /// Application router configuration using GoRouter
@@ -293,6 +294,13 @@ class AppRouter {
         builder: (context, state) => const ProfilePage().withAuthGuard(
           redirectRoute: AppConstants.introRoute,
         ),
+      ),
+
+      // Payment Packages Route (Protected)
+      GoRoute(
+        path: '/payment/packages',
+        name: 'payment-packages',
+        builder: (context, state) => const AuthGuard(child: PaymentPackagesPage()),
       ),
 
       // History Route (Protected)

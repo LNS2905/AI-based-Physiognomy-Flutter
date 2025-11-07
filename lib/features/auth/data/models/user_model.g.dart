@@ -16,6 +16,7 @@ UserModel _$UserModelFromJson(Map<String, dynamic> json) => UserModel(
   age: _ageFromJson(json['age']),
   gender: $enumDecode(_$GenderEnumMap, json['gender']),
   avatar: json['avatar'] as String?,
+  credits: (json['credits'] as num?)?.toInt(),
   createdAt: json['createdAt'] == null
       ? null
       : DateTime.parse(json['createdAt'] as String),
@@ -34,6 +35,7 @@ Map<String, dynamic> _$UserModelToJson(UserModel instance) => <String, dynamic>{
   'age': _ageToJson(instance.age),
   'gender': _$GenderEnumMap[instance.gender]!,
   'avatar': instance.avatar,
+  'credits': instance.credits,
   'createdAt': instance.createdAt?.toIso8601String(),
   'updatedAt': instance.updatedAt?.toIso8601String(),
 };

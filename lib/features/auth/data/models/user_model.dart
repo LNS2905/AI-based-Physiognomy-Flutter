@@ -51,6 +51,7 @@ class UserModel extends Equatable {
   final double age;
   final Gender gender;
   final String? avatar;
+  final int? credits;
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
@@ -64,6 +65,7 @@ class UserModel extends Equatable {
     required this.age,
     required this.gender,
     this.avatar,
+    this.credits,
     this.createdAt,
     this.updatedAt,
   });
@@ -92,6 +94,7 @@ class UserModel extends Equatable {
     double? age,
     Gender? gender,
     String? avatar,
+    int? credits,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -105,6 +108,7 @@ class UserModel extends Equatable {
       age: age ?? this.age,
       gender: gender ?? this.gender,
       avatar: avatar ?? this.avatar,
+      credits: credits ?? this.credits,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -121,6 +125,7 @@ class UserModel extends Equatable {
         age,
         gender,
         avatar,
+        credits,
         createdAt,
         updatedAt,
       ];

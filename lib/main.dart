@@ -14,6 +14,7 @@ import 'features/ai_conversation/presentation/providers/chat_provider.dart';
 import 'features/history/presentation/providers/history_provider.dart';
 import 'features/profile/presentation/providers/profile_provider.dart';
 import 'features/tu_vi/presentation/providers/tu_vi_provider.dart';
+import 'features/payment/presentation/providers/payment_provider.dart';
 
 void main() async {
   // Ensure Flutter binding is initialized
@@ -113,6 +114,11 @@ class MyApp extends StatelessWidget {
         // Tu Vi Provider
         ChangeNotifierProvider(
           create: (context) => TuViProvider(),
+        ),
+
+        // Payment Provider
+        ChangeNotifierProvider(
+          create: (context) => PaymentProvider(),
         ),
 
         // Add other providers here as needed

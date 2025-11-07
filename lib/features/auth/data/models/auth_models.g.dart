@@ -117,6 +117,7 @@ User _$UserFromJson(Map<String, dynamic> json) => User(
   age: (json['age'] as num?)?.toInt(),
   gender: $enumDecodeNullable(_$GenderEnumMap, json['gender']),
   avatar: json['avatar'] as String?,
+  credits: (json['credits'] as num?)?.toInt(),
 );
 
 Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
@@ -128,6 +129,7 @@ Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
   'age': instance.age,
   'gender': _$GenderEnumMap[instance.gender],
   'avatar': instance.avatar,
+  'credits': instance.credits,
 };
 
 AuthResponse _$AuthResponseFromJson(Map<String, dynamic> json) => AuthResponse(
