@@ -258,7 +258,7 @@ class AppRouter {
         redirect: (context, state) => AppConstants.aiConversationRoute,
       ),
 
-      // AI Conversation Route
+      // AI Conversation Route (No auth required for Tu Vi flow testing)
       GoRoute(
         path: AppConstants.aiConversationRoute,
         name: 'ai-conversation',
@@ -267,9 +267,7 @@ class AppRouter {
           final conversationId = conversationIdStr != null 
               ? int.tryParse(conversationIdStr) 
               : null;
-          return AIConversationPage(conversationId: conversationId).withAuthGuard(
-            redirectRoute: AppConstants.introRoute,
-          );
+          return AIConversationPage(conversationId: conversationId);
         },
       ),
 

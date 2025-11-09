@@ -70,11 +70,18 @@ class MessageBubble extends StatelessWidget {
           maxWidth: MediaQuery.of(context).size.width * 0.75,
         ),
         padding: const EdgeInsets.symmetric(
-          horizontal: 15,
-          vertical: 8,
+          horizontal: 16,
+          vertical: 10,
         ),
         decoration: BoxDecoration(
-          color: isUser ? const Color(0xFF999999) : const Color(0xFFF5F5F5),
+          gradient: isUser
+              ? LinearGradient(
+                  colors: [AppColors.primary, AppColors.primaryDark],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                )
+              : null,
+          color: isUser ? null : AppColors.surface,
           borderRadius: BorderRadius.only(
             topLeft: const Radius.circular(20),
             topRight: const Radius.circular(20),
@@ -84,9 +91,18 @@ class MessageBubble extends StatelessWidget {
           border: isUser
               ? null
               : Border.all(
-                  color: const Color(0xFF999999),
+                  color: AppColors.border,
                   width: 1,
                 ),
+          boxShadow: isUser
+              ? [
+                  BoxShadow(
+                    color: AppColors.primary.withValues(alpha: 0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : null,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -190,20 +206,34 @@ class MessageBubble extends StatelessWidget {
       width: 32,
       height: 32,
       decoration: BoxDecoration(
-        color: isUser ? const Color(0xFFF0F0F0) : const Color(0xFFF5F5F5),
+        gradient: isUser
+            ? null
+            : LinearGradient(
+                colors: [AppColors.primary, AppColors.primaryDark],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+        color: isUser ? AppColors.primaryLight : null,
         shape: BoxShape.circle,
         border: Border.all(
-          color: const Color(0xFFCCCCCC),
-          width: 1,
+          color: isUser ? AppColors.primary : Colors.transparent,
+          width: 1.5,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withValues(alpha: 0.2),
+            blurRadius: 4,
+            offset: const Offset(0, 1),
+          ),
+        ],
       ),
       child: Center(
         child: Text(
-          isUser ? '👤' : 'AI',
+          isUser ? '👤' : '星',
           style: TextStyle(
-            fontSize: isUser ? 8 : 8,
-            fontWeight: FontWeight.w700,
-            color: isUser ? const Color(0xFF666666) : const Color(0xFF999999),
+            fontSize: isUser ? 16 : 14,
+            fontWeight: FontWeight.bold,
+            color: isUser ? AppColors.primary : Colors.white,
           ),
         ),
       ),

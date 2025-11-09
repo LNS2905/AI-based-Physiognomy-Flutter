@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/error_handler.dart';
@@ -13,8 +12,6 @@ import '../widgets/message_bubble.dart';
 import '../widgets/typing_indicator.dart';
 import '../widgets/chat_input_field.dart';
 import '../widgets/quick_suggestion_buttons.dart';
-import '../widgets/analysis_report_card.dart';
-import '../widgets/quick_action_buttons.dart';
 
 /// AI Conversation page for chatting with AI assistant
 class AIConversationPage extends StatefulWidget {
@@ -125,15 +122,16 @@ class _AIConversationPageState extends State<AIConversationPage>
     final message = _messageController.text.trim();
     if (message.isEmpty) return;
 
+    // TODO: TEMPORARILY DISABLED FOR TESTING - RE-ENABLE LATER
     // Check if user has enough credits
-    final authProvider = context.read<EnhancedAuthProvider>();
-    final currentUser = authProvider.currentUser;
-    final credits = currentUser?.credits ?? 0;
+    // final authProvider = context.read<EnhancedAuthProvider>();
+    // final currentUser = authProvider.currentUser;
+    // final credits = currentUser?.credits ?? 0;
 
-    if (credits < 1) {
-      _showInsufficientCreditsDialog();
-      return;
-    }
+    // if (credits < 1) {
+    //   _showInsufficientCreditsDialog();
+    //   return;
+    // }
 
     final chatProvider = context.read<ChatProvider>();
     
@@ -196,33 +194,41 @@ class _AIConversationPageState extends State<AIConversationPage>
 
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
-      backgroundColor: const Color(0xFFFAFAFA),
-      elevation: 0,
+      backgroundColor: Colors.white,
+      elevation: 1,
+      shadowColor: AppColors.shadow,
       leading: const Padding(
         padding: EdgeInsets.all(8.0),
         child: StandardBackButton(),
       ),
       title: Row(
         children: [
-          // AI Avatar
+          // AI Avatar with gold theme
           Container(
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: const Color(0xFFF5F5F5),
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: const Color(0xFF999999),
-                width: 2,
+              gradient: LinearGradient(
+                colors: [AppColors.primary, AppColors.primaryDark],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.primary.withValues(alpha: 0.3),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
             child: const Center(
               child: Text(
-                'AI',
+                '星',
                 style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFFF5F5F5),
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
                 ),
               ),
             ),
@@ -237,21 +243,23 @@ class _AIConversationPageState extends State<AIConversationPage>
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     const Text(
-                      'Trợ lý AI Trò chuyện',
+                      'Trợ lý Tử Vi AI',
                       style: TextStyle(
                         fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF333333),
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
                       ),
                     ),
                     Text(
                       chatProvider.isAiTyping
-                          ? 'AI đang nhập...'
-                          : 'Trực tuyến • Sẵn sàng giúp đỡ',
-                      style: const TextStyle(
+                          ? 'Đang suy nghĩ...'
+                          : 'Sẵn sàng giải đáp',
+                      style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w400,
-                        color: Color(0xFF666666),
+                        color: chatProvider.isAiTyping 
+                            ? AppColors.primary 
+                            : AppColors.textSecondary,
                       ),
                     ),
                   ],
@@ -340,35 +348,43 @@ class _AIConversationPageState extends State<AIConversationPage>
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              width: 80,
-              height: 80,
+              width: 100,
+              height: 100,
               decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.1),
+                gradient: LinearGradient(
+                  colors: [
+                    AppColors.primary.withValues(alpha: 0.2),
+                    AppColors.primaryLight.withValues(alpha: 0.1),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
-                Icons.smart_toy,
-                size: 40,
-                color: AppColors.primary,
+              child: const Center(
+                child: Text(
+                  '☯️',
+                  style: TextStyle(fontSize: 48),
+                ),
               ),
             ),
             const SizedBox(height: 24),
             Text(
-              'Bắt đầu cuộc trò chuyện',
+              'Chào mừng đến với Trợ lý Tử Vi',
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 color: AppColors.textPrimary,
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 8),
             Text(
-              'Hỏi tôi bất cứ điều gì! Tôi ở đây để giúp bạn trả lời câu hỏi và cung cấp thông tin chi tiết.',
+              'Tôi sẽ giúp bạn giải đáp các thắc mắc về lá số tử vi và vận mệnh của bạn',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: AppColors.textSecondary,
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 32),
             _buildSuggestedQuestions(),
           ],
         ),
@@ -378,30 +394,37 @@ class _AIConversationPageState extends State<AIConversationPage>
 
   Widget _buildSuggestedQuestions() {
     final suggestions = [
-      'Bạn có thể giúp tôi điều gì?',
-      'Hãy kể cho tôi về tướng học',
-      'Phân tích khuôn mặt hoạt động như thế nào?',
+      '🌟 Giải thích lá số tử vi của tôi',
+      '💫 Cung Mệnh của tôi như thế nào?',
+      '✨ Vận mệnh năm nay ra sao?',
     ];
 
     return Column(
       children: suggestions.map((suggestion) {
         return Container(
           width: double.infinity,
-          margin: const EdgeInsets.only(bottom: 8),
+          margin: const EdgeInsets.only(bottom: 12),
           child: OutlinedButton(
             onPressed: () {
               _messageController.text = suggestion;
               _onSendMessage();
             },
             style: OutlinedButton.styleFrom(
-              foregroundColor: const Color(0xFF666666),
-              side: const BorderSide(color: Color(0xFFDDDDDD)),
-              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+              foregroundColor: AppColors.textPrimary,
+              side: BorderSide(color: AppColors.primary.withValues(alpha: 0.3)),
+              backgroundColor: AppColors.primaryLight.withValues(alpha: 0.1),
+              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+                borderRadius: BorderRadius.circular(12),
               ),
             ),
-            child: Text(suggestion),
+            child: Text(
+              suggestion,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
           ),
         );
       }).toList(),
@@ -422,18 +445,10 @@ class _AIConversationPageState extends State<AIConversationPage>
     for (int i = 0; i < chatProvider.messages.length; i++) {
       count += 1; // Message
 
-      // Add quick suggestions after first AI message
-      if (i == 0 && chatProvider.messages[i].sender == MessageSender.ai) {
-        count += 1;
-      }
-
-      // Add analysis report card after specific messages
-      if (i == 1 && chatProvider.messages.length > 1) {
-        count += 1;
-      }
-
-      // Add quick actions after analysis report
-      if (i == 1 && chatProvider.messages.length > 2) {
+      // Only show quick suggestions after first AI message if user hasn't sent any message
+      if (i == 0 && 
+          chatProvider.messages.length == 1 && 
+          chatProvider.messages[i].sender == MessageSender.ai) {
         count += 1;
       }
     }
@@ -455,7 +470,6 @@ class _AIConversationPageState extends State<AIConversationPage>
       }
     }
 
-
     int currentIndex = 0;
 
     for (int i = 0; i < chatProvider.messages.length; i++) {
@@ -468,53 +482,18 @@ class _AIConversationPageState extends State<AIConversationPage>
       }
       currentIndex++;
 
-      // Add quick suggestions after first AI message
-      if (i == 0 && chatProvider.messages[i].sender == MessageSender.ai) {
+      // Only show quick suggestions after first AI message AND if user hasn't sent any message yet
+      // (messages.length == 1 means only the AI welcome message exists)
+      if (i == 0 && 
+          chatProvider.messages.length == 1 && 
+          chatProvider.messages[i].sender == MessageSender.ai) {
         if (currentIndex == index) {
           return QuickSuggestionButtons(
-            suggestions: ['Giải thích kết quả của tôi', 'Hỏi về các tính năng'],
+            suggestions: ['Phân tích 14 chính tinh', 'Giải thích Đại Hạn'],
             onSuggestionTap: (suggestion) {
               _messageController.text = suggestion;
               _onSendMessage();
             },
-          );
-        }
-        currentIndex++;
-      }
-
-      // Add analysis report card after specific messages
-      if (i == 1 && chatProvider.messages.length > 1) {
-        if (currentIndex == index) {
-          return AnalysisReportCard(
-            title: 'Báo cáo phân tích khuôn mặt của bạn',
-            subtitle: 'Điểm tổng thể: 87% • 6 tính năng đã phân tích',
-            description: 'Nhấn để xem phân tích chi tiết',
-            onTap: () {
-              // TODO: Navigate to detailed analysis
-            },
-          );
-        }
-        currentIndex++;
-      }
-
-      // Add quick actions after analysis report
-      if (i == 1 && chatProvider.messages.length > 2) {
-        if (currentIndex == index) {
-          return QuickActionButtons(
-            actions: [
-              QuickAction(
-                title: 'Chia sẻ phân tích',
-                onTap: () {
-                  // TODO: Implement share functionality
-                },
-              ),
-              QuickAction(
-                title: 'So sánh tính năng',
-                onTap: () {
-                  // TODO: Implement compare functionality
-                },
-              ),
-            ],
           );
         }
         currentIndex++;
@@ -525,7 +504,7 @@ class _AIConversationPageState extends State<AIConversationPage>
     if (chatProvider.isAiTyping && currentIndex == index) {
       return TypingIndicator(
         isVisible: chatProvider.isAiTyping,
-        customText: 'AI đang suy nghĩ',
+        customText: 'Đang suy nghĩ về lá số của bạn',
       );
     }
 
@@ -535,7 +514,7 @@ class _AIConversationPageState extends State<AIConversationPage>
   Widget _buildInitialAIGreeting() {
     final greetingMessage = ChatMessageModel.ai(
       id: 'greeting',
-      content: "Xin chào! Tôi là trợ lý tướng học AI của bạn. Tôi có thể giúp bạn hiểu kết quả phân tích khuôn mặt của mình.",
+      content: "Xin chào! 🌟 Tôi là trợ lý Tử Vi AI của bạn. Tôi sẽ giúp bạn hiểu rõ về lá số tử vi và vận mệnh của mình.",
     );
 
     return MessageBubble(
@@ -546,7 +525,7 @@ class _AIConversationPageState extends State<AIConversationPage>
 
   Widget _buildInitialQuickSuggestions() {
     return QuickSuggestionButtons(
-      suggestions: ['Giải thích kết quả của tôi', 'Hỏi về các tính năng'],
+      suggestions: ['Giải thích Cung Mệnh', 'Phân tích 12 cung'],
       onSuggestionTap: (suggestion) {
         _messageController.text = suggestion;
         _onSendMessage();
@@ -563,10 +542,6 @@ class _AIConversationPageState extends State<AIConversationPage>
           isLoading: chatProvider.isAiTyping,
           onSend: _onSendMessage,
           onChanged: chatProvider.updateCurrentMessage,
-          showAttachmentButton: true,
-          onAttachmentTap: () {
-            // TODO: Implement attachment functionality
-          },
         );
       },
     );
@@ -664,47 +639,5 @@ class _AIConversationPageState extends State<AIConversationPage>
     );
   }
 
-  /// Show insufficient credits dialog
-  void _showInsufficientCreditsDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Row(
-          children: [
-            Icon(Icons.warning_amber_rounded, color: Colors.orange),
-            SizedBox(width: 8),
-            Text('Insufficient Credits'),
-          ],
-        ),
-        content: const Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'You need at least 1 credit to send a message to the AI chatbot.',
-              style: TextStyle(fontSize: 16),
-            ),
-            SizedBox(height: 12),
-            Text(
-              'Would you like to buy more credits?',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              context.go('/payment/packages');
-            },
-            child: const Text('Buy Credits'),
-          ),
-        ],
-      ),
-    );
-  }
+
 }

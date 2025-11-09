@@ -10,8 +10,6 @@ class ChatInputField extends StatefulWidget {
   final bool isLoading;
   final VoidCallback? onSend;
   final ValueChanged<String>? onChanged;
-  final VoidCallback? onAttachmentTap;
-  final bool showAttachmentButton;
 
   const ChatInputField({
     super.key,
@@ -21,46 +19,25 @@ class ChatInputField extends StatefulWidget {
     this.isLoading = false,
     this.onSend,
     this.onChanged,
-    this.onAttachmentTap,
-    this.showAttachmentButton = false,
   });
 
   @override
   State<ChatInputField> createState() => _ChatInputFieldState();
 }
 
-class _ChatInputFieldState extends State<ChatInputField>
-    with TickerProviderStateMixin {
-  late AnimationController _sendButtonController;
-  late Animation<double> _sendButtonAnimation;
+class _ChatInputFieldState extends State<ChatInputField> {
   bool _hasText = false;
 
   @override
   void initState() {
     super.initState();
-    _sendButtonController = AnimationController(
-      duration: AppConstants.shortAnimationDuration,
-      vsync: this,
-    );
-    _sendButtonAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _sendButtonController,
-      curve: Curves.easeInOut,
-    ));
-
     widget.controller.addListener(_onTextChanged);
     _hasText = widget.controller.text.isNotEmpty;
-    if (_hasText) {
-      _sendButtonController.forward();
-    }
   }
 
   @override
   void dispose() {
     widget.controller.removeListener(_onTextChanged);
-    _sendButtonController.dispose();
     super.dispose();
   }
 
@@ -70,11 +47,6 @@ class _ChatInputFieldState extends State<ChatInputField>
       setState(() {
         _hasText = hasText;
       });
-      if (hasText) {
-        _sendButtonController.forward();
-      } else {
-        _sendButtonController.reverse();
-      }
     }
     widget.onChanged?.call(widget.controller.text);
   }
@@ -88,11 +60,16 @@ class _ChatInputFieldState extends State<ChatInputField>
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    final isDisabled = !widget.enabled || widget.isLoading;
+    
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
       padding: const EdgeInsets.all(AppConstants.defaultPadding),
-      decoration: const BoxDecoration(
-        color: Color(0xFFFAFAFA),
-        border: Border(
+      decoration: BoxDecoration(
+        color: isDisabled 
+            ? const Color(0xFFF5F5F5) 
+            : const Color(0xFFFAFAFA),
+        border: const Border(
           top: BorderSide(
             color: Color(0xFFEEEEEE),
             width: 1,
@@ -106,37 +83,71 @@ class _ChatInputFieldState extends State<ChatInputField>
             // Main input row
             Row(
               children: [
-                _buildAttachmentButton(),
-                const SizedBox(width: 8),
                 Expanded(
                   child: _buildTextField(),
                 ),
-                const SizedBox(width: 8),
-                _buildVoiceButton(),
-                const SizedBox(width: 8),
+                const SizedBox(width: 12),
                 _buildSendButton(),
               ],
             ),
-            const SizedBox(height: 16),
-            // Suggested questions
-            _buildSuggestedQuestions(),
+            if (!widget.isLoading) ...[
+              const SizedBox(height: 16),
+              // Suggested questions (only show when not loading)
+              _buildSuggestedQuestions(),
+            ] else ...[
+              const SizedBox(height: 12),
+              _buildLoadingIndicator(),
+            ],
           ],
         ),
       ),
     );
   }
 
+  Widget _buildLoadingIndicator() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        SizedBox(
+          width: 14,
+          height: 14,
+          child: CircularProgressIndicator(
+            strokeWidth: 2,
+            valueColor: AlwaysStoppedAnimation<Color>(
+              const Color(0xFFD4AF37).withValues(alpha: 0.6),
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          'AI đang xử lý...',
+          style: TextStyle(
+            fontSize: 12,
+            color: const Color(0xFF666666).withValues(alpha: 0.7),
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildTextField() {
-    return Container(
+    final isDisabled = !widget.enabled || widget.isLoading;
+    
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
       constraints: const BoxConstraints(
         minHeight: 48,
         maxHeight: 120,
       ),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDisabled 
+            ? const Color(0xFFF5F5F5) 
+            : Colors.white,
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: const Color(0xFFDDDDDD),
+          color: isDisabled 
+              ? const Color(0xFFE0E0E0) 
+              : const Color(0xFFDDDDDD),
           width: 1,
         ),
       ),
@@ -146,17 +157,23 @@ class _ChatInputFieldState extends State<ChatInputField>
         maxLines: null,
         textInputAction: TextInputAction.newline,
         keyboardType: TextInputType.multiline,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.w400,
-          color: Color(0xFF333333),
+          color: isDisabled 
+              ? const Color(0xFF999999) 
+              : const Color(0xFF333333),
         ),
         decoration: InputDecoration(
-          hintText: widget.hintText.isEmpty ? 'Hỏi tôi về phân tích của bạn...' : widget.hintText,
-          hintStyle: const TextStyle(
+          hintText: isDisabled
+              ? 'Đang chờ AI trả lời...'
+              : (widget.hintText.isEmpty ? 'Hỏi về lá số tử vi của bạn...' : widget.hintText),
+          hintStyle: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w400,
-            color: Color(0xFF999999),
+            color: isDisabled 
+                ? const Color(0xFFBBBBBB) 
+                : const Color(0xFF999999),
           ),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(
@@ -165,7 +182,7 @@ class _ChatInputFieldState extends State<ChatInputField>
           ),
         ),
         onSubmitted: (_) {
-          if (_hasText) {
+          if (_hasText && !isDisabled) {
             _onSendPressed();
           }
         },
@@ -174,133 +191,73 @@ class _ChatInputFieldState extends State<ChatInputField>
   }
 
   Widget _buildSendButton() {
-    return AnimatedBuilder(
-      animation: _sendButtonAnimation,
-      builder: (context, child) {
-        return Transform.scale(
-          scale: _sendButtonAnimation.value,
-          child: Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: _hasText && widget.enabled && !widget.isLoading
-                  ? const Color(0xFF999999)
-                  : const Color(0xFFDDDDDD),
-              shape: BoxShape.circle,
-            ),
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                borderRadius: BorderRadius.circular(20),
-                onTap: _hasText && widget.enabled && !widget.isLoading
-                    ? _onSendPressed
-                    : null,
-                child: Center(
-                  child: widget.isLoading
-                      ? const SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              Colors.white,
-                            ),
-                          ),
-                        )
-                      : Text(
-                          '→',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            color: _hasText && widget.enabled
-                                ? Colors.white
-                                : const Color(0xFF999999),
-                          ),
-                        ),
+    final canSend = _hasText && widget.enabled && !widget.isLoading;
+    
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      width: 44,
+      height: 44,
+      decoration: BoxDecoration(
+        gradient: canSend
+            ? const LinearGradient(
+                colors: [Color(0xFFD4AF37), Color(0xFFB8860B)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              )
+            : null,
+        color: canSend ? null : const Color(0xFFE0E0E0),
+        shape: BoxShape.circle,
+        boxShadow: canSend
+            ? [
+                BoxShadow(
+                  color: const Color(0xFFD4AF37).withValues(alpha: 0.4),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
                 ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildAttachmentButton() {
-    return Container(
-      width: 24,
-      height: 24,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(
-          color: const Color(0xFFCCCCCC),
-          width: 1,
-        ),
+              ]
+            : null,
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(12),
-          onTap: widget.enabled && !widget.isLoading
-              ? widget.onAttachmentTap
-              : null,
-          child: const Center(
-            child: Text(
-              '📎',
-              style: TextStyle(
-                fontSize: 10,
-                color: Color(0xFF666666),
-              ),
-            ),
+          borderRadius: BorderRadius.circular(22),
+          onTap: canSend ? _onSendPressed : null,
+          child: Center(
+            child: widget.isLoading
+                ? SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2.5,
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        const Color(0xFF999999).withValues(alpha: 0.6),
+                      ),
+                    ),
+                  )
+                : Icon(
+                    Icons.send_rounded,
+                    size: 20,
+                    color: canSend
+                        ? Colors.white
+                        : const Color(0xFF999999).withValues(alpha: 0.5),
+                  ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildVoiceButton() {
-    return Container(
-      width: 24,
-      height: 24,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(
-          color: const Color(0xFFCCCCCC),
-          width: 1,
-        ),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(12),
-          onTap: widget.enabled && !widget.isLoading
-              ? () {
-                  // TODO: Implement voice recording
-                }
-              : null,
-          child: const Center(
-            child: Text(
-              '🎤',
-              style: TextStyle(
-                fontSize: 10,
-                color: Color(0xFF666666),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+
 
   Widget _buildSuggestedQuestions() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'Câu hỏi gợi ý:',
+          '💫 Gợi ý câu hỏi về Tử Vi:',
           style: TextStyle(
             fontSize: 12,
-            fontWeight: FontWeight.w400,
+            fontWeight: FontWeight.w500,
             color: Color(0xFF666666),
           ),
         ),
@@ -308,11 +265,11 @@ class _ChatInputFieldState extends State<ChatInputField>
         Row(
           children: [
             Expanded(
-              child: _buildSuggestionChip('Hình dạng mũi của tôi thế nào?'),
+              child: _buildSuggestionChip('Cung Tài Bạch như thế nào?'),
             ),
             const SizedBox(width: 8),
             Expanded(
-              child: _buildSuggestionChip('Giải thích sự hài hòa khuôn mặt'),
+              child: _buildSuggestionChip('Giải thích Cung Phu Thê'),
             ),
           ],
         ),
@@ -321,20 +278,27 @@ class _ChatInputFieldState extends State<ChatInputField>
   }
 
   Widget _buildSuggestionChip(String text) {
+    final isEnabled = widget.enabled && !widget.isLoading;
+    
     return Container(
-      height: 28,
+      height: 32,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: const Color(0xFFDDDDDD),
+          color: isEnabled 
+              ? const Color(0xFFD4AF37).withValues(alpha: 0.3) 
+              : const Color(0xFFE0E0E0),
           width: 1,
         ),
+        color: isEnabled 
+            ? const Color(0xFFF4E4BC).withValues(alpha: 0.2) 
+            : const Color(0xFFF5F5F5),
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(14),
-          onTap: widget.enabled && !widget.isLoading
+          borderRadius: BorderRadius.circular(16),
+          onTap: isEnabled
               ? () {
                   widget.controller.text = text;
                   widget.onChanged?.call(text);
@@ -342,14 +306,21 @@ class _ChatInputFieldState extends State<ChatInputField>
                 }
               : null,
           child: Center(
-            child: Text(
-              text,
-              style: const TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w400,
-                color: Color(0xFF666666),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: Text(
+                text,
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
+                  color: isEnabled 
+                      ? const Color(0xFF333333) 
+                      : const Color(0xFF999999),
+                ),
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
-              textAlign: TextAlign.center,
             ),
           ),
         ),

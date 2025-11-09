@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../../core/constants/app_constants.dart';
+import '../../../../core/theme/app_colors.dart';
 
-/// Typing indicator widget to show when AI is responding
+/// Enhanced typing indicator widget for AI conversation
 class TypingIndicator extends StatefulWidget {
   final bool isVisible;
   final String? customText;
@@ -18,23 +18,37 @@ class TypingIndicator extends StatefulWidget {
 
 class _TypingIndicatorState extends State<TypingIndicator>
     with TickerProviderStateMixin {
-  late AnimationController _animationController;
+  late AnimationController _fadeController;
+  late AnimationController _pulseController;
   late Animation<double> _fadeAnimation;
+  late Animation<double> _pulseAnimation;
 
   @override
   void initState() {
     super.initState();
-    _animationController = AnimationController(
-      duration: AppConstants.mediumAnimationDuration,
+    
+    // Fade animation
+    _fadeController = AnimationController(
+      duration: const Duration(milliseconds: 300),
       vsync: this,
     );
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _fadeController, curve: Curves.easeInOut),
+    );
+
+    // Pulse animation for avatar
+    _pulseController = AnimationController(
+      duration: const Duration(milliseconds: 1000),
+      vsync: this,
+    )..repeat(reverse: true);
+    
+    _pulseAnimation = Tween<double>(begin: 0.9, end: 1.0).animate(
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
+    );
+
+    if (widget.isVisible) {
+      _fadeController.forward();
+    }
   }
 
   @override
@@ -42,16 +56,17 @@ class _TypingIndicatorState extends State<TypingIndicator>
     super.didUpdateWidget(oldWidget);
     if (widget.isVisible != oldWidget.isVisible) {
       if (widget.isVisible) {
-        _animationController.forward();
+        _fadeController.forward();
       } else {
-        _animationController.reverse();
+        _fadeController.reverse();
       }
     }
   }
 
   @override
   void dispose() {
-    _animationController.dispose();
+    _fadeController.dispose();
+    _pulseController.dispose();
     super.dispose();
   }
 
@@ -67,15 +82,13 @@ class _TypingIndicatorState extends State<TypingIndicator>
         return Opacity(
           opacity: _fadeAnimation.value,
           child: Container(
-            margin: const EdgeInsets.symmetric(
-              horizontal: AppConstants.defaultPadding,
-              vertical: AppConstants.smallPadding,
-            ),
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                _buildAvatar(),
-                const SizedBox(width: AppConstants.smallPadding),
-                _buildTypingBubble(context),
+                _buildPulsingAvatar(),
+                const SizedBox(width: 12),
+                _buildTypingBubble(),
               ],
             ),
           ),
@@ -84,39 +97,54 @@ class _TypingIndicatorState extends State<TypingIndicator>
     );
   }
 
-  Widget _buildAvatar() {
-    return Container(
-      width: 32,
-      height: 32,
-      decoration: BoxDecoration(
-        color: const Color(0xFFF5F5F5),
-        shape: BoxShape.circle,
-        border: Border.all(
-          color: const Color(0xFF999999),
-          width: 1,
-        ),
-      ),
-      child: const Center(
-        child: Text(
-          'AI',
-          style: TextStyle(
-            fontSize: 8,
-            fontWeight: FontWeight.w700,
-            color: Color(0xFF999999),
+  Widget _buildPulsingAvatar() {
+    return AnimatedBuilder(
+      animation: _pulseAnimation,
+      builder: (context, child) {
+        return Transform.scale(
+          scale: _pulseAnimation.value,
+          child: Container(
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  AppColors.primary.withValues(alpha: 0.9),
+                  AppColors.primaryDark,
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.primary.withValues(alpha: 0.5),
+                  blurRadius: 8,
+                  spreadRadius: 1,
+                ),
+              ],
+            ),
+            child: const Center(
+              child: Text(
+                '星',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
-  Widget _buildTypingBubble(BuildContext context) {
+  Widget _buildTypingBubble() {
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 15,
-        vertical: 8,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: const Color(0xFFF5F5F5),
+        color: AppColors.surface,
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(20),
           topRight: Radius.circular(20),
@@ -124,39 +152,48 @@ class _TypingIndicatorState extends State<TypingIndicator>
           bottomRight: Radius.circular(20),
         ),
         border: Border.all(
-          color: const Color(0xFF999999),
+          color: AppColors.border,
           width: 1,
         ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _buildDots(),
-            ],
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withValues(alpha: 0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
-          const SizedBox(height: 4),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.auto_awesome,
+            size: 16,
+            color: AppColors.primary,
+          ),
+          const SizedBox(width: 8),
           Text(
-            widget.customText ?? 'AI đang trả lời...',
-            style: const TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.w400,
-              color: Color(0xFF999999),
+            widget.customText ?? 'Đang suy nghĩ',
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+              color: AppColors.textSecondary,
             ),
           ),
+          const SizedBox(width: 12),
+          _buildAnimatedDots(),
         ],
       ),
     );
   }
 
-  Widget _buildDots() {
+  Widget _buildAnimatedDots() {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: List.generate(3, (index) {
-        return AnimatedDot(
-          delay: Duration(milliseconds: index * 200),
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 2),
+          child: AnimatedDot(delay: Duration(milliseconds: index * 200)),
         );
       }),
     );
@@ -179,7 +216,8 @@ class AnimatedDot extends StatefulWidget {
 class _AnimatedDotState extends State<AnimatedDot>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  late Animation<double> _animation;
+  late Animation<double> _scaleAnimation;
+  late Animation<double> _opacityAnimation;
 
   @override
   void initState() {
@@ -188,15 +226,15 @@ class _AnimatedDotState extends State<AnimatedDot>
       duration: const Duration(milliseconds: 600),
       vsync: this,
     );
-    _animation = Tween<double>(
-      begin: 0.4,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeInOut,
-    ));
+    
+    _scaleAnimation = Tween<double>(begin: 0.6, end: 1.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+    
+    _opacityAnimation = Tween<double>(begin: 0.4, end: 1.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
 
-    // Start animation with delay
     Future.delayed(widget.delay, () {
       if (mounted) {
         _controller.repeat(reverse: true);
@@ -213,18 +251,28 @@ class _AnimatedDotState extends State<AnimatedDot>
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
-      animation: _animation,
+      animation: _controller,
       builder: (context, child) {
-        return Container(
-          margin: const EdgeInsets.symmetric(horizontal: 2),
+        return Transform.scale(
+          scale: _scaleAnimation.value,
           child: Opacity(
-            opacity: _animation.value,
+            opacity: _opacityAnimation.value,
             child: Container(
-              width: 4,
-              height: 4,
-              decoration: const BoxDecoration(
-                color: Color(0xFF999999),
+              width: 6,
+              height: 6,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [AppColors.primary, AppColors.primaryDark],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
                 shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.primary.withValues(alpha: 0.4),
+                    blurRadius: 4,
+                  ),
+                ],
               ),
             ),
           ),

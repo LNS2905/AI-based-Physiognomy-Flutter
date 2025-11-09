@@ -8,6 +8,7 @@ import '../widgets/element_widgets.dart';
 import '../../../auth/presentation/providers/enhanced_auth_provider.dart';
 import '../../../auth/data/models/auth_models.dart';
 import '../../../ai_conversation/presentation/providers/chat_provider.dart';
+import '../../../../core/theme/app_colors.dart';
 
 /// Result page displaying Tu Vi chart
 class TuViResultPage extends StatefulWidget {
@@ -88,6 +89,10 @@ class _TuViResultPageState extends State<TuViResultPage> {
               : chart == null
                   ? const Center(child: Text('Không tìm thấy lá số'))
                   : _buildChartContent(chart),
+      floatingActionButton: chart != null && !provider.isLoading && !provider.hasError
+          ? _buildChatbotFAB(chart)
+          : null,
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 
@@ -115,11 +120,7 @@ class _TuViResultPageState extends State<TuViResultPage> {
 
           // Additional info
           _buildAdditionalInfo(chart),
-          const SizedBox(height: 24),
-
-          // Chatbot button
-          _buildChatbotButton(chart),
-          const SizedBox(height: 32),
+          const SizedBox(height: 80), // Space for floating button
         ],
       ),
     );
@@ -764,80 +765,56 @@ class _TuViResultPageState extends State<TuViResultPage> {
     }
   }
 
-  Widget _buildChatbotButton(TuViChartResponse chart) {
+  Widget _buildChatbotFAB(TuViChartResponse chart) {
     return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            const Color(0xFF6A5AE0),
-            const Color(0xFF8B7FE8),
-          ],
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-        ),
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF6A5AE0).withOpacity(0.3),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      child: FloatingActionButton.extended(
+        onPressed: () => _onChatbotPressed(chart),
+        backgroundColor: AppColors.primary,
+        elevation: 6,
+        extendedPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        icon: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.2),
+            borderRadius: BorderRadius.circular(8),
           ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () => _onChatbotPressed(chart),
-          borderRadius: BorderRadius.circular(16),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+          child: const Icon(
+            Icons.chat_bubble_outline,
+            color: Colors.white,
+            size: 24,
+          ),
+        ),
+        label: const Row(
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Icon(
-                    Icons.chat_bubble_outline,
+                Text(
+                  'Gặp Chatbot',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
                     color: Colors.white,
-                    size: 24,
                   ),
                 ),
-                const SizedBox(width: 16),
-                const Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Gặp Chatbot',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                    SizedBox(height: 4),
-                    Text(
-                      'Hỏi AI về lá số của bạn',
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Colors.white70,
-                      ),
-                    ),
-                  ],
-                ),
-                const Spacer(),
-                const Icon(
-                  Icons.arrow_forward_ios,
-                  color: Colors.white,
-                  size: 20,
+                Text(
+                  'Hỏi AI về lá số của bạn',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.white70,
+                  ),
                 ),
               ],
             ),
-          ),
+            SizedBox(width: 12),
+            Icon(
+              Icons.arrow_forward_ios,
+              color: Colors.white,
+              size: 18,
+            ),
+          ],
         ),
       ),
     );
