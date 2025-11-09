@@ -7,10 +7,14 @@ class AppConstants {
   static const String appName = 'Ứng dụng Tướng học AI';
   static const String appVersion = '1.0.0';
   
-  // Old Backend API Configuration (Face/Palm Analysis, Chat)
+  // Old Backend API Configuration (Face/Palm Analysis)
   // VPS Production: http://160.250.180.132:3000/ai
   // Local Development: http://192.168.100.55:3000/ai
   static const String oldBackendBaseUrl = 'http://160.250.180.132:3000/ai';
+
+  // Chatbot API Configuration (Separate service)
+  // Ngrok URL (temporary): https://crayfish-pretty-certainly.ngrok-free.app
+  static const String chatbotBaseUrl = 'https://crayfish-pretty-certainly.ngrok-free.app';
 
   // New Backend API Configuration (Auth, User Management from OpenAPI docs)
   // VPS Production: http://160.250.180.132:3000

@@ -1,0 +1,4583 @@
+root@glowlab:~# docker logs glowlab_backend --tail 100
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /docs
+{}
+GET /favicon.ico
+{}
+GET /
+{}
+GET /swagger
+{}
+GET /health
+{}
+GET /
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /docs
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+POST /auth/google/mobile
+{"token":"eyJhbGciOiJSUzI1NiIsImtpZCI6IjRmZWI0NGYwZjdhN2UyN2M3YzQwMzM3OWFmZjIwYWY1YzhjZjUyZGMiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2FjY291bnRzLmdvb2dsZS5jb20iLCJhenAiOiI0NzQ4OTkyMTQ3MzctZDE1aHJpdnNrY2NrOTJwaXFha2w5dWdjdGRzdW5nbzYuYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJhdWQiOiI0NzQ4OTkyMTQ3MzctdjgzYzZvOGVsa20xZDlnOWk0OXNocGd1bjNqbXA5aDEuYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJzdWIiOiIxMDc0NzQ5NTM5OTIzOTQ2NzA2NzEiLCJlbWFpbCI6ImtyaWxkZWxpZXIxMEBnbWFpbC5jb20iLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwibmFtZSI6IkRlbGllciBLcmlsIiwicGljdHVyZSI6Imh0dHBzOi8vbGgzLmdvb2dsZXVzZXJjb250ZW50LmNvbS9hL0FDZzhvY0lBR0hLRzF6X25jbFEzeS01V2FlZHBFM1M0VDZ4c2drN2VJZE1pV0V5WnNLUlNVQT1zOTYtYyIsImdpdmVuX25hbWUiOiJEZWxpZXIiLCJmYW1pbHlfbmFtZSI6IktyaWwiLCJpYXQiOjE3NjI2NTExNDQsImV4cCI6MTc2MjY1NDc0NH0.iq48YvpQ5cxR5csO6DN57K5bhYs4thHRB015E-ztvp4TzZBVyYtwUE62aYebsf1A2Xlw1sVgBPcENpns9cOtA7bgy4J55Q3ymuGTOEAp8pqxE9bW-tGv0CbbzM0fMKsG9cH-vTvu8HBcjqkEoIj49GGBoGdtbmUI_RZ90wg6bV7nCxa8gcRHanqNehW49zzP9PW1UboRr2Np1va3rXJ1H-nCA6We3ju5JjdtlQ0RVMPLiGjwdYoZXAN0vL2eoY0CyqdfFljp-E6j_PtnbVZdszVp3-wGUvjHL0e-Ym7v_KrncZwlw0dZWFXzpJyB1OjeYt9OMEBHlqjj0j-jwHiR6g"}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+root@glowlab:~# docker logs glowlab_backend -f
+Waiting for PostgreSQL to be ready...
+Syncing database schema with Prisma...
+warn The configuration property `package.json#prisma` is deprecated and will be removed in Prisma 7. Please migrate to a Prisma config file (e.g., `prisma.config.ts`).
+For more information, see: https://pris.ly/prisma-config
+
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "physio_db", schema "public" at "postgres:5432"
+Error: insert or update on table "TuviChart" violates foreign key constraint "TuviChart_userId_fkey"
+   0: sql_schema_connector::apply_migration::migration_step
+           with step=AddForeignKey { foreign_key_id: ForeignKeyId(11) }
+             at schema-engine/connectors/sql-schema-connector/src/apply_migration.rs:28
+   1: sql_schema_connector::apply_migration::apply_migration
+             at schema-engine/connectors/sql-schema-connector/src/apply_migration.rs:11
+   2: schema_core::state::SchemaPush
+             at schema-engine/core/src/state.rs:515
+
+npm notice
+npm notice New major version of npm available! 10.8.2 -> 11.6.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.6.2
+npm notice To update run: npm install -g npm@11.6.2
+npm notice
+Warning: Schema sync failed. Trying migrate deploy...
+warn The configuration property `package.json#prisma` is deprecated and will be removed in Prisma 7. Please migrate to a Prisma config file (e.g., `prisma.config.ts`).
+For more information, see: https://pris.ly/prisma-config
+
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "physio_db", schema "public" at "postgres:5432"
+
+2 migrations found in prisma/migrations
+
+Error: P3005
+
+The database schema is not empty. Read more about how to baseline an existing production database: https://pris.ly/d/migrate-baseline
+
+Warning: Migration also failed. Server will start but may have schema issues.
+Manual intervention may be required.
+Starting server...
+Server running on http://localhost:3000
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+Waiting for PostgreSQL to be ready...
+Syncing database schema with Prisma...
+warn The configuration property `package.json#prisma` is deprecated and will be removed in Prisma 7. Please migrate to a Prisma config file (e.g., `prisma.config.ts`).
+For more information, see: https://pris.ly/prisma-config
+
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "physio_db", schema "public" at "postgres:5432"
+
+⚠️  There might be data loss when applying the changes:
+
+  • You are about to drop the `tuvi_conversations` table, which is not empty (7 rows).
+
+  • You are about to drop the `tuvi_messages` table, which is not empty (10 rows).
+
+
+
+🚀  Your database is now in sync with your Prisma schema. Done in 280ms
+
+Starting server...
+Server running on http://localhost:3000
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /
+{}
+GET /
+{}
+GET /favicon.ico
+{}
+GET /health
+{}
+GET /wiki
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /
+{}
+GET /
+{}
+GET /favicon.ico
+{}
+GET /sitemap.xml
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+PUT /SDK/webLanguage
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /favicon.ico
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+POST /auth/google/mobile
+{"token":"eyJhbGciOiJSUzI1NiIsImtpZCI6IjRmZWI0NGYwZjdhN2UyN2M3YzQwMzM3OWFmZjIwYWY1YzhjZjUyZGMiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2FjY291bnRzLmdvb2dsZS5jb20iLCJhenAiOiI0NzQ4OTkyMTQ3MzctZDE1aHJpdnNrY2NrOTJwaXFha2w5dWdjdGRzdW5nbzYuYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJhdWQiOiI0NzQ4OTkyMTQ3MzctdjgzYzZvOGVsa20xZDlnOWk0OXNocGd1bjNqbXA5aDEuYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJzdWIiOiIxMDc0NzQ5NTM5OTIzOTQ2NzA2NzEiLCJlbWFpbCI6ImtyaWxkZWxpZXIxMEBnbWFpbC5jb20iLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwibmFtZSI6IkRlbGllciBLcmlsIiwicGljdHVyZSI6Imh0dHBzOi8vbGgzLmdvb2dsZXVzZXJjb250ZW50LmNvbS9hL0FDZzhvY0lBR0hLRzF6X25jbFEzeS01V2FlZHBFM1M0VDZ4c2drN2VJZE1pV0V5WnNLUlNVQT1zOTYtYyIsImdpdmVuX25hbWUiOiJEZWxpZXIiLCJmYW1pbHlfbmFtZSI6IktyaWwiLCJpYXQiOjE3NjI2NTExNDQsImV4cCI6MTc2MjY1NDc0NH0.iq48YvpQ5cxR5csO6DN57K5bhYs4thHRB015E-ztvp4TzZBVyYtwUE62aYebsf1A2Xlw1sVgBPcENpns9cOtA7bgy4J55Q3ymuGTOEAp8pqxE9bW-tGv0CbbzM0fMKsG9cH-vTvu8HBcjqkEoIj49GGBoGdtbmUI_RZ90wg6bV7nCxa8gcRHanqNehW49zzP9PW1UboRr2Np1va3rXJ1H-nCA6We3ju5JjdtlQ0RVMPLiGjwdYoZXAN0vL2eoY0CyqdfFljp-E6j_PtnbVZdszVp3-wGUvjHL0e-Ym7v_KrncZwlw0dZWFXzpJyB1OjeYt9OMEBHlqjj0j-jwHiR6g"}
+GET /health
+{}
+GET /health
+{}
+POST /users/signUp
+{"username":"krildelier99@gmail.com","password":"290503Sang.","confirmPassword":"290503Sang.","firstName":"asda","lastName":"sdas","email":"krildelier99@gmail.com","phone":"0123456879","age":22,"gender":"male","avatar":null}
+prisma:info Starting a postgresql pool with 5 connections.
+prisma:query SELECT "public"."user"."id", "public"."user"."firstName", "public"."user"."lastName", "public"."user"."email", "public"."user"."phone", "public"."user"."age", "public"."user"."gender"::text, "public"."user"."avatar", "public"."user"."password", "public"."user"."resetPwdToken", "public"."user"."credits", "public"."user"."createBy", "public"."user"."createAt", "public"."user"."updateBy", "public"."user"."updateAt", "public"."user"."delFlag", "public"."user"."googleId" FROM "public"."user" WHERE ("public"."user"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query INSERT INTO "public"."user" ("firstName","lastName","email","phone","age","gender","avatar","password","credits","createAt","updateAt","delFlag") VALUES ($1,$2,$3,$4,$5,CAST($6::text AS "public"."Gender"),$7,$8,$9,$10,$11,$12) RETURNING "public"."user"."id", "public"."user"."firstName", "public"."user"."lastName", "public"."user"."email", "public"."user"."phone", "public"."user"."age", "public"."user"."gender"::text, "public"."user"."avatar", "public"."user"."password", "public"."user"."resetPwdToken", "public"."user"."credits", "public"."user"."createBy", "public"."user"."createAt", "public"."user"."updateBy", "public"."user"."updateAt", "public"."user"."delFlag", "public"."user"."googleId"
+prisma:error
+Invalid `prisma.user.create()` invocation:
+
+
+Unique constraint failed on the fields: (`id`)
+GET /favicon.ico
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+POST /users/signUp
+{"full_name":"Test User","email":"test@example.com","password":"Test123!@#"}
+POST /auth/user
+{"email":"test@example.com","password":"Test123!@#"}
+POST /api/v1/chat/start
+{"user_id":1}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+POST /api/v1/chat/start
+{"user_id":1}
+GET /health
+{}
+GET /
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /docs
+{}
+GET /favicon.ico
+{}
+GET /
+{}
+GET /swagger
+{}
+GET /health
+{}
+GET /
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /docs
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+POST /auth/google/mobile
+{"token":"eyJhbGciOiJSUzI1NiIsImtpZCI6IjRmZWI0NGYwZjdhN2UyN2M3YzQwMzM3OWFmZjIwYWY1YzhjZjUyZGMiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2FjY291bnRzLmdvb2dsZS5jb20iLCJhenAiOiI0NzQ4OTkyMTQ3MzctZDE1aHJpdnNrY2NrOTJwaXFha2w5dWdjdGRzdW5nbzYuYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJhdWQiOiI0NzQ4OTkyMTQ3MzctdjgzYzZvOGVsa20xZDlnOWk0OXNocGd1bjNqbXA5aDEuYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJzdWIiOiIxMDc0NzQ5NTM5OTIzOTQ2NzA2NzEiLCJlbWFpbCI6ImtyaWxkZWxpZXIxMEBnbWFpbC5jb20iLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwibmFtZSI6IkRlbGllciBLcmlsIiwicGljdHVyZSI6Imh0dHBzOi8vbGgzLmdvb2dsZXVzZXJjb250ZW50LmNvbS9hL0FDZzhvY0lBR0hLRzF6X25jbFEzeS01V2FlZHBFM1M0VDZ4c2drN2VJZE1pV0V5WnNLUlNVQT1zOTYtYyIsImdpdmVuX25hbWUiOiJEZWxpZXIiLCJmYW1pbHlfbmFtZSI6IktyaWwiLCJpYXQiOjE3NjI2NTExNDQsImV4cCI6MTc2MjY1NDc0NH0.iq48YvpQ5cxR5csO6DN57K5bhYs4thHRB015E-ztvp4TzZBVyYtwUE62aYebsf1A2Xlw1sVgBPcENpns9cOtA7bgy4J55Q3ymuGTOEAp8pqxE9bW-tGv0CbbzM0fMKsG9cH-vTvu8HBcjqkEoIj49GGBoGdtbmUI_RZ90wg6bV7nCxa8gcRHanqNehW49zzP9PW1UboRr2Np1va3rXJ1H-nCA6We3ju5JjdtlQ0RVMPLiGjwdYoZXAN0vL2eoY0CyqdfFljp-E6j_PtnbVZdszVp3-wGUvjHL0e-Ym7v_KrncZwlw0dZWFXzpJyB1OjeYt9OMEBHlqjj0j-jwHiR6g"}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+GET /health
+{}
+
+^Croot@glowlab:~# docker inspect glowlab_backend | grep -A 10 "Health"
+            "Health": {
+                "Status": "unhealthy",
+                "FailingStreak": 2084,
+                "Log": [
+                    {
+                        "Start": "2025-11-09T02:51:50.711372018+01:00",
+                        "End": "2025-11-09T02:51:50.925083482+01:00",
+                        "ExitCode": 1,
+                        "Output": ""
+                    },
+                    {
+--
+            "Healthcheck": {
+                "Test": [
+                    "CMD",
+                    "node",
+                    "-e",
+                    "require('http').get('http://localhost:3000/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
+                ],
+                "Interval": 30000000000,
+                "Timeout": 3000000000,
+                "StartPeriod": 10000000000,
+                "Retries": 3
+root@glowlab:~# docker exec glowlab_backend ps aux
+PID   USER     TIME  COMMAND
+    1 nodejs    0:28 node dist/server.js
+   58 nodejs    0:00 [node]
+33655 nodejs    0:00 ps aux
+root@glowlab:~# curl http://localhost:3000/health
+Forbiddenroot@glowlab:~# curl http://localhost:3000/
+okroot@glowlab:~# docker exec glowlab_postgres psql -U postgres -c "SELECT version();"
+psql: error: connection to server on socket "/var/run/postgresql/.s.PGSQL.5432" failed: FATAL:  role "postgres" does not exist
+root@glowlab:~#  docker logs glowlab_backend | grep -i "database\|postgres\|connection"
+Waiting for PostgreSQL to be ready...
+Syncing database schema with Prisma...
+warn The configuration property `package.json#prisma` is deprecated and will be removed in Prisma 7. Please migrate to a Prisma config file (e.g., `prisma.config.ts`).
+For more information, see: https://pris.ly/prisma-config
+
+Error: insert or update on table "TuviChart" violates foreign key constraint "TuviChart_userId_fkey"
+   0: sql_schema_connector::apply_migration::migration_step
+           with step=AddForeignKey { foreign_key_id: ForeignKeyId(11) }
+             at schema-engine/connectors/sql-schema-connector/src/apply_migration.rs:28
+   1: sql_schema_connector::apply_migration::apply_migration
+             at schema-engine/connectors/sql-schema-connector/src/apply_migration.rs:11
+   2: schema_core::state::SchemaPush
+             at schema-engine/core/src/state.rs:515
+
+npm notice
+npm notice New major version of npm available! 10.8.2 -> 11.6.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.6.2
+npm notice To update run: npm install -g npm@11.6.2
+npm notice
+warn The configuration property `package.json#prisma` is deprecated and will be removed in Prisma 7. Please migrate to a Prisma config file (e.g., `prisma.config.ts`).
+For more information, see: https://pris.ly/prisma-config
+
+Error: P3005
+
+The database schema is not empty. Read more about how to baseline an existing production database: https://pris.ly/d/migrate-baseline
+
+warn The configuration property `package.json#prisma` is deprecated and will be removed in Prisma 7. Please migrate to a Prisma config file (e.g., `prisma.config.ts`).
+For more information, see: https://pris.ly/prisma-config
+
+Datasource "db": PostgreSQL database "physio_db", schema "public" at "postgres:5432"
+Datasource "db": PostgreSQL database "physio_db", schema "public" at "postgres:5432"
+Waiting for PostgreSQL to be ready...
+Syncing database schema with Prisma...
+Datasource "db": PostgreSQL database "physio_db", schema "public" at "postgres:5432"
+🚀  Your database is now in sync with your Prisma schema. Done in 280ms
+prisma:info Starting a postgresql pool with 5 connections.
+root@glowlab:~# docker inspect glowlab_backend | grep -A 30 '"Env"'
+            "Env": [
+                "PING_KEY=super-secret-anhtruongdeptraiquadihihi-072202006124",
+                "GOOGLE_ANDROID_CLIENT_SECRET=",
+                "LANG=en_US.UTF-8",
+                "GOOGLE_WEB_REDIRECT_URL=http://localhost:3000/auth/google/callback",
+                "AUTH_ACCESS_TOKEN_EXPIRES=15m",
+                "GOOGLE_WEB_CLIENT_ID=474899214737-v83c6o8elkm1d9g9i49shpgun3jmp9h1.apps.googleusercontent.com",
+                "MAIL_PASSWORD=",
+                "CLOUDINARY_CLOUD_NAME=dsfmzrwc1",
+                "PORT=3000",
+                "STRIPE_PUBLISHABLE_KEY=pk_test_51SR6hxPofBTvOXyOgfTqc2CwRZex2Oe1u0NesBJKFOAD3MgxxbzQqInnzpbTNODCC0rv2QjuPOMyUp9RzwMHXXTr00jGlA5ohH",
+                "AUTH_REFRESH_TOKEN_EXPIRES=7d",
+                "CLOUDINARY_API_SECRET=qvNpRQG2NDF9nYeYhAg7bF_-lqo",
+                "AUTH_SALT_ROUNDS=10",
+                "SKIP_MIGRATION=false",
+                "GOOGLE_ANDROID_CLIENT_ID=474899214737-d15hrivskcck92piqakl9ugctdsungo6.apps.googleusercontent.com",
+                "STRIPE_BASE_URL_PRODUCTION=https://160.250.180.132",
+                "MAIL_HOST=",
+                "GOOGLE_WEB_CLIENT_SECRET=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",
+                "DATABASE_URL=postgresql://physio_db:290503Sang.@postgres:5432/physio_db?schema=public",
+                "STRIPE_SECRET_KEY=sk_test_51SR6hxPofBTvOXyOkCNZzLSks11IrUpP03ymouaCI6QC4I91lZKSmOpn02OUUdKkQmYVkZYXK7iVG9G0kEd3wCz200TqIrV4Wa",
+                "JWT_SECRET=1234567890000000000000000000",
+                "MAIL_PORT=",
+                "NODE_ENV=production",
+                "CLOUDINARY_API_KEY=595277418892966",
+                "MAIL_USER=",
+                "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+                "NODE_VERSION=18.20.8",
+                "YARN_VERSION=1.22.22"
+            ],
+            "Cmd": null,
+root@glowlab:~#  docker exec glowlab_backend printenv | grep -E "DATABASE|PORT|NODE_ENV"
+PORT=3000
+DATABASE_URL=postgresql://physio_db:290503Sang.@postgres:5432/physio_db?schema=public
+MAIL_PORT=
+NODE_ENV=production
+root@glowlab:~# docker restart glowlab_backend
+^Croot@glowlab:~# ^C
+root@glowlab:~# docker exec glowlab_backend ping glowlab_postgres -c 3
+PING glowlab_postgres (172.20.0.2): 56 data bytes
+64 bytes from 172.20.0.2: seq=0 ttl=42 time=0.487 ms
+root@glowlab:~# docker exec glowlab_backend netstat -tlnp | grep 3000
+root@glowlab:~#

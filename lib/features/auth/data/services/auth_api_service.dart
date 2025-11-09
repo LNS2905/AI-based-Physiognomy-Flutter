@@ -15,13 +15,29 @@ class AuthApiService {
     AppLogger.info('AuthApiService: Registering new user');
     
     try {
+      // Ensure username is set to email if not provided (backend requirement)
+      final userDto = createUserDto.username == null || createUserDto.username!.isEmpty
+          ? CreateUserDTO(
+              username: createUserDto.email,
+              password: createUserDto.password,
+              confirmPassword: createUserDto.confirmPassword,
+              firstName: createUserDto.firstName,
+              lastName: createUserDto.lastName,
+              email: createUserDto.email,
+              phone: createUserDto.phone,
+              age: createUserDto.age,
+              gender: createUserDto.gender,
+              avatar: createUserDto.avatar,
+            )
+          : createUserDto;
+
       final response = await http.post(
         Uri.parse('$_baseUrl/users/signUp'),
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
         },
-        body: jsonEncode(createUserDto.toJson()),
+        body: jsonEncode(userDto.toJson()),
       );
 
       AppLogger.info('AuthApiService: Register response status: ${response.statusCode}');

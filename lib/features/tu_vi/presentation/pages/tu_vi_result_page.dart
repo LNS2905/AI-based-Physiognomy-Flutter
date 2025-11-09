@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import '../providers/tu_vi_provider.dart';
 import '../../data/models/tu_vi_chart_response.dart';
 import '../../data/models/tu_vi_house.dart';
 import '../widgets/element_widgets.dart';
+import '../../../auth/presentation/providers/enhanced_auth_provider.dart';
+import '../../../auth/data/models/auth_models.dart';
+import '../../../ai_conversation/presentation/providers/chat_provider.dart';
 
 /// Result page displaying Tu Vi chart
 class TuViResultPage extends StatefulWidget {
@@ -111,6 +115,11 @@ class _TuViResultPageState extends State<TuViResultPage> {
 
           // Additional info
           _buildAdditionalInfo(chart),
+          const SizedBox(height: 24),
+
+          // Chatbot button
+          _buildChatbotButton(chart),
+          const SizedBox(height: 32),
         ],
       ),
     );
@@ -752,6 +761,173 @@ class _TuViResultPageState extends State<TuViResultPage> {
         return const Color(0xFF795548);
       default:
         return Colors.grey;
+    }
+  }
+
+  Widget _buildChatbotButton(TuViChartResponse chart) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            const Color(0xFF6A5AE0),
+            const Color(0xFF8B7FE8),
+          ],
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF6A5AE0).withOpacity(0.3),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => _onChatbotPressed(chart),
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.chat_bubble_outline,
+                    color: Colors.white,
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                const Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Gặp Chatbot',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      'Hỏi AI về lá số của bạn',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.white70,
+                      ),
+                    ),
+                  ],
+                ),
+                const Spacer(),
+                const Icon(
+                  Icons.arrow_forward_ios,
+                  color: Colors.white,
+                  size: 20,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _onChatbotPressed(TuViChartResponse chart) async {
+    // Get chat provider
+    final chatProvider = Provider.of<ChatProvider>(context, listen: false);
+
+    // TODO: TEMPORARY - Bypass authentication for testing
+    // Get auth provider when needed:
+    // final authProvider = Provider.of<EnhancedAuthProvider>(context, listen: false);
+    // Uncomment these lines when API auth is fixed:
+    // if (authProvider.currentUser == null) {
+    //   if (mounted) {
+    //     ScaffoldMessenger.of(context).showSnackBar(
+    //       const SnackBar(
+    //         content: Text('Vui lòng đăng nhập để sử dụng chatbot'),
+    //         backgroundColor: Colors.red,
+    //       ),
+    //     );
+    //   }
+    //   return;
+    // }
+    // final user = authProvider.currentUser!;
+
+    // TEMPORARY: Mock user for testing (user_id = 1 as per API docs)
+    const mockUser = User(
+      id: 1,
+      email: 'test@example.com',
+      firstName: 'Test',
+      lastName: 'User',
+    );
+
+    // Show loading indicator
+    if (mounted) {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
+    try {
+      // Set user in chat provider (using mock user for testing)
+      chatProvider.setUser(mockUser);
+
+      // Create new conversation with chart_id
+      final success = await chatProvider.createNewConversation(
+        chartId: chart.id,
+      );
+
+      // Hide loading indicator
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
+
+      if (success && chatProvider.currentConversationId != null) {
+        // Navigate to chatbot screen
+        if (mounted) {
+          context.push('/ai-conversation?conversationId=${chatProvider.currentConversationId}');
+        }
+      } else {
+        // Show error message
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Không thể khởi tạo cuộc trò chuyện. Vui lòng thử lại.'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      // Hide loading indicator
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
+
+      // Show error message
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Lỗi: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 }

@@ -37,6 +37,14 @@ class _AuthGuardState extends State<AuthGuard> {
   }
 
   void _checkAuthState() {
+    // Skip auth check if bypassed
+    if (AppConstants.bypassAuthentication) {
+      AppLogger.info('AuthGuard: Authentication bypassed, skipping checks');
+      _hasCheckedAuth = true;
+      setState(() {});
+      return;
+    }
+    
     if (!_isListenerAdded) {
       _authProvider = context.read<EnhancedAuthProvider>();
       
@@ -51,6 +59,11 @@ class _AuthGuardState extends State<AuthGuard> {
 
   void _onAuthStateChanged() {
     if (!mounted) return;
+    
+    // Skip auth check if bypassed
+    if (AppConstants.bypassAuthentication) {
+      return;
+    }
     
     final authProvider = context.read<EnhancedAuthProvider>();
 

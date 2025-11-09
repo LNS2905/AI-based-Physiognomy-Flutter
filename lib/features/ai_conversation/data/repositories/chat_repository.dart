@@ -16,7 +16,8 @@ class ChatRepository {
       : _httpService = httpService ?? HttpService();
 
   /// Start a new conversation
-  Future<ApiResult<int>> startConversation(int userId, {int? chartId}) async {
+  /// Returns a map with conversationId and optional welcome message
+  Future<ApiResult<Map<String, dynamic>>> startConversation(int userId, {int? chartId}) async {
     try {
       AppLogger.info('Starting new conversation for user: $userId');
       
@@ -25,15 +26,26 @@ class ChatRepository {
         chartId: chartId,
       );
       
+      // Chat API endpoint with /api/v1 prefix (ngrok backend)
       final response = await _httpService.post(
         '/api/v1/chat/start',
         body: request.toJson(),
       );
 
+      // Backend response format:
+      // {
+      //   "success": true,
+      //   "conversation_id": 42,
+      //   "message": "Welcome message from backend..."
+      // }
       final conversationId = response['conversation_id'] as int;
+      final welcomeMessage = response['message'] as String?;
       
       AppLogger.info('Started conversation: $conversationId');
-      return Success(conversationId);
+      return Success({
+        'conversation_id': conversationId,
+        'welcome_message': welcomeMessage,
+      });
     } catch (e) {
       AppLogger.error('Failed to start conversation', e);
       return Error(_mapErrorToFailure(e));
@@ -45,29 +57,23 @@ class ChatRepository {
     try {
       AppLogger.info('Sending chat message: ${request.message} to conversation: ${request.conversationId}');
       
+      // Chat API endpoint with /api/v1 prefix (ngrok backend)
       final response = await _httpService.post(
         '/api/v1/chat/message',
         body: request.toJson(),
       );
 
-      // Parse response - API might return message directly or in nested structure
-      String messageContent;
-      String messageId;
-      
-      if (response.containsKey('message')) {
-        messageContent = response['message'] as String;
-        messageId = response['id']?.toString() ?? DateTime.now().millisecondsSinceEpoch.toString();
-      } else if (response.containsKey('response')) {
-        messageContent = response['response'] as String;
-        messageId = response['id']?.toString() ?? DateTime.now().millisecondsSinceEpoch.toString();
-      } else {
-        // If response format is different, try to get the first string value
-        messageContent = response.values.firstWhere(
-          (v) => v is String,
-          orElse: () => 'No response',
-        ) as String;
-        messageId = DateTime.now().millisecondsSinceEpoch.toString();
-      }
+      // Backend response format:
+      // {
+      //   "success": true,
+      //   "answer": "AI response...",
+      //   "tools_used": [],
+      //   "conversation_id": 1
+      // }
+      final messageContent = response['answer'] as String? ?? 
+                            response['message'] as String? ?? 
+                            'No response';
+      final messageId = DateTime.now().millisecondsSinceEpoch.toString();
       
       // Convert API response to ChatMessageModel
       final aiMessage = ChatMessageModel.ai(
@@ -90,29 +96,31 @@ class ChatRepository {
     try {
       AppLogger.info('Fetching conversation history: $conversationId');
       
+      // Chat API endpoint with /api/v1 prefix (ngrok backend)
       final response = await _httpService.get(
         '/api/v1/chat/history/$conversationId',
       );
 
-      // Parse response - expecting array of messages
+      // Backend response format:
+      // {
+      //   "success": true,
+      //   "messages": [
+      //     {
+      //       "id": 5,
+      //       "conversationId": 36,
+      //       "role": "user",
+      //       "content": "...",
+      //       "createAt": "..."
+      //     }
+      //   ]
+      // }
       List<ChatMessageModel> messages = [];
       
       if (response.containsKey('messages') && response['messages'] is List) {
         final messagesList = response['messages'] as List;
         messages = messagesList.map((msg) {
-          final isUser = msg['role'] == 'user' || msg['sender'] == 'user';
-          final content = msg['content']?.toString() ?? msg['message']?.toString() ?? '';
-          final id = msg['id']?.toString() ?? DateTime.now().millisecondsSinceEpoch.toString();
-          
-          return isUser
-              ? ChatMessageModel.user(id: id, content: content)
-              : ChatMessageModel.ai(id: id, content: content);
-        }).toList();
-      } else if (response['data'] is List) {
-        final messagesList = response['data'] as List;
-        messages = messagesList.map((msg) {
-          final isUser = msg['role'] == 'user' || msg['sender'] == 'user';
-          final content = msg['content']?.toString() ?? msg['message']?.toString() ?? '';
+          final isUser = msg['role'] == 'user';
+          final content = msg['content']?.toString() ?? '';
           final id = msg['id']?.toString() ?? DateTime.now().millisecondsSinceEpoch.toString();
           
           return isUser

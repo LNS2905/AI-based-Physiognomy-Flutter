@@ -61,13 +61,67 @@ class ChatProvider extends BaseProvider {
     );
 
     if (result != null) {
-      _currentConversationId = result;
+      _currentConversationId = result['conversation_id'] as int;
       _messages = [];
-      AppLogger.info('Created new conversation: $result');
+      
+      // Add welcome message from backend (local only, not saved to history)
+      final welcomeMessage = result['welcome_message'] as String?;
+      if (welcomeMessage != null && welcomeMessage.isNotEmpty) {
+        _addWelcomeMessageFromBackend(welcomeMessage);
+      } else {
+        // Fallback to local message if backend doesn't provide one
+        _addWelcomeMessage(chartId);
+      }
+      
+      AppLogger.info('Created new conversation: $_currentConversationId');
       notifyListeners();
       return true;
     }
     return false;
+  }
+
+  /// Add welcome message from backend
+  void _addWelcomeMessageFromBackend(String message) {
+    final now = DateTime.now();
+    final welcomeMessage = ChatMessageModel.ai(
+      id: 'welcome_${now.millisecondsSinceEpoch}',
+      content: message,
+      isDelivered: true,
+    );
+    _messages.insert(0, welcomeMessage);
+  }
+
+  /// Add welcome message (displayed locally, not saved to history)
+  void _addWelcomeMessage(int? chartId) {
+    final now = DateTime.now();
+    final welcomeText = chartId != null
+        ? '''Xin chào! Tôi là trợ lý AI tử vi của bạn. 🌟
+
+Tôi đã nhận được lá số tử vi của bạn. Hãy đặt câu hỏi cho tôi về:
+• Tính cách và vận mệnh
+• Sự nghiệp và tài lộc
+• Tình duyên và hôn nhân
+• Sức khỏe và gia đạo
+• Hoặc bất kỳ khía cạnh nào khác trong lá số
+
+Bạn muốn hỏi tôi điều gì?'''
+        : '''Xin chào! Tôi là trợ lý AI tử vi của bạn. 🌟
+
+Tôi có thể giúp bạn tìm hiểu về:
+• Lá số tử vi
+• Vận mệnh và tính cách
+• Sự nghiệp và tình duyên
+• Các câu hỏi về phong thủy
+
+Bạn muốn hỏi tôi điều gì?''';
+
+    final welcomeMessage = ChatMessageModel.ai(
+      id: 'welcome_${now.millisecondsSinceEpoch}',
+      content: welcomeText,
+      isDelivered: true,
+    );
+
+    _messages.insert(0, welcomeMessage);
   }
 
   /// Select an existing conversation and load its history

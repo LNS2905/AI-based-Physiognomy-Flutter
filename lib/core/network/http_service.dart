@@ -274,31 +274,66 @@ class HttpService {
   /// Build URI with query parameters
   Uri _buildUri(String endpoint, Map<String, dynamic>? queryParameters) {
     // Determine which backend to use based on endpoint
-    String baseUrl;
-    String path;
+    String finalUrl;
 
-    if (endpoint.contains('analyze-face-from-cloudinary') ||
-        endpoint.contains('analyze-palm-cloudinary') ||
-        endpoint.startsWith('/api/chat')) {
-      // Old Backend APIs (Face/Palm Analysis, Chat)
-      baseUrl = AppConstants.oldBackendBaseUrl;
-      path = endpoint.startsWith('http')
-          ? endpoint.replaceFirst(baseUrl, '')
-          : endpoint;
+    if (endpoint.startsWith('/api/chat') || endpoint.contains('/chat/')) {
+      // Chat API - separate chatbot service
+      final baseUrl = AppConstants.chatbotBaseUrl;
+      
+      // If endpoint is absolute URL, use it directly
+      if (endpoint.startsWith('http')) {
+        finalUrl = endpoint;
+      } else {
+        // Combine base URL with endpoint
+        final normalizedEndpoint = endpoint.startsWith('/') ? endpoint.substring(1) : endpoint;
+        finalUrl = baseUrl.endsWith('/') 
+            ? '$baseUrl$normalizedEndpoint'
+            : '$baseUrl/$normalizedEndpoint';
+      }
+    } else if (endpoint.contains('analyze-face-from-cloudinary') ||
+        endpoint.contains('analyze-palm-cloudinary')) {
+      // Old Backend APIs (Face/Palm Analysis)
+      // oldBackendBaseUrl already includes /ai path
+      final baseUrl = AppConstants.oldBackendBaseUrl;
+      
+      // If endpoint is absolute URL, use it directly
+      if (endpoint.startsWith('http')) {
+        finalUrl = endpoint;
+      } else {
+        // Combine base URL with endpoint
+        // Remove leading slash from endpoint if baseUrl doesn't end with slash
+        final normalizedEndpoint = endpoint.startsWith('/') ? endpoint.substring(1) : endpoint;
+        finalUrl = baseUrl.endsWith('/') 
+            ? '$baseUrl$normalizedEndpoint'
+            : '$baseUrl/$normalizedEndpoint';
+      }
     } else {
       // New Backend APIs (Auth, User Management from OpenAPI docs)
-      baseUrl = AppConstants.baseUrl;
-      path = endpoint.startsWith('http')
-          ? endpoint.replaceFirst(baseUrl, '')
-          : endpoint; // Don't add version prefix for new backend
+      final baseUrl = AppConstants.baseUrl;
+      
+      if (endpoint.startsWith('http')) {
+        finalUrl = endpoint;
+      } else {
+        final normalizedEndpoint = endpoint.startsWith('/') ? endpoint.substring(1) : endpoint;
+        finalUrl = baseUrl.endsWith('/') 
+            ? '$baseUrl$normalizedEndpoint'
+            : '$baseUrl/$normalizedEndpoint';
+      }
     }
 
-    return Uri.parse(baseUrl).replace(
-      path: path.startsWith('/') ? path : '/$path',
-      queryParameters: queryParameters?.map(
-        (key, value) => MapEntry(key, value.toString()),
-      ),
-    );
+    // Parse the final URL
+    final uri = Uri.parse(finalUrl);
+    
+    // Add query parameters if provided
+    if (queryParameters != null && queryParameters.isNotEmpty) {
+      return uri.replace(
+        queryParameters: queryParameters.map(
+          (key, value) => MapEntry(key, value.toString()),
+        ),
+      );
+    }
+    
+    return uri;
   }
 
   /// Build request headers with automatic authorization
