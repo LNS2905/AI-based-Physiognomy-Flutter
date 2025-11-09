@@ -17,7 +17,7 @@ enum ConversationStatus {
 /// Conversation model
 @JsonSerializable()
 class ConversationModel extends Equatable {
-  final String id;
+  final int id;
   final String title;
   final List<ChatMessageModel> messages;
   final DateTime createdAt;
@@ -37,7 +37,7 @@ class ConversationModel extends Equatable {
 
   /// Create a new conversation
   factory ConversationModel.create({
-    required String id,
+    required int id,
     String? title,
     Map<String, dynamic>? metadata,
   }) {
@@ -123,7 +123,7 @@ class ConversationModel extends Equatable {
 
   /// Copy with method
   ConversationModel copyWith({
-    String? id,
+    int? id,
     String? title,
     List<ChatMessageModel>? messages,
     DateTime? createdAt,

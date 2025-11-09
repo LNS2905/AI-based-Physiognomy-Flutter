@@ -7,14 +7,15 @@ part 'chat_request_model.g.dart';
 @JsonSerializable()
 class ChatRequestModel extends Equatable {
   final String message;
-  final String? conversationId;
+  @JsonKey(name: 'conversation_id')
+  final int conversationId;
   final Map<String, dynamic>? context;
   final List<String>? attachments;
   final Map<String, dynamic>? metadata;
 
   const ChatRequestModel({
     required this.message,
-    this.conversationId,
+    required this.conversationId,
     this.context,
     this.attachments,
     this.metadata,
@@ -23,7 +24,7 @@ class ChatRequestModel extends Equatable {
   /// Create a simple text message request
   factory ChatRequestModel.text({
     required String message,
-    String? conversationId,
+    required int conversationId,
     Map<String, dynamic>? context,
   }) {
     return ChatRequestModel(
@@ -37,7 +38,7 @@ class ChatRequestModel extends Equatable {
   factory ChatRequestModel.withAttachments({
     required String message,
     required List<String> attachments,
-    String? conversationId,
+    required int conversationId,
     Map<String, dynamic>? context,
   }) {
     return ChatRequestModel(
@@ -51,7 +52,7 @@ class ChatRequestModel extends Equatable {
   /// Copy with method
   ChatRequestModel copyWith({
     String? message,
-    String? conversationId,
+    int? conversationId,
     Map<String, dynamic>? context,
     List<String>? attachments,
     Map<String, dynamic>? metadata,
@@ -91,7 +92,8 @@ class ChatRequestModel extends Equatable {
 class ChatResponseModel extends Equatable {
   final String id;
   final String message;
-  final String conversationId;
+  @JsonKey(name: 'conversation_id')
+  final int conversationId;
   final DateTime timestamp;
   final bool isComplete;
   final Map<String, dynamic>? metadata;
@@ -109,7 +111,7 @@ class ChatResponseModel extends Equatable {
   ChatResponseModel copyWith({
     String? id,
     String? message,
-    String? conversationId,
+    int? conversationId,
     DateTime? timestamp,
     bool? isComplete,
     Map<String, dynamic>? metadata,

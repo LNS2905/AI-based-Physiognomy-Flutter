@@ -8,14 +8,14 @@ class AppConstants {
   static const String appVersion = '1.0.0';
   
   // Old Backend API Configuration (Face/Palm Analysis, Chat)
-  // VPS Production: http://72.60.115.238/ai
+  // VPS Production: http://160.250.180.132:3000/ai
   // Local Development: http://192.168.100.55:3000/ai
-  static const String oldBackendBaseUrl = 'http://192.168.100.55:3000/ai';
+  static const String oldBackendBaseUrl = 'http://160.250.180.132:3000/ai';
 
   // New Backend API Configuration (Auth, User Management from OpenAPI docs)
-  // VPS Production: http://72.60.115.238
+  // VPS Production: http://160.250.180.132:3000
   // Local Development: http://192.168.100.55:3000
-  static const String baseUrl = 'http://192.168.100.55:3000';
+  static const String baseUrl = 'http://160.250.180.132:3000';
   static const String apiVersion = 'v1';
 
   // Authentication API Endpoints (New Backend - OpenAPI docs)

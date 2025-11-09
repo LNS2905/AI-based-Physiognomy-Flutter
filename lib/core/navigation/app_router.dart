@@ -263,7 +263,10 @@ class AppRouter {
         path: AppConstants.aiConversationRoute,
         name: 'ai-conversation',
         builder: (context, state) {
-          final conversationId = state.uri.queryParameters['id'];
+          final conversationIdStr = state.uri.queryParameters['id'];
+          final conversationId = conversationIdStr != null 
+              ? int.tryParse(conversationIdStr) 
+              : null;
           return AIConversationPage(conversationId: conversationId).withAuthGuard(
             redirectRoute: AppConstants.introRoute,
           );

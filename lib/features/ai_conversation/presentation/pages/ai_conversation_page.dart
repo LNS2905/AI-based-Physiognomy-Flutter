@@ -18,7 +18,7 @@ import '../widgets/quick_action_buttons.dart';
 
 /// AI Conversation page for chatting with AI assistant
 class AIConversationPage extends StatefulWidget {
-  final String? conversationId;
+  final int? conversationId;
 
   const AIConversationPage({
     super.key,
@@ -69,12 +69,20 @@ class _AIConversationPageState extends State<AIConversationPage>
   void _initializeChat() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final chatProvider = context.read<ChatProvider>();
+      final authProvider = context.read<EnhancedAuthProvider>();
+      final currentUser = authProvider.currentUser;
       
-      if (widget.conversationId != null) {
-        chatProvider.selectConversation(widget.conversationId!);
-      } else {
-        // Start with a new conversation
-        chatProvider.createNewConversation();
+      if (currentUser != null) {
+        // Initialize provider with user
+        chatProvider.setUser(currentUser);
+        
+        if (widget.conversationId != null) {
+          // Load existing conversation
+          chatProvider.selectConversation(widget.conversationId!);
+        } else {
+          // Clear any previous conversation (will create new on first message)
+          chatProvider.clearConversation();
+        }
       }
       
       // Scroll to bottom after messages load
@@ -138,8 +146,8 @@ class _AIConversationPageState extends State<AIConversationPage>
         // Scroll to bottom to show new messages
         _scrollToBottom();
         
-        // Refresh user data to get updated credits
-        authProvider.getCurrentUser();
+        // Refresh user data to get updated credits (will happen automatically through API)
+        // Credits are updated by backend when sending messages
       } else {
         // Show error if message failed to send
         if (mounted && chatProvider.hasError) {
@@ -588,7 +596,8 @@ class _AIConversationPageState extends State<AIConversationPage>
   void _handleMenuAction(String action, ChatProvider chatProvider) {
     switch (action) {
       case 'new_chat':
-        chatProvider.createNewConversation();
+        chatProvider.clearConversation();
+        _messageController.clear();
         break;
       case 'clear_chat':
         _showClearChatDialog(chatProvider);
@@ -604,11 +613,55 @@ class _AIConversationPageState extends State<AIConversationPage>
   }
 
   void _showClearChatDialog(ChatProvider chatProvider) {
-    // TODO: Implement clear chat dialog
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Clear Conversation'),
+        content: const Text(
+          'Are you sure you want to clear this conversation? This will start a new chat.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              chatProvider.clearConversation();
+              _messageController.clear();
+            },
+            child: const Text('Clear'),
+          ),
+        ],
+      ),
+    );
   }
 
   void _showDeleteChatDialog(ChatProvider chatProvider) {
-    // TODO: Implement delete chat dialog
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Conversation'),
+        content: const Text(
+          'Note: The backend API does not support deleting conversations. Clearing will start a new chat instead.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              chatProvider.clearConversation();
+              _messageController.clear();
+            },
+            child: const Text('Clear'),
+          ),
+        ],
+      ),
+    );
   }
 
   /// Show insufficient credits dialog

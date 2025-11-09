@@ -88,9 +88,9 @@ class MyApp extends StatelessWidget {
           ),
         ),
 
-        // AI Chat Provider
+        // AI Chat Provider - initialized when user logs in
         ChangeNotifierProvider(
-          create: (context) => ChatProvider()..initialize(),
+          create: (context) => ChatProvider(),
         ),
 
         // History Provider

@@ -2,8 +2,8 @@ import 'dart:async';
 import 'dart:math';
 import '../../../../core/providers/base_provider.dart';
 import '../../../../core/utils/logger.dart';
+import '../../../auth/data/models/auth_models.dart';
 import '../../data/models/chat_message_model.dart';
-import '../../data/models/conversation_model.dart';
 import '../../data/models/chat_request_model.dart';
 import '../../data/repositories/chat_repository.dart';
 
@@ -15,100 +15,93 @@ class ChatProvider extends BaseProvider {
       : _repository = repository ?? ChatRepository();
 
   // Current conversation state
-  ConversationModel? _currentConversation;
-  List<ConversationModel> _conversations = [];
+  int? _currentConversationId;
+  List<ChatMessageModel> _messages = [];
   bool _isTyping = false;
   bool _isAiTyping = false;
   String _currentMessage = '';
   Timer? _typingTimer;
+  User? _currentUser;
 
   // Getters
-  ConversationModel? get currentConversation => _currentConversation;
-  List<ConversationModel> get conversations => _conversations;
-  List<ChatMessageModel> get messages => _currentConversation?.messages ?? [];
+  int? get currentConversationId => _currentConversationId;
+  List<ChatMessageModel> get messages => _messages;
   bool get isTyping => _isTyping;
   bool get isAiTyping => _isAiTyping;
   String get currentMessage => _currentMessage;
-  bool get hasActiveConversation => _currentConversation != null;
-  bool get canSendMessage => _currentMessage.trim().isNotEmpty && !_isAiTyping;
+  bool get hasActiveConversation => _currentConversationId != null;
+  bool get canSendMessage => _currentMessage.trim().isNotEmpty && !_isAiTyping && hasActiveConversation;
 
-  /// Initialize chat provider
-  Future<void> initialize() async {
-    AppLogger.info('Initializing chat provider');
-    await loadConversations();
+  /// Initialize chat provider with user
+  Future<void> initialize(User user) async {
+    AppLogger.info('Initializing chat provider for user: ${user.id}');
+    _currentUser = user;
+    notifyListeners();
   }
 
-  /// Load conversations from API
-  Future<void> loadConversations() async {
-    final result = await executeApiOperation(
-      () => _repository.getConversations(),
-      operationName: 'loadConversations',
-    );
-
-    if (result != null) {
-      _conversations = result;
-      AppLogger.info('Loaded ${_conversations.length} conversations');
-      notifyListeners();
-    }
+  /// Set current user
+  void setUser(User user) {
+    _currentUser = user;
+    notifyListeners();
   }
 
   /// Create a new conversation
-  Future<bool> createNewConversation({String? title}) async {
+  Future<bool> createNewConversation({int? chartId}) async {
+    if (_currentUser == null) {
+      AppLogger.error('Cannot create conversation: No user set');
+      return false;
+    }
+
+    // User.id is already an int, no need to parse
+    final userId = _currentUser!.id;
     
     final result = await executeApiOperation(
-      () => _repository.createConversation(
-        title: title ?? 'New Conversation',
-        metadata: {'created_from': 'mobile_app'},
-      ),
+      () => _repository.startConversation(userId, chartId: chartId),
       operationName: 'createNewConversation',
     );
 
     if (result != null) {
-      _currentConversation = result;
-      _conversations.insert(0, result);
-      AppLogger.info('Created new conversation: ${result.id}');
+      _currentConversationId = result;
+      _messages = [];
+      AppLogger.info('Created new conversation: $result');
       notifyListeners();
       return true;
     }
     return false;
   }
 
-  /// Select an existing conversation
-  Future<void> selectConversation(String conversationId) async {
-    final existingConversation = _conversations
-        .where((conv) => conv.id == conversationId)
-        .firstOrNull;
+  /// Select an existing conversation and load its history
+  Future<void> selectConversation(int conversationId) async {
+    _currentConversationId = conversationId;
+    _messages = [];
+    notifyListeners();
 
-    if (existingConversation != null) {
-      _currentConversation = existingConversation;
-      AppLogger.info('Selected conversation: $conversationId');
-      notifyListeners();
-      return;
-    }
-
-    // Load conversation from API if not in local list
+    // Load conversation history from API
     final result = await executeApiOperation(
-      () => _repository.getConversation(conversationId),
+      () => _repository.getConversationHistory(conversationId),
       operationName: 'selectConversation',
     );
 
     if (result != null) {
-      _currentConversation = result;
-      // Add to conversations list if not already there
-      if (!_conversations.any((conv) => conv.id == conversationId)) {
-        _conversations.insert(0, result);
-      }
-      AppLogger.info('Loaded and selected conversation: $conversationId');
+      _messages = result;
+      AppLogger.info('Loaded conversation with ${_messages.length} messages');
       notifyListeners();
     }
   }
 
   /// Send a message to the AI
   Future<bool> sendMessage(String message) async {
-    if (!canSendMessage) return false;
-
     final trimmedMessage = message.trim();
     if (trimmedMessage.isEmpty) return false;
+
+    // Create new conversation if none exists
+    if (_currentConversationId == null) {
+      final created = await createNewConversation();
+      if (!created || _currentConversationId == null) {
+        AppLogger.error('Failed to create conversation');
+        return false;
+      }
+    }
 
     // Create user message
     final userMessage = ChatMessageModel.user(
@@ -116,20 +109,8 @@ class ChatProvider extends BaseProvider {
       content: trimmedMessage,
     );
 
-    // Add user message to conversation
-    if (_currentConversation != null) {
-      _currentConversation = _currentConversation!.addMessage(userMessage);
-      _updateConversationInList(_currentConversation!);
-    } else {
-      // Create new conversation if none exists
-      await createNewConversation();
-      if (_currentConversation != null) {
-        _currentConversation = _currentConversation!.addMessage(userMessage);
-        _updateConversationInList(_currentConversation!);
-      }
-    }
-
-    // Clear current message and show AI typing
+    // Add user message to list
+    _messages.add(userMessage);
     _currentMessage = '';
     _setAiTyping(true);
     notifyListeners();
@@ -137,7 +118,7 @@ class ChatProvider extends BaseProvider {
     // Send message to API
     final request = ChatRequestModel.text(
       message: trimmedMessage,
-      conversationId: _currentConversation?.id,
+      conversationId: _currentConversationId!,
       context: _buildContext(),
     );
 
@@ -149,10 +130,9 @@ class ChatProvider extends BaseProvider {
 
     _setAiTyping(false);
 
-    if (result != null && _currentConversation != null) {
-      // Add AI response to conversation
-      _currentConversation = _currentConversation!.addMessage(result);
-      _updateConversationInList(_currentConversation!);
+    if (result != null) {
+      // Add AI response to list
+      _messages.add(result);
       AppLogger.info('Received AI response: ${result.id}');
       notifyListeners();
       return true;
@@ -175,54 +155,13 @@ class ChatProvider extends BaseProvider {
     notifyListeners();
   }
 
-  /// Delete a conversation
-  Future<bool> deleteConversation(String conversationId) async {
-    final result = await executeApiOperation(
-      () => _repository.deleteConversation(conversationId),
-      operationName: 'deleteConversation',
-    );
-
-    if (result == true) {
-      _conversations.removeWhere((conv) => conv.id == conversationId);
-      if (_currentConversation?.id == conversationId) {
-        _currentConversation = null;
-      }
-      AppLogger.info('Deleted conversation: $conversationId');
-      notifyListeners();
-      return true;
-    }
-    return false;
-  }
-
-  /// Update conversation title
-  Future<bool> updateConversationTitle(String conversationId, String title) async {
-    final result = await executeApiOperation(
-      () => _repository.updateConversationTitle(conversationId, title),
-      operationName: 'updateConversationTitle',
-    );
-
-    if (result != null) {
-      _updateConversationInList(result);
-      if (_currentConversation?.id == conversationId) {
-        _currentConversation = result;
-      }
-      AppLogger.info('Updated conversation title: $conversationId');
-      notifyListeners();
-      return true;
-    }
-    return false;
-  }
-
-  /// Mark conversation as read
-  void markConversationAsRead(String conversationId) {
-    final conversationIndex = _conversations.indexWhere((conv) => conv.id == conversationId);
-    if (conversationIndex != -1) {
-      _conversations[conversationIndex] = _conversations[conversationIndex].markAllAsRead();
-      if (_currentConversation?.id == conversationId) {
-        _currentConversation = _conversations[conversationIndex];
-      }
-      notifyListeners();
-    }
+  /// Clear current conversation (start fresh)
+  void clearConversation() {
+    _currentConversationId = null;
+    _messages = [];
+    _currentMessage = '';
+    notifyListeners();
+    AppLogger.info('Cleared conversation');
   }
 
   /// Set typing indicator
@@ -249,26 +188,14 @@ class ChatProvider extends BaseProvider {
     }
   }
 
-  /// Update conversation in the list
-  void _updateConversationInList(ConversationModel updatedConversation) {
-    final index = _conversations.indexWhere((conv) => conv.id == updatedConversation.id);
-    if (index != -1) {
-      _conversations[index] = updatedConversation;
-      // Move to top of list
-      _conversations.removeAt(index);
-      _conversations.insert(0, updatedConversation);
-    } else {
-      _conversations.insert(0, updatedConversation);
-    }
-  }
-
   /// Build context for API requests
   Map<String, dynamic> _buildContext() {
     return {
       'platform': 'mobile',
       'app_version': '1.0.0',
       'timestamp': DateTime.now().toIso8601String(),
-      'message_count': _currentConversation?.messages.length ?? 0,
+      'message_count': _messages.length,
+      if (_currentUser != null) 'user_id': _currentUser!.id,
     };
   }
 

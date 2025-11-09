@@ -3,6 +3,12 @@ enum LoadingState {
   /// No loading operation in progress
   idle,
   
+  /// Loading data
+  loading,
+  
+  /// Data loaded successfully
+  loaded,
+  
   /// Initializing camera or services
   initializing,
   
@@ -29,6 +35,10 @@ extension LoadingStateExtension on LoadingState {
     switch (this) {
       case LoadingState.idle:
         return '';
+      case LoadingState.loading:
+        return 'Đang tải...';
+      case LoadingState.loaded:
+        return 'Đã tải!';
       case LoadingState.initializing:
         return 'Đang khởi tạo...';
       case LoadingState.uploading:
@@ -49,6 +59,10 @@ extension LoadingStateExtension on LoadingState {
     switch (this) {
       case LoadingState.idle:
         return '';
+      case LoadingState.loading:
+        return 'Đang tải...';
+      case LoadingState.loaded:
+        return 'Đã tải!';
       case LoadingState.initializing:
         return 'Đang khởi tạo camera...';
       case LoadingState.uploading:
@@ -69,6 +83,10 @@ extension LoadingStateExtension on LoadingState {
     switch (this) {
       case LoadingState.idle:
         return '';
+      case LoadingState.loading:
+        return 'Đang tải...';
+      case LoadingState.loaded:
+        return 'Đã tải!';
       case LoadingState.initializing:
         return 'Đang khởi tạo camera...';
       case LoadingState.uploading:
@@ -106,6 +124,10 @@ extension LoadingStateExtension on LoadingState {
     switch (this) {
       case LoadingState.idle:
         return 0.0;
+      case LoadingState.loading:
+        return 0.2;
+      case LoadingState.loaded:
+        return 1.0;
       case LoadingState.initializing:
         return 0.1;
       case LoadingState.uploading:
@@ -126,6 +148,10 @@ extension LoadingStateExtension on LoadingState {
     switch (this) {
       case LoadingState.idle:
         return 0;
+      case LoadingState.loading:
+        return 1;
+      case LoadingState.loaded:
+        return 4;
       case LoadingState.initializing:
         return 1;
       case LoadingState.uploading:
