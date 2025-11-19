@@ -60,6 +60,7 @@
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>com.physiognomy.app.aiPhysiognomy</string>
+				<string>physioapp</string>
 			</array>
 		</dict>
 		<dict>

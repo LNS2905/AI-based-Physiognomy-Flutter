@@ -1,4 +1,3 @@
-import '../../../../core/network/http_service.dart';
 import '../../../../core/network/api_result.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/errors/exceptions.dart';
@@ -7,6 +6,7 @@ import '../models/tu_vi_chart_request.dart';
 import '../models/tu_vi_chart_response.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'dart:io';
 
 /// Repository for handling Tu Vi API operations
 class TuViRepository {
@@ -26,10 +26,13 @@ class TuViRepository {
       final response = await http
           .post(
             uri,
-            headers: {'Content-Type': 'application/json'},
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+            },
             body: jsonEncode(request.toJson()),
           )
-          .timeout(const Duration(seconds: 10));
+          .timeout(const Duration(seconds: 45)); // Increased timeout for release builds
 
       if (response.statusCode == 200) {
         final data = jsonDecode(utf8.decode(response.bodyBytes));
@@ -47,6 +50,22 @@ class TuViRepository {
           ),
         );
       }
+    } on TimeoutException catch (e) {
+      AppLogger.error('Timeout creating Tu Vi chart', e);
+      return Error(
+        NetworkFailure(
+          message: 'Hết thời gian chờ. Vui lòng kiểm tra kết nối và thử lại.',
+          code: 'TIMEOUT',
+        ),
+      );
+    } on SocketException catch (e) {
+      AppLogger.error('Network error creating Tu Vi chart', e);
+      return Error(
+        NetworkFailure(
+          message: 'Không thể kết nối đến server. Vui lòng kiểm tra kết nối.',
+          code: 'CONNECTION_ERROR',
+        ),
+      );
     } catch (e) {
       AppLogger.error('Error creating Tu Vi chart', e);
       return Error(_mapErrorToFailure(e));
@@ -60,8 +79,14 @@ class TuViRepository {
 
       final uri = Uri.parse('$baseUrl/charts/$id');
       final response = await http
-          .get(uri, headers: {'Content-Type': 'application/json'})
-          .timeout(const Duration(seconds: 10));
+          .get(
+            uri,
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+            },
+          )
+          .timeout(const Duration(seconds: 45)); // Increased timeout for release builds
 
       if (response.statusCode == 200) {
         final data = jsonDecode(utf8.decode(response.bodyBytes));
@@ -86,6 +111,22 @@ class TuViRepository {
           ),
         );
       }
+    } on TimeoutException catch (e) {
+      AppLogger.error('Timeout fetching Tu Vi chart', e);
+      return Error(
+        NetworkFailure(
+          message: 'Hết thời gian chờ. Vui lòng kiểm tra kết nối và thử lại.',
+          code: 'TIMEOUT',
+        ),
+      );
+    } on SocketException catch (e) {
+      AppLogger.error('Network error fetching Tu Vi chart', e);
+      return Error(
+        NetworkFailure(
+          message: 'Không thể kết nối đến server. Vui lòng kiểm tra kết nối.',
+          code: 'CONNECTION_ERROR',
+        ),
+      );
     } catch (e) {
       AppLogger.error('Error fetching Tu Vi chart', e);
       return Error(_mapErrorToFailure(e));
@@ -103,8 +144,14 @@ class TuViRepository {
         queryParameters: {'limit': limit.toString()},
       );
       final response = await http
-          .get(uri, headers: {'Content-Type': 'application/json'})
-          .timeout(const Duration(seconds: 10));
+          .get(
+            uri,
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+            },
+          )
+          .timeout(const Duration(seconds: 45)); // Increased timeout for release builds
 
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(utf8.decode(response.bodyBytes));
@@ -124,6 +171,22 @@ class TuViRepository {
           ),
         );
       }
+    } on TimeoutException catch (e) {
+      AppLogger.error('Timeout fetching Tu Vi charts', e);
+      return Error(
+        NetworkFailure(
+          message: 'Hết thời gian chờ. Vui lòng kiểm tra kết nối và thử lại.',
+          code: 'TIMEOUT',
+        ),
+      );
+    } on SocketException catch (e) {
+      AppLogger.error('Network error fetching Tu Vi charts', e);
+      return Error(
+        NetworkFailure(
+          message: 'Không thể kết nối đến server. Vui lòng kiểm tra kết nối.',
+          code: 'CONNECTION_ERROR',
+        ),
+      );
     } catch (e) {
       AppLogger.error('Error fetching Tu Vi charts list', e);
       return Error(_mapErrorToFailure(e));

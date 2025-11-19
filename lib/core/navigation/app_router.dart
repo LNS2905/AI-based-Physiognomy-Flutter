@@ -33,6 +33,7 @@ import '../../features/testing/presentation/pages/tu_vi_test_page.dart';
 import '../../features/tu_vi/presentation/pages/tu_vi_input_page.dart';
 import '../../features/tu_vi/presentation/pages/tu_vi_result_page.dart';
 import '../../features/payment/presentation/pages/payment_packages_page.dart';
+import '../../features/payment/presentation/pages/payment_status_page.dart';
 import '../widgets/auth_guard.dart';
 
 /// Application router configuration using GoRouter
@@ -302,6 +303,31 @@ class AppRouter {
         path: '/payment/packages',
         name: 'payment-packages',
         builder: (context, state) => const AuthGuard(child: PaymentPackagesPage()),
+      ),
+
+      // Payment Success Route
+      GoRoute(
+        path: '/payment-success',
+        name: 'payment-success',
+        builder: (context, state) {
+          final creditsStr = state.uri.queryParameters['credits'];
+          final credits = creditsStr != null ? int.tryParse(creditsStr) : null;
+          return PaymentStatusPage(isSuccess: true, credits: credits);
+        },
+      ),
+
+      // Payment Failed Route
+      GoRoute(
+        path: '/payment-failed',
+        name: 'payment-failed',
+        builder: (context, state) => const PaymentStatusPage(isSuccess: false),
+      ),
+
+      // Payment Cancel Route
+      GoRoute(
+        path: '/payment-cancel',
+        name: 'payment-cancel',
+        builder: (context, state) => const PaymentStatusPage(isSuccess: false),
       ),
 
       // History Route (Protected)

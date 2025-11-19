@@ -36,6 +36,11 @@ android {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.getByName("debug")
+            
+            // Completely disable minification and ProGuard to avoid issues with reflection and serialization
+            isMinifyEnabled = false
+            isShrinkResources = false
+            // ProGuard completely disabled to fix Tu Vi API hanging issue
         }
     }
 }
