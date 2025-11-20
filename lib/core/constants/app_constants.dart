@@ -10,7 +10,8 @@ class AppConstants {
   // Old Backend API Configuration (Face/Palm Analysis)
   // VPS Production: http://160.250.180.132:3000/ai
   // Local Development: http://192.168.100.55:3000/ai
-  static const String oldBackendBaseUrl = 'http://160.250.180.132:3000/ai';
+  // New AI Service: https://inspired-bear-emerging.ngrok-free.app
+  static const String oldBackendBaseUrl = 'https://inspired-bear-emerging.ngrok-free.app';
 
   // Chatbot API Configuration (Separate service)
   // Ngrok URL (temporary): https://crayfish-pretty-certainly.ngrok-free.app

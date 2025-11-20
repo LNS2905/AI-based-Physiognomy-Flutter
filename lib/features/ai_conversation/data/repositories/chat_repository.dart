@@ -17,12 +17,12 @@ class ChatRepository {
 
   /// Start a new conversation
   /// Returns a map with conversationId and optional welcome message
-  Future<ApiResult<Map<String, dynamic>>> startConversation(int userId, {int? chartId}) async {
+  Future<ApiResult<Map<String, dynamic>>> startConversation(String userId, {int? chartId}) async {
     try {
       AppLogger.info('Starting new conversation for user: $userId');
       
       final request = ChatStartRequest(
-        userId: userId,
+        userId: int.tryParse(userId) ?? 0, // Backend expects int, convert safely
         chartId: chartId,
       );
       
@@ -133,6 +133,35 @@ class ChatRepository {
       return Success(messages);
     } catch (e) {
       AppLogger.error('Failed to fetch conversation history', e);
+      return Error(_mapErrorToFailure(e));
+    }
+  }
+
+  /// Get list of conversations for a user
+  Future<ApiResult<List<int>>> getUserConversations(String userId) async {
+    try {
+      AppLogger.info('Fetching conversations for user: $userId');
+      
+      // Chat API endpoint with /api/v1 prefix (ngrok backend)
+      final response = await _httpService.get(
+        '/api/v1/chat/user/$userId/conversations',
+      );
+
+      // Backend response format:
+      // {
+      //   "success": true,
+      //   "conversation_ids": [1, 2, 3]
+      // }
+      
+      List<int> conversationIds = [];
+      if (response.containsKey('conversation_ids') && response['conversation_ids'] is List) {
+        conversationIds = List<int>.from(response['conversation_ids']);
+      }
+      
+      AppLogger.info('Fetched ${conversationIds.length} conversations');
+      return Success(conversationIds);
+    } catch (e) {
+      AppLogger.error('Failed to fetch user conversations', e);
       return Error(_mapErrorToFailure(e));
     }
   }

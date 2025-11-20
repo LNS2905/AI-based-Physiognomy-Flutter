@@ -8,18 +8,25 @@ import '../../../face_scan/data/models/facial_analysis_server_model.dart';
 import '../../../palm_scan/data/models/palm_analysis_response_model.dart';
 import '../../../palm_scan/data/models/palm_analysis_server_model.dart';
 import '../../../auth/presentation/providers/enhanced_auth_provider.dart';
+import '../../../ai_conversation/data/repositories/chat_repository.dart';
+import '../../../ai_conversation/data/models/conversation_model.dart';
+import '../../../ai_conversation/data/models/chat_message_model.dart';
 import '../models/history_item_model.dart';
+import '../models/chat_history_model.dart';
 
 /// Repository for managing history data from API
 class HistoryRepository {
   final HttpService _httpService;
   final EnhancedAuthProvider _authProvider;
+  final ChatRepository _chatRepository;
 
   HistoryRepository({
     HttpService? httpService,
     required EnhancedAuthProvider authProvider,
+    ChatRepository? chatRepository,
   })  : _httpService = httpService ?? HttpService(),
-        _authProvider = authProvider;
+        _authProvider = authProvider,
+        _chatRepository = chatRepository ?? ChatRepository(httpService: httpService);
 
   /// Get facial analysis history for current user
   Future<ApiResult<List<FaceAnalysisHistoryModel>>> getFacialAnalysisHistory() async {
@@ -196,6 +203,113 @@ class HistoryRepository {
     }
   }
 
+  /// Get chat history for current user
+  Future<ApiResult<List<ChatHistoryModel>>> getChatHistory() async {
+    final userId = _authProvider.userId;
+    if (userId == null) {
+      AppLogger.error('No current user found for chat history');
+      return Error(AuthFailure(
+        message: 'User not authenticated',
+        code: 'NO_CURRENT_USER',
+      ));
+    }
+
+    try {
+      AppLogger.info('Getting chat history for user: $userId');
+
+      // 1. Get list of conversation IDs
+      final conversationIdsResult = await _chatRepository.getUserConversations(userId.toString());
+      
+      if (conversationIdsResult is! Success<List<int>>) {
+        return Error(conversationIdsResult.failure!);
+      }
+
+      final conversationIds = (conversationIdsResult as Success<List<int>>).data;
+      final List<ChatHistoryModel> historyItems = [];
+
+      // 2. Fetch details for each conversation
+      // Limit to last 20 conversations to avoid performance issues
+      final idsToFetch = conversationIds.take(20).toList();
+      
+      for (final id in idsToFetch) {
+        try {
+          final historyResult = await _chatRepository.getConversationHistory(id);
+          
+          if (historyResult is Success<List<ChatMessageModel>>) {
+            final messages = historyResult.data;
+            if (messages.isNotEmpty) {
+              // Create conversation model
+              // Infer timestamps from messages
+              // Messages are likely sorted by time, but let's be safe
+              messages.sort((a, b) {
+                 // Assuming id is timestamp-based or we can parse a timestamp field if available
+                 // For now, we'll rely on the order or metadata if available
+                 return a.id.compareTo(b.id); 
+              });
+              
+              // Try to get timestamp from message ID if it's a timestamp
+              DateTime createdAt = DateTime.now();
+              DateTime updatedAt = DateTime.now();
+              
+              if (messages.isNotEmpty) {
+                try {
+                  // Try to parse timestamp from ID (format: timestamp_random)
+                  final parts = messages.first.id.split('_');
+                  if (parts.isNotEmpty && int.tryParse(parts[0]) != null) {
+                    createdAt = DateTime.fromMillisecondsSinceEpoch(int.parse(parts[0]));
+                  }
+                  
+                  final lastParts = messages.last.id.split('_');
+                  if (lastParts.isNotEmpty && int.tryParse(lastParts[0]) != null) {
+                    updatedAt = DateTime.fromMillisecondsSinceEpoch(int.parse(lastParts[0]));
+                  }
+                } catch (_) {
+                  // Fallback to current time if parsing fails
+                }
+              }
+
+              // Generate title from first user message
+              String title = 'Cuộc trò chuyện #$id';
+              final firstUserMessage = messages.where((msg) => msg.sender == MessageSender.user).firstOrNull;
+              if (firstUserMessage != null) {
+                title = firstUserMessage.content.length > 30 
+                    ? '${firstUserMessage.content.substring(0, 30)}...' 
+                    : firstUserMessage.content;
+              }
+
+              final conversation = ConversationModel(
+                id: id,
+                title: title,
+                messages: messages,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+              );
+
+              final historyItem = ChatHistoryModel.fromConversation(
+                id: 'chat_$id',
+                conversation: conversation,
+              );
+
+              historyItems.add(historyItem);
+            }
+          }
+        } catch (e) {
+          AppLogger.warning('Failed to fetch conversation $id: $e');
+          continue;
+        }
+      }
+
+      AppLogger.info('Chat history retrieved: ${historyItems.length} items');
+      return Success(historyItems);
+    } catch (e) {
+      AppLogger.error('Exception in getChatHistory', e);
+      return Error(UnknownFailure(
+        message: 'Failed to get chat history: ${e.toString()}',
+        code: 'CHAT_HISTORY_ERROR',
+      ));
+    }
+  }
+
   /// Convert PalmAnalysisServerModel to PalmAnalysisResponseModel for display
   PalmAnalysisResponseModel _convertServerModelToResponseModel(PalmAnalysisServerModel serverModel) {
     // Assume 1 hand for palm analysis (server doesn't track actual hands)
@@ -237,7 +351,7 @@ class HistoryRepository {
     );
   }
 
-  /// Get all history items for current user (combines facial and palm analysis)
+  /// Get all history items for current user (combines facial, palm, and chat analysis)
   Future<ApiResult<List<HistoryItemModel>>> getAllHistory() async {
     final userId = _authProvider.userId;
     if (userId == null) {
@@ -250,10 +364,11 @@ class HistoryRepository {
     try {
       AppLogger.info('Getting all history for user: $userId');
 
-      // Get both facial and palm analysis history concurrently
+      // Get facial, palm, and chat analysis history concurrently
       final results = await Future.wait([
         getFacialAnalysisHistory(),
         getPalmAnalysisHistory(),
+        getChatHistory(),
       ]);
 
       final List<HistoryItemModel> allHistoryItems = [];
@@ -272,6 +387,14 @@ class HistoryRepository {
         allHistoryItems.addAll(palmResult.data);
       } else {
         AppLogger.warning('Failed to get palm analysis history: ${palmResult.failure?.message}');
+      }
+
+      // Add chat history
+      final chatResult = results[2];
+      if (chatResult is Success<List<ChatHistoryModel>>) {
+        allHistoryItems.addAll(chatResult.data);
+      } else {
+        AppLogger.warning('Failed to get chat history: ${chatResult.failure?.message}');
       }
 
       // Sort by creation date (newest first)

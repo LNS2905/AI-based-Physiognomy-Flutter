@@ -824,30 +824,21 @@ class _TuViResultPageState extends State<TuViResultPage> {
     // Get chat provider
     final chatProvider = Provider.of<ChatProvider>(context, listen: false);
 
-    // TODO: TEMPORARY - Bypass authentication for testing
-    // Get auth provider when needed:
-    // final authProvider = Provider.of<EnhancedAuthProvider>(context, listen: false);
-    // Uncomment these lines when API auth is fixed:
-    // if (authProvider.currentUser == null) {
-    //   if (mounted) {
-    //     ScaffoldMessenger.of(context).showSnackBar(
-    //       const SnackBar(
-    //         content: Text('Vui lòng đăng nhập để sử dụng chatbot'),
-    //         backgroundColor: Colors.red,
-    //       ),
-    //     );
-    //   }
-    //   return;
-    // }
-    // final user = authProvider.currentUser!;
-
-    // TEMPORARY: Mock user for testing (user_id = 1 as per API docs)
-    const mockUser = User(
-      id: 1,
-      email: 'test@example.com',
-      firstName: 'Test',
-      lastName: 'User',
-    );
+    // Get auth provider
+    final authProvider = Provider.of<EnhancedAuthProvider>(context, listen: false);
+    
+    if (authProvider.currentUser == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Vui lòng đăng nhập để sử dụng chatbot'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+      return;
+    }
+    final user = authProvider.currentUser!;
 
     // Show loading indicator
     if (mounted) {
@@ -861,8 +852,8 @@ class _TuViResultPageState extends State<TuViResultPage> {
     }
 
     try {
-      // Set user in chat provider (using mock user for testing)
-      chatProvider.setUser(mockUser);
+      // Set user in chat provider
+      chatProvider.setUser(user);
 
       // Create new conversation with chart_id
       final success = await chatProvider.createNewConversation(

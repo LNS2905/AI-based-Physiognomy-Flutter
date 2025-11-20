@@ -446,7 +446,7 @@ class _ChatHistoryDetailPageState extends State<ChatHistoryDetailPage> {
 
   void _continueConversation() {
     // Navigate to AI conversation page with this conversation
-    context.push('/ai-conversation', extra: _historyItem!.conversation);
+    context.push('${AppConstants.aiConversationRoute}?id=${_historyItem!.conversation.id}');
   }
 
   void _shareConversation() {

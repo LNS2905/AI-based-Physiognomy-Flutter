@@ -17,6 +17,7 @@ class ChatProvider extends BaseProvider {
   // Current conversation state
   int? _currentConversationId;
   List<ChatMessageModel> _messages = [];
+  List<int> _conversationIds = [];
   bool _isTyping = false;
   bool _isAiTyping = false;
   String _currentMessage = '';
@@ -26,6 +27,7 @@ class ChatProvider extends BaseProvider {
   // Getters
   int? get currentConversationId => _currentConversationId;
   List<ChatMessageModel> get messages => _messages;
+  List<int> get conversationIds => _conversationIds;
   bool get isTyping => _isTyping;
   bool get isAiTyping => _isAiTyping;
   String get currentMessage => _currentMessage;
@@ -56,7 +58,7 @@ class ChatProvider extends BaseProvider {
     final userId = _currentUser!.id;
     
     final result = await executeApiOperation(
-      () => _repository.startConversation(userId, chartId: chartId),
+      () => _repository.startConversation(userId.toString(), chartId: chartId),
       operationName: 'createNewConversation',
     );
 
@@ -139,6 +141,27 @@ Bạn muốn hỏi tôi điều gì?''';
     if (result != null) {
       _messages = result;
       AppLogger.info('Loaded conversation with ${_messages.length} messages');
+      notifyListeners();
+    }
+  }
+
+  /// Fetch list of conversations for current user
+  Future<void> fetchUserConversations() async {
+    if (_currentUser == null) {
+      AppLogger.error('Cannot fetch conversations: No user set');
+      return;
+    }
+
+    final result = await executeApiOperation(
+      () => _repository.getUserConversations(_currentUser!.id.toString()),
+      operationName: 'fetchUserConversations',
+    );
+
+    if (result != null) {
+      _conversationIds = result;
+      // Sort descending (newest first) - assuming IDs are incremental
+      _conversationIds.sort((a, b) => b.compareTo(a));
+      AppLogger.info('Loaded ${_conversationIds.length} conversations');
       notifyListeners();
     }
   }

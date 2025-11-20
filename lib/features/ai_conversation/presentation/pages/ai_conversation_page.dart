@@ -285,6 +285,16 @@ class _AIConversationPageState extends State<AIConversationPage>
                     ],
                   ),
                 ),
+                const PopupMenuItem(
+                  value: 'history',
+                  child: Row(
+                    children: [
+                      Icon(Icons.history),
+                      SizedBox(width: 8),
+                      Text('Lịch sử trò chuyện'),
+                    ],
+                  ),
+                ),
                 if (chatProvider.hasActiveConversation) ...[
                   const PopupMenuItem(
                     value: 'clear_chat',
@@ -574,6 +584,9 @@ class _AIConversationPageState extends State<AIConversationPage>
         chatProvider.clearConversation();
         _messageController.clear();
         break;
+      case 'history':
+        _showHistoryDialog(chatProvider);
+        break;
       case 'clear_chat':
         _showClearChatDialog(chatProvider);
         break;
@@ -581,6 +594,73 @@ class _AIConversationPageState extends State<AIConversationPage>
         _showDeleteChatDialog(chatProvider);
         break;
     }
+  }
+
+  void _showHistoryDialog(ChatProvider chatProvider) {
+    // Fetch history when opening dialog
+    chatProvider.fetchUserConversations();
+
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => Consumer<ChatProvider>(
+        builder: (context, provider, child) {
+          return Container(
+            padding: const EdgeInsets.all(16),
+            height: MediaQuery.of(context).size.height * 0.6,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Lịch sử trò chuyện',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Expanded(
+                  child: provider.conversationIds.isEmpty
+                      ? const Center(
+                          child: Text('Chưa có cuộc trò chuyện nào'),
+                        )
+                      : ListView.builder(
+                          itemCount: provider.conversationIds.length,
+                          itemBuilder: (context, index) {
+                            final id = provider.conversationIds[index];
+                            final isSelected = id == provider.currentConversationId;
+                            
+                            return ListTile(
+                              leading: const CircleAvatar(
+                                child: Icon(Icons.chat_bubble_outline),
+                              ),
+                              title: Text('Cuộc trò chuyện #$id'),
+                              subtitle: Text(
+                                isSelected ? 'Đang xem' : 'Nhấn để xem lại',
+                                style: TextStyle(
+                                  color: isSelected ? AppColors.primary : null,
+                                  fontWeight: isSelected ? FontWeight.bold : null,
+                                ),
+                              ),
+                              selected: isSelected,
+                              onTap: () {
+                                Navigator.pop(context);
+                                if (!isSelected) {
+                                  provider.selectConversation(id);
+                                }
+                              },
+                            );
+                          },
+                        ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
   }
 
   void _showMessageOptions(dynamic message) {
