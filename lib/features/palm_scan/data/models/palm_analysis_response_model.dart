@@ -29,21 +29,27 @@ class PalmAnalysisResponseModel extends Equatable {
   });
 
   factory PalmAnalysisResponseModel.fromJson(Map<String, dynamic> json) {
+    // Check if the response is wrapped in a 'data' field (common in some API responses)
+    final data = json['data'] as Map<String, dynamic>?;
+    final root = data ?? json;
+
     return PalmAnalysisResponseModel(
-      status: json['status'] as String? ?? 'success',
+      status: json['status'] as String? ?? (json['success'] == true ? 'success' : 'error'),
       message: json['message'] as String? ?? 'Palm analysis completed',
-      userId: json['user_id'] as String? ?? 'anonymous',
-      processedAt: json['processed_at'] as String? ?? DateTime.now().toIso8601String(),
-      handsDetected: json['hands_detected'] as int? ?? 0,
-      processingTime: (json['processing_time'] as num?)?.toDouble() ?? 0.0,
-      analysisType: json['analysis_type'] as String? ?? 'palm_analysis',
-      annotatedImageUrl: json['annotated_image_url'] as String?,
-      comparisonImageUrl: json['comparison_image_url'] as String?,
-      analysis: json['analysis'] != null
-          ? PalmAnalysisDataModel.fromJson(json['analysis'] as Map<String, dynamic>)
-          : null,
-      measurementsSummary: json['measurements_summary'] != null
-          ? MeasurementsSummaryModel.fromJson(json['measurements_summary'] as Map<String, dynamic>)
+      userId: root['user_id'] as String? ?? json['user_id'] as String? ?? 'anonymous',
+      processedAt: root['processed_at'] as String? ?? json['processed_at'] as String? ?? DateTime.now().toIso8601String(),
+      handsDetected: root['hands_detected'] as int? ?? root['palm_lines_detected'] as int? ?? json['hands_detected'] as int? ?? 0,
+      processingTime: (root['processing_time'] as num?)?.toDouble() ?? (json['processing_time'] as num?)?.toDouble() ?? 0.0,
+      analysisType: root['analysis_type'] as String? ?? json['analysis_type'] as String? ?? 'palm_analysis',
+      annotatedImageUrl: root['annotated_image_url'] as String? ?? json['annotated_image_url'] as String?,
+      comparisonImageUrl: root['comparison_image_url'] as String? ?? json['comparison_image_url'] as String?,
+      analysis: root['analysis'] != null
+          ? PalmAnalysisDataModel.fromJson(root['analysis'] as Map<String, dynamic>)
+          : data != null 
+              ? PalmAnalysisDataModel.fromJson(data) // If data exists but no explicit 'analysis' field, treat 'data' as analysis
+              : null,
+      measurementsSummary: root['measurements_summary'] != null
+          ? MeasurementsSummaryModel.fromJson(root['measurements_summary'] as Map<String, dynamic>)
           : null,
     );
   }

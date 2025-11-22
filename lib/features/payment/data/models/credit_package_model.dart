@@ -63,7 +63,6 @@ class CreditPackageModel extends Equatable {
 }
 
 /// Payment Session Request Model
-@JsonSerializable()
 class PaymentSessionRequest extends Equatable {
   final List<StripeLineItem> lineItems;
   final String mode;
@@ -74,16 +73,23 @@ class PaymentSessionRequest extends Equatable {
   });
 
   factory PaymentSessionRequest.fromJson(Map<String, dynamic> json) =>
-      _$PaymentSessionRequestFromJson(json);
+      PaymentSessionRequest(
+        lineItems: (json['lineItems'] as List<dynamic>)
+            .map((e) => StripeLineItem.fromJson(e as Map<String, dynamic>))
+            .toList(),
+        mode: json['mode'] as String? ?? 'payment',
+      );
 
-  Map<String, dynamic> toJson() => _$PaymentSessionRequestToJson(this);
+  Map<String, dynamic> toJson() => {
+        'lineItems': lineItems.map((e) => e.toJson()).toList(),
+        'mode': mode,
+      };
 
   @override
   List<Object?> get props => [lineItems, mode];
 }
 
 /// Stripe Line Item Model
-@JsonSerializable()
 class StripeLineItem extends Equatable {
   final StripePriceData priceData;
   final int quantity;
@@ -93,17 +99,22 @@ class StripeLineItem extends Equatable {
     this.quantity = 1,
   });
 
-  factory StripeLineItem.fromJson(Map<String, dynamic> json) =>
-      _$StripeLineItemFromJson(json);
+  factory StripeLineItem.fromJson(Map<String, dynamic> json) => StripeLineItem(
+        priceData: StripePriceData.fromJson(
+            json['price_data'] as Map<String, dynamic>),
+        quantity: (json['quantity'] as num?)?.toInt() ?? 1,
+      );
 
-  Map<String, dynamic> toJson() => _$StripeLineItemToJson(this);
+  Map<String, dynamic> toJson() => {
+        'price_data': priceData.toJson(),
+        'quantity': quantity,
+      };
 
   @override
   List<Object?> get props => [priceData, quantity];
 }
 
 /// Stripe Price Data Model
-@JsonSerializable()
 class StripePriceData extends Equatable {
   final String currency;
   final StripeProductData productData;
@@ -116,25 +127,33 @@ class StripePriceData extends Equatable {
   });
 
   factory StripePriceData.fromJson(Map<String, dynamic> json) =>
-      _$StripePriceDataFromJson(json);
+      StripePriceData(
+        currency: json['currency'] as String,
+        productData: StripeProductData.fromJson(
+            json['product_data'] as Map<String, dynamic>),
+        unitAmount: (json['unit_amount'] as num).toInt(),
+      );
 
-  Map<String, dynamic> toJson() => _$StripePriceDataToJson(this);
+  Map<String, dynamic> toJson() => {
+        'currency': currency,
+        'product_data': productData.toJson(),
+        'unit_amount': unitAmount,
+      };
 
   @override
   List<Object?> get props => [currency, productData, unitAmount];
 }
 
 /// Stripe Product Data Model
-@JsonSerializable()
 class StripeProductData extends Equatable {
   final String name;
 
   const StripeProductData({required this.name});
 
   factory StripeProductData.fromJson(Map<String, dynamic> json) =>
-      _$StripeProductDataFromJson(json);
+      StripeProductData(name: json['name'] as String);
 
-  Map<String, dynamic> toJson() => _$StripeProductDataToJson(this);
+  Map<String, dynamic> toJson() => {'name': name};
 
   @override
   List<Object?> get props => [name];

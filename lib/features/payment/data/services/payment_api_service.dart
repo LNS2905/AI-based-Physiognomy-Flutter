@@ -85,8 +85,9 @@ class PaymentApiService {
     try {
       AppLogger.info('PaymentApiService: Getting current user credits');
 
+      // Endpoint changed from /users/me to /auth/me based on server analysis
       final response = await http.get(
-        Uri.parse('$_baseUrl/users/me'),
+        Uri.parse('$_baseUrl/auth/me'),
         headers: await _getAuthHeaders(),
       ).timeout(ApiConfig.requestTimeout);
 

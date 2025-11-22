@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Read(//c/Code/lasotuvi/**)",
-      "Bash(python -m uvicorn:*)"
+      "Bash(python -m uvicorn:*)",
+      "Bash(dart run build_runner build:*)",
+      "Bash(flutter pub run build_runner build --delete-conflicting-outputs)"
     ],
     "deny": [],
     "ask": []

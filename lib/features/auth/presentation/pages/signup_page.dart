@@ -795,16 +795,31 @@ class _SignUpPageState extends State<SignUpPage> {
         if (errorMessage.contains('Internal server error') ||
             errorMessage.contains('500') ||
             errorMessage.contains('INTERNAL_ERROR')) {
-          errorMessage = 'Hệ thống đang bảo trì. Vui lòng thử lại sau ít phút.';
+          // Check for unique constraint violations which often manifest as 500s in some backend configs
+          // or if we can parse the error details
+          if (errorMessage.contains('phone')) {
+             errorMessage = 'Số điện thoại này đã được đăng ký.';
+          } else if (errorMessage.contains('email')) {
+             errorMessage = 'Email này đã được đăng ký.';
+          } else {
+             errorMessage = 'Hệ thống đang gặp sự cố. Vui lòng thử lại sau.';
+          }
         } else if (errorMessage.contains('username must be a valid email')) {
           errorMessage = 'Vui lòng sử dụng email hợp lệ để đăng ký.';
+        } else if (errorMessage.contains('Unique constraint failed')) {
+           if (errorMessage.contains('phone')) {
+             errorMessage = 'Số điện thoại này đã được đăng ký.';
+          } else if (errorMessage.contains('email')) {
+             errorMessage = 'Email này đã được đăng ký.';
+          }
+        } else if (errorMessage.contains('DUPLICATE_USER')) {
+          errorMessage = 'Số điện thoại hoặc Email này đã được đăng ký.';
         }
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(errorMessage),
             backgroundColor: AppColors.error,
-            duration: const Duration(seconds: 5),
           ),
         );
       }

@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
+import 'package:image/image.dart' as img;
 import '../utils/logger.dart';
 import '../errors/exceptions.dart';
 
@@ -54,6 +55,9 @@ class ImagePickerService {
           );
         }
 
+        // Fix EXIF orientation
+        await _fixImageOrientation(image.path);
+
         return image.path;
       } else {
         AppLogger.info('No image selected from gallery');
@@ -70,6 +74,48 @@ class ImagePickerService {
         message: 'Failed to select image: ${e.toString()}',
         code: 'IMAGE_PICKER_ERROR',
       );
+    }
+  }
+
+  /// Fix image orientation based on EXIF data
+  Future<void> _fixImageOrientation(String imagePath) async {
+    try {
+      AppLogger.info('Checking and fixing image orientation for: $imagePath');
+      
+      // Read the image file
+      final imageFile = File(imagePath);
+      final imageBytes = await imageFile.readAsBytes();
+      
+      // Decode the image
+      final image = img.decodeImage(imageBytes);
+      
+      if (image == null) {
+        AppLogger.warning('Failed to decode image for orientation fix');
+        return;
+      }
+
+      // The image package automatically handles EXIF orientation when decoding
+      // We just need to re-encode and save it
+      // This removes the EXIF orientation tag and bakes the rotation into the image data
+      
+      // Encode back to the original format
+      List<int>? encodedImage;
+      final extension = imagePath.toLowerCase().split('.').last;
+      
+      if (extension == 'png') {
+        encodedImage = img.encodePng(image);
+      } else {
+        // Default to JPEG for jpg, jpeg, and other formats
+        encodedImage = img.encodeJpg(image, quality: 85);
+      }
+
+      // Save the corrected image back to the same path
+      await imageFile.writeAsBytes(encodedImage);
+      
+      AppLogger.info('Image orientation fixed successfully');
+    } catch (e) {
+      // Log error but don't throw - orientation fix is not critical
+      AppLogger.warning('Failed to fix image orientation (non-critical): $e');
     }
   }
 

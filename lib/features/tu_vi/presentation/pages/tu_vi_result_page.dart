@@ -826,7 +826,7 @@ class _TuViResultPageState extends State<TuViResultPage> {
 
     // Get auth provider
     final authProvider = Provider.of<EnhancedAuthProvider>(context, listen: false);
-    
+
     if (authProvider.currentUser == null) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -855,9 +855,13 @@ class _TuViResultPageState extends State<TuViResultPage> {
       // Set user in chat provider
       chatProvider.setUser(user);
 
-      // Create new conversation with chart_id
+      // Convert chart to JSON for fast Tu Vi analysis
+      final chartJson = chart.toJson();
+
+      // Create new conversation with chart_id AND full chart data JSON
       final success = await chatProvider.createNewConversation(
         chartId: chart.id,
+        chartData: chartJson, // ✅ Pass full JSON data for fast analysis
       );
 
       // Hide loading indicator

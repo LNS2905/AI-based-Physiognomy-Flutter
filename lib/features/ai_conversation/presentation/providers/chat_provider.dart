@@ -23,6 +23,7 @@ class ChatProvider extends BaseProvider {
   String _currentMessage = '';
   Timer? _typingTimer;
   User? _currentUser;
+  Map<String, dynamic>? _currentChartData; // Store chart data for Tu Vi analysis
 
   // Getters
   int? get currentConversationId => _currentConversationId;
@@ -33,6 +34,7 @@ class ChatProvider extends BaseProvider {
   String get currentMessage => _currentMessage;
   bool get hasActiveConversation => _currentConversationId != null;
   bool get canSendMessage => _currentMessage.trim().isNotEmpty && !_isAiTyping && hasActiveConversation;
+  bool get hasTuViChart => _currentChartData != null;
 
   /// Initialize chat provider with user
   Future<void> initialize(User user) async {
@@ -48,15 +50,21 @@ class ChatProvider extends BaseProvider {
   }
 
   /// Create a new conversation
-  Future<bool> createNewConversation({int? chartId}) async {
+  Future<bool> createNewConversation({
+    int? chartId,
+    Map<String, dynamic>? chartData,
+  }) async {
     if (_currentUser == null) {
       AppLogger.error('Cannot create conversation: No user set');
       return false;
     }
 
+    // Store chart data for Tu Vi analysis
+    _currentChartData = chartData;
+
     // User.id is already an int, no need to parse
     final userId = _currentUser!.id;
-    
+
     final result = await executeApiOperation(
       () => _repository.startConversation(userId.toString(), chartId: chartId),
       operationName: 'createNewConversation',
@@ -65,7 +73,7 @@ class ChatProvider extends BaseProvider {
     if (result != null) {
       _currentConversationId = result['conversation_id'] as int;
       _messages = [];
-      
+
       // Add welcome message from backend (local only, not saved to history)
       final welcomeMessage = result['welcome_message'] as String?;
       if (welcomeMessage != null && welcomeMessage.isNotEmpty) {
@@ -74,8 +82,8 @@ class ChatProvider extends BaseProvider {
         // Fallback to local message if backend doesn't provide one
         _addWelcomeMessage(chartId);
       }
-      
-      AppLogger.info('Created new conversation: $_currentConversationId');
+
+      AppLogger.info('Created new conversation: $_currentConversationId with Tu Vi chart: ${_currentChartData != null}');
       notifyListeners();
       return true;
     }
@@ -96,10 +104,14 @@ class ChatProvider extends BaseProvider {
   /// Add welcome message (displayed locally, not saved to history)
   void _addWelcomeMessage(int? chartId) {
     final now = DateTime.now();
-    final welcomeText = chartId != null
+    final hasTuViData = _currentChartData != null;
+
+    final welcomeText = chartId != null && hasTuViData
         ? '''Xin chào! Tôi là trợ lý AI tử vi của bạn. 🌟
 
-Tôi đã nhận được lá số tử vi của bạn. Hãy đặt câu hỏi cho tôi về:
+✅ Tôi đã nhận được lá số tử vi đầy đủ của bạn!
+
+⚡ Phân tích NHANH (8-15 giây) - Hãy đặt câu hỏi về:
 • Tính cách và vận mệnh
 • Sự nghiệp và tài lộc
 • Tình duyên và hôn nhân
@@ -192,7 +204,42 @@ Bạn muốn hỏi tôi điều gì?''';
     _setAiTyping(true);
     notifyListeners();
 
-    // Send message to API
+    // If we have Tu Vi chart data, use the fast analyze-json endpoint
+    if (_currentChartData != null) {
+      final analysisResult = await executeApiOperation(
+        () => _repository.analyzeTuViJson(
+          chartData: _currentChartData!,
+          question: trimmedMessage,
+        ),
+        operationName: 'analyzeTuViJson',
+        showLoading: false,
+      );
+
+      _setAiTyping(false);
+
+      if (analysisResult != null) {
+        // Convert analysis result to chat message
+        final aiMessage = ChatMessageModel.ai(
+          id: _generateId(),
+          content: analysisResult.analysis,
+          isDelivered: true,
+          metadata: {
+            'method': analysisResult.method,
+            'processing_time': analysisResult.processingTime,
+            'timestamp': analysisResult.timestamp,
+          },
+        );
+
+        _messages.add(aiMessage);
+        AppLogger.info('Received Tu Vi analysis (${analysisResult.processingTime})');
+        notifyListeners();
+        return true;
+      }
+
+      return false;
+    }
+
+    // Otherwise, use regular chat endpoint
     final request = ChatRequestModel.text(
       message: trimmedMessage,
       conversationId: _currentConversationId!,
@@ -237,6 +284,7 @@ Bạn muốn hỏi tôi điều gì?''';
     _currentConversationId = null;
     _messages = [];
     _currentMessage = '';
+    _currentChartData = null;
     notifyListeners();
     AppLogger.info('Cleared conversation');
   }

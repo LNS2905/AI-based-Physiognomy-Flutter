@@ -7,6 +7,7 @@ import '../../../../core/utils/logger.dart';
 import '../models/chat_request_model.dart';
 import '../models/chat_message_model.dart';
 import '../models/chat_start_model.dart';
+import '../models/tuvi_analysis_models.dart';
 
 /// Repository for handling AI chat API operations
 class ChatRepository {
@@ -141,7 +142,7 @@ class ChatRepository {
   Future<ApiResult<List<int>>> getUserConversations(String userId) async {
     try {
       AppLogger.info('Fetching conversations for user: $userId');
-      
+
       // Chat API endpoint with /api/v1 prefix (ngrok backend)
       final response = await _httpService.get(
         '/api/v1/chat/user/$userId/conversations',
@@ -152,16 +153,55 @@ class ChatRepository {
       //   "success": true,
       //   "conversation_ids": [1, 2, 3]
       // }
-      
+
       List<int> conversationIds = [];
       if (response.containsKey('conversation_ids') && response['conversation_ids'] is List) {
         conversationIds = List<int>.from(response['conversation_ids']);
       }
-      
+
       AppLogger.info('Fetched ${conversationIds.length} conversations');
       return Success(conversationIds);
     } catch (e) {
       AppLogger.error('Failed to fetch user conversations', e);
+      return Error(_mapErrorToFailure(e));
+    }
+  }
+
+  /// Analyze Tu Vi chart using JSON data (FAST - 8-15 seconds)
+  /// This is the recommended endpoint for Tu Vi analysis
+  Future<ApiResult<AnalysisResult>> analyzeTuViJson({
+    required Map<String, dynamic> chartData,
+    required String question,
+  }) async {
+    try {
+      AppLogger.info('Analyzing Tu Vi chart with question: $question');
+
+      final request = ChartJsonInput(
+        chartData: chartData,
+        question: question,
+      );
+
+      // Tu Vi API endpoint with /api/v1 prefix (ngrok backend)
+      final response = await _httpService.post(
+        '/api/v1/tuvi/analyze-json',
+        body: request.toJson(),
+      );
+
+      // Backend response format:
+      // {
+      //   "analysis": "Detailed analysis text...",
+      //   "timestamp": "2025-11-20T10:30:00",
+      //   "status": "success",
+      //   "method": "json",
+      //   "processing_time": "12.5s"
+      // }
+
+      final analysisResult = AnalysisResult.fromJson(response);
+
+      AppLogger.info('Received Tu Vi analysis (${analysisResult.processingTime})');
+      return Success(analysisResult);
+    } catch (e) {
+      AppLogger.error('Failed to analyze Tu Vi chart', e);
       return Error(_mapErrorToFailure(e));
     }
   }

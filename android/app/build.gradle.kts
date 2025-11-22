@@ -29,6 +29,9 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        
+        // Suppress warnings about 3rd party libraries
+        multiDexEnabled = true
     }
 
     buildTypes {
