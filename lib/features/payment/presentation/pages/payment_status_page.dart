@@ -55,7 +55,7 @@ class _PaymentStatusPageState extends State<PaymentStatusPage> {
               const SizedBox(height: 16),
               Text(
                 widget.isSuccess
-                    ? 'Bạn đã nhận được ${widget.credits ?? 0} credits vào tài khoản.'
+                    ? 'Bạn đã nhận được ${widget.credits ?? 0} tín dụng vào tài khoản.'
                     : 'Đã có lỗi xảy ra trong quá trình thanh toán. Vui lòng thử lại.',
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                       color: AppColors.textSecondary,

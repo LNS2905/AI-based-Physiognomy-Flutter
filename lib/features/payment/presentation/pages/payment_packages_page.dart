@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/logger.dart';
 import '../../../../core/widgets/standard_back_button.dart';
 import '../../../auth/presentation/providers/enhanced_auth_provider.dart';
 import '../../data/models/credit_package_model.dart';
 import '../providers/payment_provider.dart';
-import '../widgets/credit_package_card.dart';
 
 class PaymentPackagesPage extends StatefulWidget {
   const PaymentPackagesPage({super.key});
@@ -17,13 +16,21 @@ class PaymentPackagesPage extends StatefulWidget {
 }
 
 class _PaymentPackagesPageState extends State<PaymentPackagesPage> {
+  final TextEditingController _amountController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+
   @override
   void initState() {
     super.initState();
     Future.microtask(() {
-      context.read<PaymentProvider>().loadCreditPackages();
       context.read<PaymentProvider>().refreshCredits();
     });
+  }
+
+  @override
+  void dispose() {
+    _amountController.dispose();
+    super.dispose();
   }
 
   @override
@@ -31,88 +38,115 @@ class _PaymentPackagesPageState extends State<PaymentPackagesPage> {
     return Scaffold(
       appBar: AppBar(
         leading: const StandardBackButton(),
-        title: const Text('Buy Credits'),
+        title: const Text('Nạp tín dụng'),
         centerTitle: true,
         elevation: 0,
       ),
       body: Consumer2<PaymentProvider, EnhancedAuthProvider>(
         builder: (context, paymentProvider, authProvider, _) {
-          if (paymentProvider.isLoading && paymentProvider.packages.isEmpty) {
-            return const Center(child: CircularProgressIndicator());
-          }
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Current credits card
+                _buildCurrentCreditsCard(
+                  context,
+                  authProvider.currentUser?.credits ?? paymentProvider.currentCredits,
+                ),
+                const SizedBox(height: 24),
 
-          if (paymentProvider.hasError) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.error_outline, size: 64, color: Colors.red[300]),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Failed to load packages',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    paymentProvider.errorMessage ?? 'Unknown error',
-                    style: Theme.of(context).textTheme.bodyMedium,
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 24),
-                  ElevatedButton.icon(
-                    onPressed: () {
-                      paymentProvider.loadCreditPackages();
-                    },
-                    icon: const Icon(Icons.refresh),
-                    label: const Text('Retry'),
-                  ),
-                ],
-              ),
-            );
-          }
+                // Info section
+                _buildInfoSection(context),
+                const SizedBox(height: 24),
 
-          return RefreshIndicator(
-            onRefresh: () async {
-              await paymentProvider.loadCreditPackages();
-              await paymentProvider.refreshCredits();
-            },
-            child: SingleChildScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Current credits card
-                  _buildCurrentCreditsCard(
-                    context,
-                    authProvider.currentUser?.credits ?? paymentProvider.currentCredits,
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Info section
-                  _buildInfoSection(context),
-                  const SizedBox(height: 24),
-
-                  // Package grid
-                  Text(
-                    'Choose Your Package',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
-                  const SizedBox(height: 16),
-                  ...paymentProvider.packages.map((package) {
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 16),
-                      child: CreditPackageCard(
-                        package: package,
-                        isLoading: paymentProvider.isLoading,
-                        onTap: () => _handlePurchase(context, package),
+                // Custom Amount Input
+                Text(
+                  'Nhập số tiền cần nạp',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
                       ),
-                    );
-                  }),
-                ],
-              ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Số tiền tối thiểu: \$5.00',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Colors.grey[600],
+                      ),
+                ),
+                const SizedBox(height: 16),
+
+                Form(
+                  key: _formKey,
+                  child: TextFormField(
+                    controller: _amountController,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+                    ],
+                    decoration: InputDecoration(
+                      prefixText: '\$ ',
+                      labelText: 'Số tiền (USD)',
+                      hintText: 'Nhập số tiền (vd: 10)',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      filled: true,
+                      fillColor: Colors.grey[50],
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Vui lòng nhập số tiền';
+                      }
+                      final amount = double.tryParse(value);
+                      if (amount == null) {
+                        return 'Số tiền không hợp lệ';
+                      }
+                      if (amount < 5.0) {
+                        return 'Số tiền tối thiểu là \$5.00';
+                      }
+                      return null;
+                    },
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                // Top Up Button
+                ElevatedButton(
+                  onPressed: paymentProvider.isLoading
+                      ? null
+                      : () {
+                          if (_formKey.currentState!.validate()) {
+                            final amount = double.parse(_amountController.text);
+                            _handleCustomPurchase(context, amount);
+                          }
+                        },
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    backgroundColor: AppColors.primary,
+                  ),
+                  child: paymentProvider.isLoading
+                      ? const SizedBox(
+                          height: 24,
+                          width: 24,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : const Text(
+                          'Nạp ngay',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                ),
+              ],
             ),
           );
         },
@@ -143,7 +177,7 @@ class _PaymentPackagesPageState extends State<PaymentPackagesPage> {
             ),
             const SizedBox(height: 12),
             const Text(
-              'Your Current Credits',
+              'Tín dụng hiện tại',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 16,
@@ -160,7 +194,7 @@ class _PaymentPackagesPageState extends State<PaymentPackagesPage> {
             ),
             const SizedBox(height: 4),
             const Text(
-              'credits',
+              'tín dụng',
               style: TextStyle(
                 color: Colors.white70,
                 fontSize: 14,
@@ -186,7 +220,7 @@ class _PaymentPackagesPageState extends State<PaymentPackagesPage> {
                 Icon(Icons.info_outline, color: AppColors.primary),
                 const SizedBox(width: 8),
                 Text(
-                  'How Credits Work',
+                  'Thông tin nạp tín dụng',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -196,29 +230,15 @@ class _PaymentPackagesPageState extends State<PaymentPackagesPage> {
             const SizedBox(height: 12),
             _buildInfoItem(
               context,
-              'AI Chatbot: 1 credit per message',
-              Icons.chat,
-            ),
-            const SizedBox(height: 8),
-            _buildInfoItem(
-              context,
-              'Face Analysis: FREE',
-              Icons.face,
+              'Tỷ giá: \$1 USD = 10 Tín dụng',
+              Icons.currency_exchange,
               isHighlighted: true,
             ),
             const SizedBox(height: 8),
             _buildInfoItem(
               context,
-              'Palm Reading: FREE',
-              Icons.back_hand,
-              isHighlighted: true,
-            ),
-            const SizedBox(height: 8),
-            _buildInfoItem(
-              context,
-              'Tử Vi Chart: FREE',
-              Icons.auto_awesome,
-              isHighlighted: true,
+              'Nạp tối thiểu: \$5.00',
+              Icons.vertical_align_bottom,
             ),
           ],
         ),
@@ -253,13 +273,25 @@ class _PaymentPackagesPageState extends State<PaymentPackagesPage> {
     );
   }
 
-  Future<void> _handlePurchase(
+  Future<void> _handleCustomPurchase(
     BuildContext context,
-    CreditPackageModel package,
+    double amount,
   ) async {
     try {
       final paymentProvider = context.read<PaymentProvider>();
       
+      // Create a temporary package for the custom amount
+      final package = CreditPackageModel(
+        id: -1, // Temporary ID
+        name: 'Nạp tín dụng tùy chỉnh',
+        credits: (amount * 10).toInt(),
+        bonusCredits: 0,
+        priceUsd: amount,
+        priceVnd: amount * 25000, // Approx exchange rate
+        isActive: true,
+        displayOrder: 0,
+      );
+
       // Show loading dialog
       showDialog(
         context: context,
@@ -273,7 +305,7 @@ class _PaymentPackagesPageState extends State<PaymentPackagesPage> {
                 children: [
                   CircularProgressIndicator(),
                   SizedBox(height: 16),
-                  Text('Creating payment session...'),
+                  Text('Đang khởi tạo thanh toán...'),
                 ],
               ),
             ),
@@ -281,51 +313,73 @@ class _PaymentPackagesPageState extends State<PaymentPackagesPage> {
         ),
       );
 
-      // Create payment session
-      final session = await paymentProvider.createPaymentSession(package);
+      // 1. Get user email
+      final authProvider = context.read<EnhancedAuthProvider>();
+      final email = authProvider.currentUser?.email;
+      
+      if (email == null) {
+        if (context.mounted) {
+          Navigator.of(context).pop(); // Close loading
+          _showErrorDialog(context, 'Không tìm thấy email người dùng. Vui lòng đăng nhập lại.');
+        }
+        return;
+      }
+
+      // 2. Initialize Payment Sheet
+      final initSuccess = await paymentProvider.initPaymentSheet(package, email);
 
       // Close loading dialog
       if (context.mounted) {
         Navigator.of(context).pop();
       }
 
-      if (session == null) {
+      if (!initSuccess) {
         if (context.mounted) {
           _showErrorDialog(
             context,
-            'Failed to create payment session. Please try again.',
+            paymentProvider.errorMessage ?? 'Khởi tạo thanh toán thất bại.',
           );
         }
         return;
       }
 
-      // Open Stripe Checkout URL
-      final uri = Uri.parse(session.url);
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(
-          uri,
-          mode: LaunchMode.externalApplication,
-        );
-        
-        if (context.mounted) {
-          _showPaymentInstructionsDialog(context);
+      // 3. Present Payment Sheet
+      if (context.mounted) {
+        // We need userId for confirmation
+        final userId = context.read<EnhancedAuthProvider>().currentUser?.id;
+        if (userId == null) {
+           if (context.mounted) {
+            _showErrorDialog(context, 'Không tìm thấy ID người dùng. Vui lòng đăng nhập lại.');
+           }
+           return;
         }
-      } else {
-        if (context.mounted) {
-          _showErrorDialog(
-            context,
-            'Could not open payment page. Please try again.',
-          );
+
+        final presentSuccess = await paymentProvider.presentPaymentSheet(userId);
+        
+        if (presentSuccess) {
+          // Payment successful
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Thanh toán thành công! Tín dụng đã được cập nhật.'),
+                backgroundColor: Colors.green,
+              ),
+            );
+            context.read<EnhancedAuthProvider>().refreshUserData();
+            // Clear input
+            _amountController.clear();
+          }
+        } else {
+          // Payment failed or cancelled
+          if (context.mounted && paymentProvider.errorMessage != null) {
+             if (paymentProvider.errorMessage != 'Payment canceled') {
+                _showErrorDialog(context, paymentProvider.errorMessage!);
+             }
+          }
         }
       }
     } catch (e) {
-      // Close loading dialog if still open
-      if (context.mounted) {
-        Navigator.of(context).pop();
-      }
-
       AppLogger.error('Payment error: $e');
-      
       if (context.mounted) {
         _showErrorDialog(context, e.toString());
       }
@@ -336,43 +390,12 @@ class _PaymentPackagesPageState extends State<PaymentPackagesPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Payment Error'),
+        title: const Text('Lỗi thanh toán'),
         content: Text(message),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
             child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showPaymentInstructionsDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Complete Your Payment'),
-        content: const Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Payment page has been opened in your browser.'),
-            SizedBox(height: 12),
-            Text('After completing payment:'),
-            SizedBox(height: 8),
-            Text('1. Return to the app'),
-            Text('2. Your credits will be updated automatically'),
-            Text('3. Pull down to refresh if needed'),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              context.read<PaymentProvider>().refreshCredits();
-            },
-            child: const Text('Got it'),
           ),
         ],
       ),

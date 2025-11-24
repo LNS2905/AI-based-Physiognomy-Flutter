@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../data/models/tu_vi_chart_request.dart';
 import '../providers/tu_vi_provider.dart';
+import '../../../auth/presentation/providers/enhanced_auth_provider.dart';
+import '../../../auth/data/models/auth_models.dart' as auth_models;
 
 /// Input page for creating Tu Vi chart
 class TuViInputPage extends StatefulWidget {
@@ -16,11 +18,56 @@ class TuViInputPage extends StatefulWidget {
 class _TuViInputPageState extends State<TuViInputPage> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
+  final _dayController = TextEditingController();
+  final _monthController = TextEditingController();
+  final _yearController = TextEditingController();
 
   DateTime _selectedDate = DateTime.now();
   int _selectedHourBranch = 1;
   int _selectedGender = 1;
   bool _isSolarCalendar = true;
+  bool _isForSelf = true;
+
+  @override
+  void initState() {
+    super.initState();
+    
+    // Initialize date controllers
+    _dayController.text = _selectedDate.day.toString();
+    _monthController.text = _selectedDate.month.toString();
+    _yearController.text = _selectedDate.year.toString();
+
+    // Auto-fill user info if default is self
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_isForSelf) {
+        _fillUserInfo();
+      }
+    });
+  }
+
+  void _fillUserInfo() {
+    final authProvider = Provider.of<EnhancedAuthProvider>(context, listen: false);
+    final user = authProvider.currentUser;
+    
+    if (user != null) {
+      setState(() {
+        if (user.firstName != null || user.lastName != null) {
+          _nameController.text = user.fullName;
+        }
+        
+        if (user.gender != null) {
+          _selectedGender = user.gender == auth_models.Gender.male ? 1 : -1;
+        }
+      });
+    }
+  }
+
+  void _clearUserInfo() {
+    setState(() {
+      _nameController.clear();
+      _selectedGender = 1; // Default to Male
+    });
+  }
 
   // Hour branch mapping
   final List<Map<String, dynamic>> _hourBranches = [
@@ -41,13 +88,27 @@ class _TuViInputPageState extends State<TuViInputPage> {
   @override
   void dispose() {
     _nameController.dispose();
+    _dayController.dispose();
+    _monthController.dispose();
+    _yearController.dispose();
     super.dispose();
   }
 
   Future<void> _selectDate(BuildContext context) async {
+    // Parse current values from controllers if valid to set initial date
+    DateTime initialDate = _selectedDate;
+    try {
+      final d = int.parse(_dayController.text);
+      final m = int.parse(_monthController.text);
+      final y = int.parse(_yearController.text);
+      initialDate = DateTime(y, m, d);
+    } catch (_) {
+      // If invalid, use current _selectedDate or now
+    }
+
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: _selectedDate,
+      initialDate: initialDate,
       firstDate: DateTime(1900),
       lastDate: DateTime(2100),
       builder: (context, child) {
@@ -64,9 +125,12 @@ class _TuViInputPageState extends State<TuViInputPage> {
         );
       },
     );
-    if (picked != null && picked != _selectedDate) {
+    if (picked != null) {
       setState(() {
         _selectedDate = picked;
+        _dayController.text = picked.day.toString();
+        _monthController.text = picked.month.toString();
+        _yearController.text = picked.year.toString();
       });
     }
   }
@@ -76,12 +140,22 @@ class _TuViInputPageState extends State<TuViInputPage> {
       return;
     }
 
+    // Parse date from controllers
+    final day = int.parse(_dayController.text);
+    final month = int.parse(_monthController.text);
+    final year = int.parse(_yearController.text);
+    
+    // Update state for consistency
+    setState(() {
+      _selectedDate = DateTime(year, month, day);
+    });
+
     final provider = Provider.of<TuViProvider>(context, listen: false);
 
     final request = TuViChartRequest(
-      day: _selectedDate.day,
-      month: _selectedDate.month,
-      year: _selectedDate.year,
+      day: day,
+      month: month,
+      year: year,
       hourBranch: _selectedHourBranch,
       gender: _selectedGender,
       name: _nameController.text.trim().isNotEmpty
@@ -167,6 +241,91 @@ class _TuViInputPageState extends State<TuViInputPage> {
 
               const SizedBox(height: 24),
 
+              // Self/Other Toggle
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey.shade300),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            _isForSelf = true;
+                            _fillUserInfo();
+                          });
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          decoration: BoxDecoration(
+                            color: _isForSelf ? const Color(0xFFFFC107) : Colors.transparent,
+                            borderRadius: BorderRadius.circular(11),
+                            boxShadow: _isForSelf
+                                ? [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.1),
+                                      blurRadius: 4,
+                                      offset: const Offset(0, 2),
+                                    )
+                                  ]
+                                : null,
+                          ),
+                          child: Center(
+                            child: Text(
+                              'Bản thân',
+                              style: TextStyle(
+                                fontWeight: _isForSelf ? FontWeight.bold : FontWeight.normal,
+                                color: _isForSelf ? Colors.black87 : Colors.grey.shade700,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            _isForSelf = false;
+                            _clearUserInfo();
+                          });
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          decoration: BoxDecoration(
+                            color: !_isForSelf ? const Color(0xFFFFC107) : Colors.transparent,
+                            borderRadius: BorderRadius.circular(11),
+                            boxShadow: !_isForSelf
+                                ? [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.1),
+                                      blurRadius: 4,
+                                      offset: const Offset(0, 2),
+                                    )
+                                  ]
+                                : null,
+                          ),
+                          child: Center(
+                            child: Text(
+                              'Người khác',
+                              style: TextStyle(
+                                fontWeight: !_isForSelf ? FontWeight.bold : FontWeight.normal,
+                                color: !_isForSelf ? Colors.black87 : Colors.grey.shade700,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 24),
+
               // Name input
               TextFormField(
                 controller: _nameController,
@@ -185,33 +344,87 @@ class _TuViInputPageState extends State<TuViInputPage> {
 
               const SizedBox(height: 16),
 
-              // Date picker
-              InkWell(
-                onTap: () => _selectDate(context),
-                child: InputDecorator(
-                  decoration: InputDecoration(
-                    labelText: 'Ngày sinh',
-                    prefixIcon: const Icon(Icons.calendar_today),
-                    border: OutlineInputBorder(
+              // Date inputs
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    flex: 2,
+                    child: TextFormField(
+                      controller: _dayController,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        labelText: 'Ngày',
+                        filled: true,
+                        fillColor: Colors.grey.shade50,
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) return 'Thiếu';
+                        final n = int.tryParse(value);
+                        if (n == null || n < 1 || n > 31) return 'Sai';
+                        return null;
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    flex: 2,
+                    child: TextFormField(
+                      controller: _monthController,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        labelText: 'Tháng',
+                        filled: true,
+                        fillColor: Colors.grey.shade50,
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) return 'Thiếu';
+                        final n = int.tryParse(value);
+                        if (n == null || n < 1 || n > 12) return 'Sai';
+                        return null;
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    flex: 3,
+                    child: TextFormField(
+                      controller: _yearController,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        labelText: 'Năm',
+                        filled: true,
+                        fillColor: Colors.grey.shade50,
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) return 'Thiếu';
+                        final n = int.tryParse(value);
+                        if (n == null || n < 1900 || n > 2100) return 'Sai';
+                        return null;
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Container(
+                    height: 56, // Match default height of text fields
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade50,
+                      border: Border.all(color: Colors.grey.shade500),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    filled: true,
-                    fillColor: Colors.grey.shade50,
+                    child: IconButton(
+                      onPressed: () => _selectDate(context),
+                      icon: const Icon(Icons.calendar_today),
+                      color: Colors.grey.shade700,
+                    ),
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        DateFormat('dd/MM/yyyy').format(_selectedDate),
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      const Icon(Icons.arrow_drop_down),
-                    ],
-                  ),
-                ),
+                ],
               ),
 
               const SizedBox(height: 16),

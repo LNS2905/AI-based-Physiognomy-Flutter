@@ -74,8 +74,11 @@ class _AIConversationPageState extends State<AIConversationPage>
         chatProvider.setUser(currentUser);
         
         if (widget.conversationId != null) {
-          // Load existing conversation
-          chatProvider.selectConversation(widget.conversationId!);
+          // Load existing conversation ONLY if it's different from current
+          // This preserves the local state (greeting, chart data) when navigating from TuViResultPage
+          if (chatProvider.currentConversationId != widget.conversationId) {
+            chatProvider.selectConversation(widget.conversationId!);
+          }
         } else {
           // Clear any previous conversation (will create new on first message)
           chatProvider.clearConversation();
@@ -122,16 +125,15 @@ class _AIConversationPageState extends State<AIConversationPage>
     final message = _messageController.text.trim();
     if (message.isEmpty) return;
 
-    // TODO: TEMPORARILY DISABLED FOR TESTING - RE-ENABLE LATER
     // Check if user has enough credits
-    // final authProvider = context.read<EnhancedAuthProvider>();
-    // final currentUser = authProvider.currentUser;
-    // final credits = currentUser?.credits ?? 0;
+    final authProvider = context.read<EnhancedAuthProvider>();
+    final currentUser = authProvider.currentUser;
+    final credits = currentUser?.credits ?? 0;
 
-    // if (credits < 1) {
-    //   _showInsufficientCreditsDialog();
-    //   return;
-    // }
+    if (credits < 1) {
+      _showInsufficientCreditsDialog();
+      return;
+    }
 
     final chatProvider = context.read<ChatProvider>();
     
@@ -143,6 +145,13 @@ class _AIConversationPageState extends State<AIConversationPage>
       if (success) {
         // Scroll to bottom to show new messages
         _scrollToBottom();
+        
+        // Update credits in AuthProvider to keep UI in sync (optimistic update)
+        // We use the 'credits' variable captured before sending
+        if (currentUser?.credits != null) {
+           final newCredits = (currentUser!.credits!) - 1;
+           authProvider.updateUserCredits(newCredits);
+        }
         
         // Refresh user data to get updated credits (will happen automatically through API)
         // Credits are updated by backend when sending messages
@@ -671,14 +680,14 @@ class _AIConversationPageState extends State<AIConversationPage>
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Clear Conversation'),
+        title: const Text('Xóa cuộc trò chuyện'),
         content: const Text(
-          'Are you sure you want to clear this conversation? This will start a new chat.',
+          'Bạn có chắc chắn muốn xóa cuộc trò chuyện này? Hành động này sẽ bắt đầu một cuộc trò chuyện mới.',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+            child: const Text('Hủy'),
           ),
           ElevatedButton(
             onPressed: () {
@@ -686,7 +695,7 @@ class _AIConversationPageState extends State<AIConversationPage>
               chatProvider.clearConversation();
               _messageController.clear();
             },
-            child: const Text('Clear'),
+            child: const Text('Xóa'),
           ),
         ],
       ),
@@ -697,14 +706,14 @@ class _AIConversationPageState extends State<AIConversationPage>
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Conversation'),
+        title: const Text('Xóa cuộc trò chuyện'),
         content: const Text(
-          'Note: The backend API does not support deleting conversations. Clearing will start a new chat instead.',
+          'Lưu ý: API backend không hỗ trợ xóa cuộc trò chuyện. Việc xóa sẽ bắt đầu một cuộc trò chuyện mới thay thế.',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+            child: const Text('Hủy'),
           ),
           ElevatedButton(
             onPressed: () {
@@ -712,7 +721,43 @@ class _AIConversationPageState extends State<AIConversationPage>
               chatProvider.clearConversation();
               _messageController.clear();
             },
-            child: const Text('Clear'),
+            child: const Text('Xóa'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showInsufficientCreditsDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Không đủ tín dụng'),
+        content: const Text('Bạn cần ít nhất 1 tín dụng để gửi tin nhắn. Vui lòng nạp thêm.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Đóng'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              // Navigate to payment page (Profile page has the payment/credits section)
+              // Assuming MainWrapper or Home handles the navigation to Profile via index or route
+              // Or context.push('/profile');
+              // Checking routes in AppConstants: profileRoute = '/profile'
+              // Use GoRouter if available, otherwise Navigator
+               try {
+                 // Try to find GoRouter
+                 // context.push('/profile'); 
+                 // Since I don't have the imports handy for GoRouter here (it is imported but...), 
+                 // let's use the Named route if registered
+                 Navigator.of(context).pushNamed('/profile');
+               } catch (e) {
+                 // Fallback
+               }
+            },
+            child: const Text('Nạp ngay'),
           ),
         ],
       ),

@@ -403,7 +403,7 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
           padding: const EdgeInsets.symmetric(horizontal: 16),
           color: Colors.white,
           child: const Text(
-            'OR',
+            'HOẶC',
             style: TextStyle(
               fontFamily: 'Arial',
               fontWeight: FontWeight.w400,

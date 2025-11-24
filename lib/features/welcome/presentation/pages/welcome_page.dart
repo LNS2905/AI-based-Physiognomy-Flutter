@@ -375,26 +375,43 @@ class _WelcomePageState extends State<WelcomePage> with SingleTickerProviderStat
     final enhancedAuthProvider = Provider.of<EnhancedAuthProvider>(context, listen: false);
 
     try {
+      // Clear any previous errors
+      enhancedAuthProvider.clearError();
+      
       await enhancedAuthProvider.loginWithGoogle();
 
       if (enhancedAuthProvider.isAuthenticated) {
         // Navigate to home after successful login
-        context.go('/home');
-
+        if (context.mounted) {
+          context.go('/home');
+          
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Đăng nhập Google thành công!'),
+              backgroundColor: AppColors.success,
+            ),
+          );
+        }
+      } else if (enhancedAuthProvider.hasError) {
+        // Show error from provider if login failed
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Đăng nhập thất bại: ${enhancedAuthProvider.errorMessage}'),
+              backgroundColor: AppColors.error,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Đăng nhập Google thành công!'),
-            backgroundColor: AppColors.success,
+          SnackBar(
+            content: Text('Đăng nhập Google thất bại: ${e.toString()}'),
+            backgroundColor: AppColors.error,
           ),
         );
       }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Đăng nhập Google thất bại: ${e.toString()}'),
-          backgroundColor: AppColors.error,
-        ),
-      );
     }
   }
 

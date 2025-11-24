@@ -130,4 +130,42 @@ class PaymentApiService {
       rethrow;
     }
   }
+
+  /// Create payment sheet session
+  Future<Map<String, dynamic>> createPaymentSheetSession(double amount, String email) async {
+    try {
+      AppLogger.info('PaymentApiService: Creating payment sheet session for $email');
+
+      final response = await http.post(
+        Uri.parse('$_baseUrl/payment/payment-sheet?amount=$amount&email=$email'),
+        headers: await _getAuthHeaders(),
+      ).timeout(ApiConfig.requestTimeout);
+
+      final responseData = _handleResponse(response, 'Create payment sheet session');
+      return responseData['data'];
+    } catch (e) {
+      AppLogger.error('PaymentApiService: Create payment sheet session error: $e');
+      rethrow;
+    }
+  }
+  /// Confirm payment sheet session and return new credits
+  Future<int> confirmPaymentSheet(String paymentIntentId, int userId) async {
+    try {
+      AppLogger.info('PaymentApiService: Confirming payment sheet session');
+
+      final response = await http.post(
+        Uri.parse('$_baseUrl/payment/confirm-payment-sheet?paymentIntentId=$paymentIntentId&userId=$userId'),
+        headers: await _getAuthHeaders(),
+      ).timeout(ApiConfig.requestTimeout);
+
+      final responseData = _handleResponse(response, 'Confirm payment sheet');
+      // Assuming backend returns the updated user object or credits
+      // The backend returns BaseUser, so we extract credits
+      final userData = responseData['data'];
+      return userData['credits'] ?? 0;
+    } catch (e) {
+      AppLogger.error('PaymentApiService: Confirm payment sheet error: $e');
+      rethrow;
+    }
+  }
 }

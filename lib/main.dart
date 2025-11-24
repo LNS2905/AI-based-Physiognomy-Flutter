@@ -15,6 +15,7 @@ import 'features/history/presentation/providers/history_provider.dart';
 import 'features/profile/presentation/providers/profile_provider.dart';
 import 'features/tu_vi/presentation/providers/tu_vi_provider.dart';
 import 'features/payment/presentation/providers/payment_provider.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
 
 void main() async {
   // Ensure Flutter binding is initialized
@@ -48,6 +49,10 @@ Future<void> _initializeServices() async {
   try {
     // Initialize Firebase
     await Firebase.initializeApp();
+
+    // Initialize Stripe
+    Stripe.publishableKey = 'pk_test_51SR6hxPofBTvOXyOgfTqc2CwRZex2Oe1u0NesBJKFOAD3MgxxbzQqInnzpbTNODCC0rv2QjuPOMyUp9RzwMHXXTr00jGlA5ohH';
+    await Stripe.instance.applySettings();
 
     // Initialize storage service
     await StorageService.init();

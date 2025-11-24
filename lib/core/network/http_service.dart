@@ -276,7 +276,7 @@ class HttpService {
     // Determine which backend to use based on endpoint
     String finalUrl;
 
-    if (endpoint.startsWith('/api/chat') || endpoint.contains('/chat/')) {
+    if (endpoint.startsWith('/api/chat') || endpoint.contains('/chat/') || endpoint.contains('/tuvi/')) {
       // Chat API - separate chatbot service
       final baseUrl = AppConstants.chatbotBaseUrl;
       

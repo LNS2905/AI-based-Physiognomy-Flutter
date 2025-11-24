@@ -75,11 +75,20 @@ class ChatProvider extends BaseProvider {
       _messages = [];
 
       // Add welcome message from backend (local only, not saved to history)
+      // CRITICAL FIX: If we have chartData, ignore backend welcome message because
+      // the backend (chatbotai) doesn't know about the chart (lasotuvi) and will
+      // send a default "Please create chart" message.
       final welcomeMessage = result['welcome_message'] as String?;
-      if (welcomeMessage != null && welcomeMessage.isNotEmpty) {
+      final hasTuViData = _currentChartData != null;
+      
+      if (welcomeMessage != null && welcomeMessage.isNotEmpty && !hasTuViData) {
         _addWelcomeMessageFromBackend(welcomeMessage);
+      } else if (hasTuViData) {
+        // If we have chart data, trigger immediate analysis to "transmit" the chart
+        // and get a personalized greeting.
+        _sendInitialAnalysis();
       } else {
-        // Fallback to local message if backend doesn't provide one
+        // Fallback to local message if backend doesn't provide one AND no chart data
         _addWelcomeMessage(chartId);
       }
 
@@ -88,6 +97,57 @@ class ChatProvider extends BaseProvider {
       return true;
     }
     return false;
+  }
+
+  /// Send initial analysis request to transmit chart data
+  Future<void> _sendInitialAnalysis() async {
+    if (_currentChartData == null) return;
+
+    // Show AI typing indicator
+    _setAiTyping(true);
+    notifyListeners();
+
+    try {
+      // Prompt for the AI to introduce the chart
+      const prompt = "Xin chào, đây là lá số tử vi của tôi. Hãy giới thiệu ngắn gọn về lá số này và chào tôi.";
+
+      final analysisResult = await executeApiOperation(
+        () => _repository.analyzeTuViJson(
+          chartData: _currentChartData!,
+          question: prompt,
+        ),
+        operationName: 'analyzeTuViJson_initial',
+        showLoading: false,
+      );
+
+      _setAiTyping(false);
+
+      if (analysisResult != null) {
+        // Convert analysis result to chat message
+        final aiMessage = ChatMessageModel.ai(
+          id: _generateId(),
+          content: analysisResult.analysis,
+          isDelivered: true,
+          metadata: {
+            'method': analysisResult.method,
+            'processing_time': analysisResult.processingTime,
+            'timestamp': analysisResult.timestamp,
+            'type': 'initial_greeting',
+          },
+        );
+
+        _messages.add(aiMessage);
+        AppLogger.info('Received initial Tu Vi greeting (${analysisResult.processingTime})');
+        notifyListeners();
+      } else {
+        // Fallback if analysis fails
+        _addWelcomeMessage(null); // Pass null to show generic greeting or handle error
+      }
+    } catch (e) {
+      AppLogger.error('Failed to send initial analysis', e);
+      _setAiTyping(false);
+      _addWelcomeMessage(null);
+    }
   }
 
   /// Add welcome message from backend
@@ -104,22 +164,11 @@ class ChatProvider extends BaseProvider {
   /// Add welcome message (displayed locally, not saved to history)
   void _addWelcomeMessage(int? chartId) {
     final now = DateTime.now();
-    final hasTuViData = _currentChartData != null;
+    // Note: We don't check hasTuViData here anymore because if we had it,
+    // we would have called _sendInitialAnalysis instead.
+    // This function is now a fallback.
 
-    final welcomeText = chartId != null && hasTuViData
-        ? '''Xin chào! Tôi là trợ lý AI tử vi của bạn. 🌟
-
-✅ Tôi đã nhận được lá số tử vi đầy đủ của bạn!
-
-⚡ Phân tích NHANH (8-15 giây) - Hãy đặt câu hỏi về:
-• Tính cách và vận mệnh
-• Sự nghiệp và tài lộc
-• Tình duyên và hôn nhân
-• Sức khỏe và gia đạo
-• Hoặc bất kỳ khía cạnh nào khác trong lá số
-
-Bạn muốn hỏi tôi điều gì?'''
-        : '''Xin chào! Tôi là trợ lý AI tử vi của bạn. 🌟
+    final welcomeText = '''Xin chào! Tôi là trợ lý AI tử vi của bạn. 🌟
 
 Tôi có thể giúp bạn tìm hiểu về:
 • Lá số tử vi
@@ -257,6 +306,16 @@ Bạn muốn hỏi tôi điều gì?''';
     if (result != null) {
       // Add AI response to list
       _messages.add(result);
+      
+      // Deduct 1 credit locally (Optimistic update)
+      if (_currentUser != null && _currentUser!.credits != null) {
+        final currentCredits = _currentUser!.credits!;
+        if (currentCredits > 0) {
+          _currentUser = _currentUser!.copyWith(credits: currentCredits - 1);
+          AppLogger.info('Deducted 1 credit. Remaining: ${_currentUser!.credits}');
+        }
+      }
+
       AppLogger.info('Received AI response: ${result.id}');
       notifyListeners();
       return true;

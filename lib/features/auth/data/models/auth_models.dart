@@ -206,6 +206,31 @@ class User {
   }
 
   String get fullName => '${firstName ?? ''} ${lastName ?? ''}'.trim();
+
+  /// Create a copy with updated fields
+  User copyWith({
+    int? id,
+    String? firstName,
+    String? lastName,
+    String? email,
+    String? phone,
+    int? age,
+    Gender? gender,
+    String? avatar,
+    int? credits,
+  }) {
+    return User(
+      id: id ?? this.id,
+      firstName: firstName ?? this.firstName,
+      lastName: lastName ?? this.lastName,
+      email: email ?? this.email,
+      phone: phone ?? this.phone,
+      age: age ?? this.age,
+      gender: gender ?? this.gender,
+      avatar: avatar ?? this.avatar,
+      credits: credits ?? this.credits,
+    );
+  }
 }
 
 /// Auth Response (login response) - only contains tokens

@@ -886,7 +886,7 @@ class AnalysisResultsPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Loading image...',
+                    'Đang tải hình ảnh...',
                     style: TextStyle(
                       color: AppColors.textSecondary,
                       fontSize: 14,
@@ -913,7 +913,7 @@ class AnalysisResultsPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    'Unable to load image',
+                    'Không thể tải hình ảnh',
                     style: TextStyle(
                       color: AppColors.textSecondary,
                       fontSize: 16,
@@ -922,7 +922,7 @@ class AnalysisResultsPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Please check your internet connection',
+                    'Vui lòng kiểm tra kết nối internet của bạn',
                     style: TextStyle(
                       color: AppColors.textSecondary.withOpacity(0.7),
                       fontSize: 12,

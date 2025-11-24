@@ -3,6 +3,7 @@ import '../../../../core/utils/logger.dart';
 import '../../../../core/enums/loading_state.dart';
 import '../../data/models/credit_package_model.dart';
 import '../../data/services/payment_api_service.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
 
 class PaymentProvider with ChangeNotifier {
   final PaymentApiService _paymentApiService = PaymentApiService();
@@ -29,11 +30,11 @@ class PaymentProvider with ChangeNotifier {
       _errorMessage = null;
       notifyListeners();
 
-      // For now, use mock data since endpoint might not be available yet
-      _packages = _getMockPackages();
-      
-      /* Uncomment when backend endpoint is ready:
+      // Use real API data
       _packages = await _paymentApiService.getCreditPackages();
+      
+      /* Mock data for reference:
+      _packages = _getMockPackages();
       */
 
       _loadingState = LoadingState.loaded;
@@ -52,19 +53,19 @@ class PaymentProvider with ChangeNotifier {
     return [
       const CreditPackageModel(
         id: 1,
-        name: 'Starter',
-        credits: 50,
+        name: 'Top Up \$1',
+        credits: 10,
         bonusCredits: 0,
-        priceUsd: 2.0,
-        priceVnd: 50000.0,
+        priceUsd: 1.0,
+        priceVnd: 25000.0,
         isActive: true,
         displayOrder: 1,
       ),
       const CreditPackageModel(
         id: 2,
-        name: 'Basic',
-        credits: 125,
-        bonusCredits: 25,
+        name: 'Top Up \$5',
+        credits: 50,
+        bonusCredits: 0,
         priceUsd: 5.0,
         priceVnd: 125000.0,
         isActive: true,
@@ -72,9 +73,9 @@ class PaymentProvider with ChangeNotifier {
       ),
       const CreditPackageModel(
         id: 3,
-        name: 'Popular',
-        credits: 275,
-        bonusCredits: 75,
+        name: 'Top Up \$10',
+        credits: 100,
+        bonusCredits: 0,
         priceUsd: 10.0,
         priceVnd: 250000.0,
         isActive: true,
@@ -82,13 +83,33 @@ class PaymentProvider with ChangeNotifier {
       ),
       const CreditPackageModel(
         id: 4,
-        name: 'Premium',
-        credits: 625,
-        bonusCredits: 125,
+        name: 'Top Up \$20',
+        credits: 200,
+        bonusCredits: 0,
         priceUsd: 20.0,
         priceVnd: 500000.0,
         isActive: true,
         displayOrder: 4,
+      ),
+      const CreditPackageModel(
+        id: 5,
+        name: 'Top Up \$50',
+        credits: 500,
+        bonusCredits: 0,
+        priceUsd: 50.0,
+        priceVnd: 1250000.0,
+        isActive: true,
+        displayOrder: 5,
+      ),
+      const CreditPackageModel(
+        id: 6,
+        name: 'Top Up \$100',
+        credits: 1000,
+        bonusCredits: 0,
+        priceUsd: 100.0,
+        priceVnd: 2500000.0,
+        isActive: true,
+        displayOrder: 6,
       ),
     ];
   }
@@ -105,27 +126,82 @@ class PaymentProvider with ChangeNotifier {
     }
   }
 
-  /// Create payment session for a package
-  Future<PaymentSessionResponse?> createPaymentSession(
-      CreditPackageModel package) async {
+  /// Initialize and present Payment Sheet
+  Future<bool> initPaymentSheet(CreditPackageModel package, String email) async {
     try {
       _loadingState = LoadingState.loading;
       _errorMessage = null;
       notifyListeners();
 
-      _currentSession = await _paymentApiService.createPaymentSession(package);
+      // 1. Get keys from backend
+      final data = await _paymentApiService.createPaymentSheetSession(package.priceUsd, email);
       
+      // 2. Initialize Payment Sheet
+      await Stripe.instance.initPaymentSheet(
+        paymentSheetParameters: SetupPaymentSheetParameters(
+          customFlow: false,
+          merchantDisplayName: 'AI Physiognomy',
+          paymentIntentClientSecret: data['paymentIntent'],
+          customerEphemeralKeySecret: data['ephemeralKey'],
+          customerId: data['customer'],
+          style: ThemeMode.system,
+        ),
+      );
+
+      // Store paymentIntentId for confirmation
+      _currentSession = PaymentSessionResponse(
+        id: data['paymentIntentId'], // We need to update the model or just store it locally
+        clientSecret: data['paymentIntent'],
+        amount: (package.priceUsd * 100).toInt(),
+        currency: 'usd',
+      );
+
       _loadingState = LoadingState.loaded;
-      AppLogger.info('PaymentProvider: Payment session created: ${_currentSession?.url}');
       notifyListeners();
-      
-      return _currentSession;
+      return true;
     } catch (e) {
       _loadingState = LoadingState.error;
       _errorMessage = e.toString();
-      AppLogger.error('PaymentProvider: Create payment session error: $e');
+      AppLogger.error('PaymentProvider: Init payment sheet error: $e');
       notifyListeners();
-      return null;
+      return false;
+    }
+  }
+
+  /// Present Payment Sheet
+  Future<bool> presentPaymentSheet(int userId) async {
+    try {
+      await Stripe.instance.presentPaymentSheet();
+      
+      // Confirm payment with backend
+      if (_currentSession != null) {
+        final newCredits = await _paymentApiService.confirmPaymentSheet(_currentSession!.id, userId);
+        _currentCredits = newCredits;
+        AppLogger.info('PaymentProvider: Payment confirmed. New credits: $_currentCredits');
+        notifyListeners();
+      }
+      
+      return true;
+    } catch (e) {
+      if (e is StripeException) {
+        if (e.error.code == FailureCode.Canceled) {
+           AppLogger.info('PaymentProvider: Payment canceled by user');
+           // User canceled, don't show error
+           _errorMessage = 'Payment canceled'; // Or leave null if we want silent fail
+        } else {
+           AppLogger.error('PaymentProvider: Stripe error: ${e.error.localizedMessage}');
+           _errorMessage = e.error.localizedMessage;
+        }
+      } else {
+        AppLogger.error('PaymentProvider: Present payment sheet error: $e');
+        _errorMessage = e.toString();
+      }
+      // Only set error state if it's not a cancellation (or if we want to show "Cancelled" as error)
+      // Usually cancellation is not an "error" state for the UI, just a return to previous state.
+      // But we return false to indicate failure/cancellation.
+      _loadingState = LoadingState.error;
+      notifyListeners();
+      return false;
     }
   }
 

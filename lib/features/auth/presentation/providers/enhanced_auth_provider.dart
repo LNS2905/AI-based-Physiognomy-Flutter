@@ -387,6 +387,15 @@ class EnhancedAuthProvider extends BaseProvider {
     AppLogger.info('EnhancedAuthProvider: Authentication state cleared');
   }
 
+  /// Update user credits locally (optimistic update)
+  void updateUserCredits(int credits) {
+    if (_currentUser != null) {
+      _currentUser = _currentUser!.copyWith(credits: credits);
+      notifyListeners();
+      AppLogger.info('EnhancedAuthProvider: Updated user credits to $credits');
+    }
+  }
+
   /// Get user ID
   int? get userId => _currentUser?.id;
 

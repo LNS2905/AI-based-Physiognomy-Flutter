@@ -872,7 +872,7 @@ class _TuViResultPageState extends State<TuViResultPage> {
       if (success && chatProvider.currentConversationId != null) {
         // Navigate to chatbot screen
         if (mounted) {
-          context.push('/ai-conversation?conversationId=${chatProvider.currentConversationId}');
+          context.push('/ai-conversation?id=${chatProvider.currentConversationId}');
         }
       } else {
         // Show error message

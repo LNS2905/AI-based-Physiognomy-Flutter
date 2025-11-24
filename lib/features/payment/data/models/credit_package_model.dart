@@ -163,15 +163,19 @@ class StripeProductData extends Equatable {
 @JsonSerializable()
 class PaymentSessionResponse extends Equatable {
   final String id;
-  final String url;
+  final String? url;
   final int? amountTotal;
   final String? currency;
+  final String? clientSecret;
+  final int? amount;
 
   const PaymentSessionResponse({
     required this.id,
-    required this.url,
+    this.url,
     this.amountTotal,
     this.currency,
+    this.clientSecret,
+    this.amount,
   });
 
   factory PaymentSessionResponse.fromJson(Map<String, dynamic> json) =>
@@ -180,5 +184,5 @@ class PaymentSessionResponse extends Equatable {
   Map<String, dynamic> toJson() => _$PaymentSessionResponseToJson(this);
 
   @override
-  List<Object?> get props => [id, url, amountTotal, currency];
+  List<Object?> get props => [id, url, amountTotal, currency, clientSecret, amount];
 }

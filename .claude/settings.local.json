@@ -4,7 +4,18 @@
       "Read(//c/Code/lasotuvi/**)",
       "Bash(python -m uvicorn:*)",
       "Bash(dart run build_runner build:*)",
-      "Bash(flutter pub run build_runner build --delete-conflicting-outputs)"
+      "Bash(flutter pub run build_runner build --delete-conflicting-outputs)",
+      "Bash(flutter build:*)",
+      "Bash(flutter doctor:*)",
+      "Bash(.gradlew assembleDebug:*)",
+      "Bash(gradlew.bat assembleDebug:*)",
+      "Bash(cmd /c \"cd C:\\Code\\AI-based-Physiognomy-Flutter\\android && gradlew.bat assembleDebug\")",
+      "Bash(powershell -Command \"cd ''C:\\Code\\AI-based-Physiognomy-Flutter\\android''; .\\gradlew.bat assembleDebug\")",
+      "Bash(powershell -Command \"echo $env:JAVA_HOME\")",
+      "Bash(cmd /c echo %JAVA_HOME%)",
+      "Bash(powershell -Command \"$env:JAVA_HOME=''C:\\Program Files\\Android\\Android Studio\\jbr''; cd ''C:\\Code\\AI-based-Physiognomy-Flutter\\android''; .\\gradlew.bat assembleDebug\")",
+      "Bash(cmd /c \"set JAVA_HOME=C:\\Program Files\\Android\\Android Studio\\jbr && cd C:\\Code\\AI-based-Physiognomy-Flutter\\android && gradlew.bat assembleDebug\")",
+      "Bash(cmd /c \"C:\\Code\\AI-based-Physiognomy-Flutter\\build_debug.bat\")"
     ],
     "deny": [],
     "ask": []

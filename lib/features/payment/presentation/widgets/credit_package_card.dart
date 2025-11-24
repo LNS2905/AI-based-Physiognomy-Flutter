@@ -158,7 +158,7 @@ class CreditPackageCard extends StatelessWidget {
                               ),
                             )
                           : const Text(
-                              'Buy Now',
+                              'Top Up',
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
