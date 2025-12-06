@@ -235,30 +235,6 @@ class ProfileProvider extends BaseProvider {
         onTap: () => _navigateToHistory(),
       ),
       ProfileMenuItem(
-        icon: Icons.analytics_outlined,
-        title: 'Thống kê',
-        subtitle: 'Xem thống kê chi tiết',
-        onTap: () => _navigateToStatistics(),
-      ),
-      ProfileMenuItem(
-        icon: Icons.settings_outlined,
-        title: 'Cài đặt',
-        subtitle: 'Tùy chỉnh ứng dụng',
-        onTap: () => _navigateToSettings(),
-      ),
-      ProfileMenuItem(
-        icon: Icons.help_outline,
-        title: 'Trợ giúp',
-        subtitle: 'Hướng dẫn và hỗ trợ',
-        onTap: () => _navigateToHelp(),
-      ),
-      ProfileMenuItem(
-        icon: Icons.info_outline,
-        title: 'Về ứng dụng',
-        subtitle: 'Thông tin phiên bản',
-        onTap: () => _navigateToAbout(),
-      ),
-      ProfileMenuItem(
         icon: Icons.logout,
         title: 'Đăng xuất',
         subtitle: 'Thoát khỏi tài khoản',
@@ -270,10 +246,12 @@ class ProfileProvider extends BaseProvider {
 
 
 
-  /// Navigation methods (to be implemented)
+  /// Navigation methods
   void _navigateToPersonalInfo() {
     AppLogger.info('ProfileProvider: Navigate to personal info');
-    // TODO: Implement navigation
+    if (_context != null) {
+      _context!.push('/edit-profile');
+    }
   }
 
   void _navigateToChangePassword() {
@@ -285,27 +263,9 @@ class ProfileProvider extends BaseProvider {
 
   void _navigateToHistory() {
     AppLogger.info('ProfileProvider: Navigate to history');
-    // TODO: Implement navigation
-  }
-
-  void _navigateToStatistics() {
-    AppLogger.info('ProfileProvider: Navigate to statistics');
-    // TODO: Implement navigation
-  }
-
-  void _navigateToSettings() {
-    AppLogger.info('ProfileProvider: Navigate to settings');
-    // TODO: Implement navigation
-  }
-
-  void _navigateToHelp() {
-    AppLogger.info('ProfileProvider: Navigate to help');
-    // TODO: Implement navigation
-  }
-
-  void _navigateToAbout() {
-    AppLogger.info('ProfileProvider: Navigate to about');
-    // TODO: Implement navigation
+    if (_context != null) {
+      _context!.push('/history');
+    }
   }
 
   /// Public method to perform logout

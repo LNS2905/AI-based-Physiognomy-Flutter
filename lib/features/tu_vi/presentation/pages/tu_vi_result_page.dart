@@ -44,11 +44,11 @@ class _TuViResultPageState extends State<TuViResultPage> {
     final chart = provider.currentChart;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.backgroundWarm,
       appBar: AppBar(
         title: const Text('Lá Số Tử Vi'),
         backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
+        foregroundColor: AppColors.textOnPrimary,
         elevation: 0,
         centerTitle: true,
         actions: [
@@ -141,121 +141,139 @@ class _TuViResultPageState extends State<TuViResultPage> {
   }
 
   Widget _buildHeaderSection(TuViChartResponse chart) {
-    return Card(
-      elevation: 4,
-      shadowColor: AppColors.shadow,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Container(
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          gradient: AppColors.primaryGradient,
-          borderRadius: BorderRadius.circular(16),
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AppColors.primary,
+            AppColors.primaryDark,
+          ],
         ),
-        child: Column(
-          children: [
-            if (chart.extra.name != null) ...[
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.shadowYellow,
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          if (chart.extra.name != null) ...[
+            Text(
+              chart.extra.name!,
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textOnPrimary,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+          ],
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                chart.extra.genderValue == 1 ? Icons.male : Icons.female,
+                color: AppColors.textOnPrimary,
+                size: 20,
+              ),
+              const SizedBox(width: 8),
               Text(
-                chart.extra.name!,
+                chart.extra.gender,
                 style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 8),
-            ],
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  chart.extra.genderValue == 1 ? Icons.male : Icons.female,
-                  color: Colors.white,
-                  size: 20,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  chart.extra.gender,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    color: Colors.white,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                Column(
-                  children: [
-                    Text(
-                      'Dương lịch',
-                      style: TextStyle(fontSize: 12, color: Colors.white.withValues(alpha: 0.8)),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      chart.extra.solarDate,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ],
-                ),
-                Container(
-                  height: 40,
-                  width: 1,
-                  color: Colors.white.withValues(alpha: 0.3),
-                ),
-                Column(
-                  children: [
-                    Text(
-                      'Âm lịch',
-                      style: TextStyle(fontSize: 12, color: Colors.white.withValues(alpha: 0.8)),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      chart.extra.lunarDate,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Text(
-                'Giờ: ${chart.extra.hour}',
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Colors.white,
+                  fontSize: 16,
+                  color: AppColors.textOnPrimary,
                   fontWeight: FontWeight.w500,
                 ),
               ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              Column(
+                children: [
+                  Text(
+                    'Dương lịch',
+                    style: TextStyle(fontSize: 12, color: AppColors.textOnPrimary.withOpacity(0.7)),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    chart.extra.solarDate,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textOnPrimary,
+                    ),
+                  ),
+                ],
+              ),
+              Container(
+                height: 40,
+                width: 1,
+                color: AppColors.textOnPrimary.withOpacity(0.3),
+              ),
+              Column(
+                children: [
+                  Text(
+                    'Âm lịch',
+                    style: TextStyle(fontSize: 12, color: AppColors.textOnPrimary.withOpacity(0.7)),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    chart.extra.lunarDate,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textOnPrimary,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: AppColors.textOnPrimary.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(20),
             ),
-          ],
-        ),
+            child: Text(
+              'Giờ: ${chart.extra.hour}',
+              style: const TextStyle(
+                fontSize: 14,
+                color: AppColors.textOnPrimary,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildMainInfoCard(TuViChartResponse chart) {
-    return Card(
-      elevation: 2,
-      shadowColor: AppColors.shadowLight,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.border.withOpacity(0.5)),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.shadow,
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -263,8 +281,16 @@ class _TuViResultPageState extends State<TuViResultPage> {
           children: [
             Row(
               children: [
-                const Icon(Icons.auto_awesome, color: AppColors.primary),
-                const SizedBox(width: 8),
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: AppColors.iconBgYellow,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(Icons.auto_awesome, color: AppColors.primaryDark, size: 22),
+                ),
+                const SizedBox(width: 12),
                 const Text(
                   'Thông tin chính',
                   style: TextStyle(
@@ -275,7 +301,7 @@ class _TuViResultPageState extends State<TuViResultPage> {
                 ),
               ],
             ),
-            const Divider(height: 24),
+            const SizedBox(height: 20),
             _buildInfoRow(
               'Mệnh chủ',
               chart.extra.menhChu,
@@ -305,15 +331,23 @@ class _TuViResultPageState extends State<TuViResultPage> {
             ),
             const SizedBox(height: 20),
             Container(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: AppColors.warning.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: AppColors.warning.withValues(alpha: 0.3)),
+                color: AppColors.iconBgYellow,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: AppColors.borderYellow),
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.balance, color: AppColors.warning, size: 20),
+                  Container(
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: AppColors.surface,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(Icons.balance, color: AppColors.primaryDark, size: 18),
+                  ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
@@ -330,15 +364,23 @@ class _TuViResultPageState extends State<TuViResultPage> {
             ),
             const SizedBox(height: 12),
             Container(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: AppColors.secondary.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: AppColors.secondary.withValues(alpha: 0.3)),
+                color: AppColors.iconBgTeal,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: AppColors.secondary.withOpacity(0.3)),
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.circle_outlined, color: AppColors.secondary, size: 20),
+                  Container(
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: AppColors.surface,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(Icons.circle_outlined, color: AppColors.secondary, size: 18),
+                  ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
@@ -362,7 +404,15 @@ class _TuViResultPageState extends State<TuViResultPage> {
   Widget _buildInfoRow(String label, String value, IconData icon, Color color) {
     return Row(
       children: [
-        Icon(icon, color: color, size: 20),
+        Container(
+          width: 36,
+          height: 36,
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Icon(icon, color: color, size: 18),
+        ),
         const SizedBox(width: 12),
         Expanded(
           child: Column(
@@ -370,9 +420,9 @@ class _TuViResultPageState extends State<TuViResultPage> {
             children: [
               Text(
                 label,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 12,
-                  color: Colors.grey.shade600,
+                  color: AppColors.textSecondary,
                 ),
               ),
               const SizedBox(height: 2),
@@ -381,6 +431,7 @@ class _TuViResultPageState extends State<TuViResultPage> {
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
                 ),
               ),
             ],
@@ -396,13 +447,22 @@ class _TuViResultPageState extends State<TuViResultPage> {
       children: [
         Row(
           children: [
-            const Icon(Icons.home, color: Color(0xFFFFC107)),
-            const SizedBox(width: 8),
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: AppColors.iconBgYellow,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(Icons.home_rounded, color: AppColors.primaryDark, size: 22),
+            ),
+            const SizedBox(width: 12),
             const Text(
               '12 Cung',
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
               ),
             ),
           ],
@@ -414,60 +474,74 @@ class _TuViResultPageState extends State<TuViResultPage> {
   }
 
   Widget _buildHouseCard(TuViHouse house) {
-    return Card(
+    return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      elevation: house.isMainHouse || house.isBodyHouse ? 4 : 1,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
           color: house.isMainHouse
-              ? Colors.purple
+              ? Colors.purple.withOpacity(0.5)
               : house.isBodyHouse
-                  ? Colors.blue
-                  : Colors.transparent,
-          width: house.isMainHouse || house.isBodyHouse ? 2 : 0,
+                  ? Colors.blue.withOpacity(0.5)
+                  : AppColors.border.withOpacity(0.5),
+          width: house.isMainHouse || house.isBodyHouse ? 2 : 1,
         ),
-      ),
-      child: ExpansionTile(
-        tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        title: Row(
-          children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: _getElementColorByName(house.element).withOpacity(0.2),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: _getElementColorByName(house.element),
-                  width: 2,
+        boxShadow: house.isMainHouse || house.isBodyHouse
+            ? [
+                BoxShadow(
+                  color: house.isMainHouse
+                      ? Colors.purple.withOpacity(0.1)
+                      : Colors.blue.withOpacity(0.1),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
                 ),
-              ),
-              child: Center(
-                child: Text(
-                  house.houseNumber.toString(),
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+              ]
+            : null,
+      ),
+      child: Theme(
+        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+        child: ExpansionTile(
+          tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          title: Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: _getElementColorByName(house.element).withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
                     color: _getElementColorByName(house.element),
+                    width: 2,
+                  ),
+                ),
+                child: Center(
+                  child: Text(
+                    house.houseNumber.toString(),
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: _getElementColorByName(house.element),
+                    ),
                   ),
                 ),
               ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Text(
-                        house.name,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          house.name,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textPrimary,
+                          ),
                         ),
-                      ),
                       if (house.isMainHouse) ...[
                         const SizedBox(width: 8),
                         Container(
@@ -516,18 +590,18 @@ class _TuViResultPageState extends State<TuViResultPage> {
                     children: [
                       Text(
                         '${house.branch} - ',
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 13,
-                          color: Colors.grey.shade600,
+                          color: AppColors.textSecondary,
                         ),
                       ),
                       ElementChip(element: house.element, isSmall: true),
                       const SizedBox(width: 8),
                       Text(
                         house.amDuongName,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 12,
-                          color: Colors.grey.shade600,
+                          color: AppColors.textSecondary,
                         ),
                       ),
                     ],
@@ -544,9 +618,9 @@ class _TuViResultPageState extends State<TuViResultPage> {
             children: [
               Text(
                 house.description,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 12,
-                  color: Colors.grey.shade600,
+                  color: AppColors.textTertiary,
                   fontStyle: FontStyle.italic,
                 ),
               ),
@@ -657,11 +731,12 @@ class _TuViResultPageState extends State<TuViResultPage> {
                 style: TextStyle(
                   fontSize: 13,
                   fontStyle: FontStyle.italic,
-                  color: Colors.grey,
+                  color: AppColors.textTertiary,
                 ),
               ),
             ),
         ],
+        ),
       ),
     );
   }
@@ -671,28 +746,47 @@ class _TuViResultPageState extends State<TuViResultPage> {
     final allStars = chart.houses.expand((house) => house.stars).toList();
     final mainStars = allStars.where((star) => star.category == 1).toList();
 
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.border.withOpacity(0.5)),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.shadow,
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                const Icon(Icons.stars, color: Color(0xFFFFC107)),
-                const SizedBox(width: 8),
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: AppColors.iconBgYellow,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(Icons.stars_rounded, color: AppColors.primaryDark, size: 22),
+                ),
+                const SizedBox(width: 12),
                 const Text(
                   '14 Chính Tinh',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
                   ),
                 ),
               ],
             ),
-            const Divider(height: 24),
+            const SizedBox(height: 20),
             Wrap(
               spacing: 8,
               runSpacing: 8,
@@ -705,33 +799,64 @@ class _TuViResultPageState extends State<TuViResultPage> {
   }
 
   Widget _buildAdditionalInfo(TuViChartResponse chart) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.border.withOpacity(0.5)),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.shadow,
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                const Icon(Icons.info_outline, color: Color(0xFFFFC107)),
-                const SizedBox(width: 8),
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: AppColors.iconBgTeal,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(Icons.info_outline_rounded, color: AppColors.secondary, size: 22),
+                ),
+                const SizedBox(width: 12),
                 const Text(
                   'Thông tin bổ sung',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
                   ),
                 ),
               ],
             ),
-            const Divider(height: 24),
+            const SizedBox(height: 20),
             _buildAdditionalInfoRow('Năm Can Chi', chart.extra.stemBranch['year'] ?? ''),
             _buildAdditionalInfoRow('Tháng Can Chi', chart.extra.stemBranch['month'] ?? ''),
             _buildAdditionalInfoRow('Ngày Can Chi', chart.extra.stemBranch['day'] ?? ''),
             _buildAdditionalInfoRow('Giờ Can Chi', chart.extra.stemBranch['hour'] ?? ''),
-            const Divider(height: 16),
+            Container(
+              margin: const EdgeInsets.symmetric(vertical: 12),
+              height: 1,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    AppColors.border.withOpacity(0),
+                    AppColors.border,
+                    AppColors.border.withOpacity(0),
+                  ],
+                ),
+              ),
+            ),
             _buildAdditionalInfoRow('Âm dương năm sinh', chart.extra.amDuongNamSinh),
             _buildAdditionalInfoRow('Múi giờ', 'UTC+${chart.extra.timezone}'),
             _buildAdditionalInfoRow('Ngày lập', chart.extra.today),
@@ -743,16 +868,16 @@ class _TuViResultPageState extends State<TuViResultPage> {
 
   Widget _buildAdditionalInfoRow(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
+      padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
         children: [
           SizedBox(
             width: 140,
             child: Text(
               label,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 13,
-                color: Colors.grey.shade700,
+                color: AppColors.textSecondary,
               ),
             ),
           ),
@@ -762,6 +887,7 @@ class _TuViResultPageState extends State<TuViResultPage> {
               style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
+                color: AppColors.textPrimary,
               ),
             ),
           ),

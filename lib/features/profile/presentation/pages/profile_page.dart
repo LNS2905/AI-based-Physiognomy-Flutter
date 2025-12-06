@@ -108,6 +108,9 @@ class _ProfilePageState extends State<ProfilePage> {
           SnackBar(
             content: Text('Không thể cập nhật thông tin: ${e.toString()}'),
             backgroundColor: AppColors.error,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            margin: const EdgeInsets.all(16),
           ),
         );
       }
@@ -117,7 +120,7 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.backgroundWarm,
       body: SafeArea(
         child: Stack(
           children: [
@@ -144,6 +147,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   return RefreshIndicator(
                     onRefresh: _handleRefresh,
                     color: AppColors.primary,
+                    backgroundColor: AppColors.surface,
                     child: _buildProfileContent(profileProvider, currentUser),
                   );
                 } catch (e, stackTrace) {
@@ -163,9 +167,31 @@ class _ProfilePageState extends State<ProfilePage> {
 
   /// Build loading state
   Widget _buildLoadingState() {
-    return const Center(
-      child: CircularProgressIndicator(
-        valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: AppColors.iconBgYellow,
+              shape: BoxShape.circle,
+            ),
+            child: const CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+              strokeWidth: 3,
+            ),
+          ),
+          const SizedBox(height: 20),
+          Text(
+            'Đang tải thông tin...',
+            style: TextStyle(
+              fontSize: 16,
+              color: AppColors.textSecondary,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -173,37 +199,81 @@ class _ProfilePageState extends State<ProfilePage> {
   /// Build error state
   Widget _buildErrorState() {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.error_outline,
-            size: 64,
-            color: AppColors.error,
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Container(
+          padding: const EdgeInsets.all(32),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.shadow,
+                blurRadius: 20,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
-          const SizedBox(height: 16),
-          Text(
-            'Không thể tải thông tin hồ sơ',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
-            ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: AppColors.errorLight,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.error_outline_rounded,
+                  size: 48,
+                  color: AppColors.error,
+                ),
+              ),
+              const SizedBox(height: 24),
+              Text(
+                'Không thể tải thông tin hồ sơ',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Vui lòng thử lại sau',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: AppColors.textSecondary,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => _profileProvider.initializeProfile(),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: AppColors.textOnPrimary,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: const Text(
+                    'Thử lại',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 8),
-          Text(
-            'Vui lòng thử lại sau',
-            style: TextStyle(
-              fontSize: 14,
-              color: AppColors.textSecondary,
-            ),
-          ),
-          const SizedBox(height: 24),
-          ElevatedButton(
-            onPressed: () => _profileProvider.initializeProfile(),
-            child: const Text('Thử lại'),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -211,38 +281,81 @@ class _ProfilePageState extends State<ProfilePage> {
   /// Build unauthenticated state
   Widget _buildUnauthenticatedState() {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.person_off_outlined,
-            size: 64,
-            color: AppColors.textSecondary,
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Container(
+          padding: const EdgeInsets.all(32),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.shadow,
+                blurRadius: 20,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
-          const SizedBox(height: 16),
-          Text(
-            'Chưa đăng nhập',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
-            ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: AppColors.iconBgTeal,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.person_outline_rounded,
+                  size: 48,
+                  color: AppColors.secondary,
+                ),
+              ),
+              const SizedBox(height: 24),
+              Text(
+                'Chưa đăng nhập',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Vui lòng đăng nhập để xem thông tin hồ sơ',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: AppColors.textSecondary,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 28),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => context.go('/login'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: AppColors.textOnPrimary,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: const Text(
+                    'Đăng nhập',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 8),
-          Text(
-            'Vui lòng đăng nhập để xem thông tin hồ sơ',
-            style: TextStyle(
-              fontSize: 14,
-              color: AppColors.textSecondary,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 24),
-          ElevatedButton(
-            onPressed: () => context.go('/login'),
-            child: const Text('Đăng nhập'),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -267,12 +380,12 @@ class _ProfilePageState extends State<ProfilePage> {
                 onEditPressed: () => _showEditProfileDialog(),
               ),
               
-              const SizedBox(height: 8),
+              const SizedBox(height: 12),
               
               // Quick access buttons
               const ProfileQuickAccess(),
               
-              const SizedBox(height: 8),
+              const SizedBox(height: 12),
               
               // Profile statistics
               if (provider.profileStats != null &&
@@ -308,7 +421,8 @@ class _ProfilePageState extends State<ProfilePage> {
       expandedHeight: 0,
       floating: true,
       pinned: false,
-      backgroundColor: Colors.transparent,
+      backgroundColor: AppColors.backgroundWarm,
+      surfaceTintColor: Colors.transparent,
       elevation: 0,
       leading: const Padding(
         padding: EdgeInsets.all(8.0),
@@ -317,53 +431,65 @@ class _ProfilePageState extends State<ProfilePage> {
       title: Text(
         'Hồ sơ',
         style: TextStyle(
-          fontSize: isTablet ? 22 : 20,
+          fontSize: isTablet ? 24 : 22,
           fontWeight: FontWeight.bold,
           color: AppColors.textPrimary,
+          letterSpacing: -0.5,
         ),
       ),
       centerTitle: true,
       actions: [
         Consumer<ProfileProvider>(
           builder: (context, profileProvider, child) {
-            return IconButton(
-              icon: profileProvider.isLoading
-                  ? SizedBox(
-                      width: isTablet ? 20 : 16,
-                      height: isTablet ? 20 : 16,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+            return Container(
+              margin: const EdgeInsets.only(right: 4),
+              child: IconButton(
+                icon: profileProvider.isLoading
+                    ? SizedBox(
+                        width: isTablet ? 20 : 18,
+                        height: isTablet ? 20 : 18,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+                        ),
+                      )
+                    : Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: AppColors.iconBgYellow,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.refresh_rounded,
+                          color: AppColors.primaryDark,
+                          size: isTablet ? 22 : 20,
+                        ),
                       ),
-                    )
-                  : Icon(
-                      Icons.refresh,
-                      color: AppColors.primary,
-                      size: isTablet ? 28 : 24,
-                    ),
-              onPressed: profileProvider.isLoading ? null : _handleRefresh,
-              tooltip: 'Cập nhật thông tin',
+                onPressed: profileProvider.isLoading ? null : _handleRefresh,
+                tooltip: 'Cập nhật thông tin',
+              ),
             );
           },
         ),
-        IconButton(
-          icon: Icon(
-            Icons.logout,
-            color: AppColors.error,
-            size: isTablet ? 28 : 24,
+        Container(
+          margin: const EdgeInsets.only(right: 8),
+          child: IconButton(
+            icon: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppColors.errorLight,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.logout_rounded,
+                color: AppColors.error,
+                size: isTablet ? 22 : 20,
+              ),
+            ),
+            onPressed: () => _showLogoutConfirmation(),
+            tooltip: 'Đăng xuất',
           ),
-          onPressed: () => _showLogoutConfirmation(),
-          tooltip: 'Đăng xuất',
         ),
-        // Hide more options menu as features are not ready
-        // IconButton(
-        //   icon: Icon(
-        //     Icons.more_vert,
-        //     color: AppColors.textPrimary,
-        //     size: isTablet ? 28 : 24,
-        //   ),
-        //   onPressed: () => _showMoreOptions(),
-        // ),
       ],
     );
   }
@@ -391,22 +517,91 @@ class _ProfilePageState extends State<ProfilePage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Xác nhận đăng xuất'),
-        content: const Text('Bạn có chắc chắn muốn đăng xuất khỏi ứng dụng?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Hủy'),
-          ),
-          TextButton(
-            onPressed: () async {
-              Navigator.of(context).pop();
-              await _performLogout();
-            },
-            child: Text(
-              'Đăng xuất',
-              style: TextStyle(color: AppColors.error),
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+        ),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: AppColors.errorLight,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.logout_rounded,
+                color: AppColors.error,
+                size: 24,
+              ),
             ),
+            const SizedBox(width: 12),
+            const Expanded(
+              child: Text(
+                'Xác nhận đăng xuất',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
+        content: Text(
+          'Bạn có chắc chắn muốn đăng xuất khỏi ứng dụng?',
+          style: TextStyle(
+            color: AppColors.textSecondary,
+            fontSize: 15,
+          ),
+        ),
+        actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 20),
+        actions: [
+          Row(
+            children: [
+              Expanded(
+                child: TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      side: BorderSide(color: AppColors.border),
+                    ),
+                  ),
+                  child: Text(
+                    'Hủy',
+                    style: TextStyle(
+                      color: AppColors.textSecondary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () async {
+                    Navigator.of(context).pop();
+                    await _performLogout();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.error,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: const Text(
+                    'Đăng xuất',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -427,6 +622,9 @@ class _ProfilePageState extends State<ProfilePage> {
           SnackBar(
             content: Text('Đăng xuất thất bại: ${e.toString()}'),
             backgroundColor: AppColors.error,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            margin: const EdgeInsets.all(16),
           ),
         );
       }
@@ -437,59 +635,123 @@ class _ProfilePageState extends State<ProfilePage> {
   void _showMoreOptions() {
     showModalBottomSheet(
       context: context,
-      backgroundColor: AppColors.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(20),
-        ),
-      ),
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
       builder: (context) => Container(
-        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: const BorderRadius.vertical(
+            top: Radius.circular(24),
+          ),
+        ),
+        padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             // Handle bar
             Container(
-              width: 40,
-              height: 4,
+              width: 48,
+              height: 5,
               decoration: BoxDecoration(
                 color: AppColors.border,
-                borderRadius: BorderRadius.circular(2),
+                borderRadius: BorderRadius.circular(3),
               ),
             ),
             
-            const SizedBox(height: 20),
+            const SizedBox(height: 24),
             
             // Options
-            ListTile(
-              leading: const Icon(Icons.share, color: AppColors.primary),
-              title: const Text('Chia sẻ hồ sơ'),
+            _buildOptionTile(
+              icon: Icons.share_rounded,
+              iconBgColor: AppColors.iconBgYellow,
+              iconColor: AppColors.primaryDark,
+              title: 'Chia sẻ hồ sơ',
               onTap: () {
                 Navigator.pop(context);
                 _shareProfile();
               },
             ),
             
-            ListTile(
-              leading: const Icon(Icons.download, color: AppColors.secondary),
-              title: const Text('Xuất dữ liệu'),
+            const SizedBox(height: 12),
+            
+            _buildOptionTile(
+              icon: Icons.download_rounded,
+              iconBgColor: AppColors.iconBgTeal,
+              iconColor: AppColors.secondary,
+              title: 'Xuất dữ liệu',
               onTap: () {
                 Navigator.pop(context);
                 _exportData();
               },
             ),
             
-            ListTile(
-              leading: const Icon(Icons.help_outline, color: AppColors.accent),
-              title: const Text('Trợ giúp'),
+            const SizedBox(height: 12),
+            
+            _buildOptionTile(
+              icon: Icons.help_outline_rounded,
+              iconBgColor: AppColors.iconBgPeach,
+              iconColor: AppColors.accent,
+              title: 'Trợ giúp',
               onTap: () {
                 Navigator.pop(context);
                 _showHelp();
               },
             ),
             
-            const SizedBox(height: 20),
+            SizedBox(height: MediaQuery.of(context).padding.bottom + 16),
           ],
+        ),
+      ),
+    );
+  }
+
+  /// Build option tile for bottom sheet
+  Widget _buildOptionTile({
+    required IconData icon,
+    required Color iconBgColor,
+    required Color iconColor,
+    required String title,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          decoration: BoxDecoration(
+            color: AppColors.surfaceVariant,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: iconBgColor,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(icon, color: iconColor, size: 22),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ),
+              Icon(
+                Icons.chevron_right_rounded,
+                color: AppColors.textTertiary,
+                size: 24,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -516,12 +778,61 @@ class _ProfilePageState extends State<ProfilePage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Trợ giúp'),
-        content: const Text('Nếu bạn cần hỗ trợ, vui lòng liên hệ với chúng tôi qua email: support@example.com'),
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+        ),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: AppColors.iconBgBlue,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.help_outline_rounded,
+                color: AppColors.info,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 12),
+            const Text(
+              'Trợ giúp',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        content: Text(
+          'Nếu bạn cần hỗ trợ, vui lòng liên hệ với chúng tôi qua email: support@example.com',
+          style: TextStyle(
+            color: AppColors.textSecondary,
+            fontSize: 15,
+          ),
+        ),
+        actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 20),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Đóng'),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () => Navigator.of(context).pop(),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: AppColors.textOnPrimary,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                elevation: 0,
+              ),
+              child: const Text(
+                'Đóng',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+            ),
           ),
         ],
       ),

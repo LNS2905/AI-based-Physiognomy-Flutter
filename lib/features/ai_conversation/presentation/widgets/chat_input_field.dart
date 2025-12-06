@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
 
 /// Chat input field widget for typing and sending messages
@@ -66,15 +67,20 @@ class _ChatInputFieldState extends State<ChatInputField> {
       duration: const Duration(milliseconds: 200),
       padding: const EdgeInsets.all(AppConstants.defaultPadding),
       decoration: BoxDecoration(
-        color: isDisabled 
-            ? const Color(0xFFF5F5F5) 
-            : const Color(0xFFFAFAFA),
-        border: const Border(
+        color: AppColors.surface,
+        border: Border(
           top: BorderSide(
-            color: Color(0xFFEEEEEE),
+            color: AppColors.borderLight,
             width: 1,
           ),
         ),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.shadowLight,
+            blurRadius: 8,
+            offset: const Offset(0, -2),
+          ),
+        ],
       ),
       child: SafeArea(
         child: Column(
@@ -109,21 +115,22 @@ class _ChatInputFieldState extends State<ChatInputField> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         SizedBox(
-          width: 14,
-          height: 14,
+          width: 16,
+          height: 16,
           child: CircularProgressIndicator(
             strokeWidth: 2,
             valueColor: AlwaysStoppedAnimation<Color>(
-              const Color(0xFFD4AF37).withValues(alpha: 0.6),
+              AppColors.primary,
             ),
           ),
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: 10),
         Text(
           'AI đang xử lý...',
           style: TextStyle(
-            fontSize: 12,
-            color: const Color(0xFF666666).withValues(alpha: 0.7),
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+            color: AppColors.textSecondary,
           ),
         ),
       ],
@@ -141,14 +148,14 @@ class _ChatInputFieldState extends State<ChatInputField> {
       ),
       decoration: BoxDecoration(
         color: isDisabled 
-            ? const Color(0xFFF5F5F5) 
-            : Colors.white,
+            ? AppColors.surfaceVariant 
+            : AppColors.surface,
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
           color: isDisabled 
-              ? const Color(0xFFE0E0E0) 
-              : const Color(0xFFDDDDDD),
-          width: 1,
+              ? AppColors.borderLight 
+              : AppColors.border,
+          width: 1.5,
         ),
       ),
       child: TextField(
@@ -158,26 +165,24 @@ class _ChatInputFieldState extends State<ChatInputField> {
         textInputAction: TextInputAction.newline,
         keyboardType: TextInputType.multiline,
         style: TextStyle(
-          fontSize: 14,
+          fontSize: 15,
           fontWeight: FontWeight.w400,
           color: isDisabled 
-              ? const Color(0xFF999999) 
-              : const Color(0xFF333333),
+              ? AppColors.textTertiary 
+              : AppColors.textPrimary,
         ),
         decoration: InputDecoration(
           hintText: isDisabled
               ? 'Đang chờ AI trả lời...'
               : (widget.hintText.isEmpty ? 'Hỏi về lá số tử vi của bạn...' : widget.hintText),
           hintStyle: TextStyle(
-            fontSize: 14,
+            fontSize: 15,
             fontWeight: FontWeight.w400,
-            color: isDisabled 
-                ? const Color(0xFFBBBBBB) 
-                : const Color(0xFF999999),
+            color: AppColors.textHint,
           ),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
+            horizontal: 20,
             vertical: 14,
           ),
         ),
@@ -195,24 +200,18 @@ class _ChatInputFieldState extends State<ChatInputField> {
     
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
-      width: 44,
-      height: 44,
+      width: 48,
+      height: 48,
       decoration: BoxDecoration(
-        gradient: canSend
-            ? const LinearGradient(
-                colors: [Color(0xFFD4AF37), Color(0xFFB8860B)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              )
-            : null,
-        color: canSend ? null : const Color(0xFFE0E0E0),
+        // Cracker Book style: solid primary color when active
+        color: canSend ? AppColors.primary : AppColors.surfaceVariant,
         shape: BoxShape.circle,
         boxShadow: canSend
             ? [
                 BoxShadow(
-                  color: const Color(0xFFD4AF37).withValues(alpha: 0.4),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
+                  color: AppColors.shadowYellow,
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
                 ),
               ]
             : null,
@@ -220,26 +219,28 @@ class _ChatInputFieldState extends State<ChatInputField> {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(22),
+          borderRadius: BorderRadius.circular(24),
           onTap: canSend ? _onSendPressed : null,
+          splashColor: AppColors.ripple,
           child: Center(
             child: widget.isLoading
                 ? SizedBox(
-                    width: 18,
-                    height: 18,
+                    width: 20,
+                    height: 20,
                     child: CircularProgressIndicator(
                       strokeWidth: 2.5,
                       valueColor: AlwaysStoppedAnimation<Color>(
-                        const Color(0xFF999999).withValues(alpha: 0.6),
+                        AppColors.textTertiary,
                       ),
                     ),
                   )
                 : Icon(
                     Icons.send_rounded,
-                    size: 20,
+                    size: 22,
+                    // Cracker Book: dark icon on yellow background
                     color: canSend
-                        ? Colors.white
-                        : const Color(0xFF999999).withValues(alpha: 0.5),
+                        ? AppColors.textOnPrimary
+                        : AppColors.textHint,
                   ),
           ),
         ),
@@ -253,15 +254,31 @@ class _ChatInputFieldState extends State<ChatInputField> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          '💫 Gợi ý câu hỏi về Tử Vi:',
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w500,
-            color: Color(0xFF666666),
-          ),
+        Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                color: AppColors.iconBgYellow,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Text(
+                '💫',
+                style: TextStyle(fontSize: 14),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              'Gợi ý câu hỏi về Tử Vi:',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 10),
         Row(
           children: [
             Expanded(
@@ -281,23 +298,24 @@ class _ChatInputFieldState extends State<ChatInputField> {
     final isEnabled = widget.enabled && !widget.isLoading;
     
     return Container(
-      height: 32,
+      height: 36,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(18),
         border: Border.all(
           color: isEnabled 
-              ? const Color(0xFFD4AF37).withValues(alpha: 0.3) 
-              : const Color(0xFFE0E0E0),
-          width: 1,
+              ? AppColors.borderYellow
+              : AppColors.borderLight,
+          width: 1.5,
         ),
         color: isEnabled 
-            ? const Color(0xFFF4E4BC).withValues(alpha: 0.2) 
-            : const Color(0xFFF5F5F5),
+            ? AppColors.surfaceYellow.withValues(alpha: 0.5) 
+            : AppColors.surfaceVariant,
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(18),
+          splashColor: AppColors.ripple,
           onTap: isEnabled
               ? () {
                   widget.controller.text = text;
@@ -307,15 +325,15 @@ class _ChatInputFieldState extends State<ChatInputField> {
               : null,
           child: Center(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 14),
               child: Text(
                 text,
                 style: TextStyle(
-                  fontSize: 11,
+                  fontSize: 12,
                   fontWeight: FontWeight.w500,
                   color: isEnabled 
-                      ? const Color(0xFF333333) 
-                      : const Color(0xFF999999),
+                      ? AppColors.textPrimary 
+                      : AppColors.textTertiary,
                 ),
                 textAlign: TextAlign.center,
                 maxLines: 1,

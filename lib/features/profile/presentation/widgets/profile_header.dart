@@ -22,19 +22,26 @@ class ProfileHeader extends StatelessWidget {
 
     return Container(
       width: double.infinity,
+      margin: EdgeInsets.symmetric(horizontal: isTablet ? 24 : 16),
       padding: EdgeInsets.all(isTablet ? 32 : 24),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            AppColors.primary.withValues(alpha: 0.1),
-            AppColors.secondary.withValues(alpha: 0.05),
-          ],
-        ),
-        borderRadius: const BorderRadius.only(
-          bottomLeft: Radius.circular(24),
-          bottomRight: Radius.circular(24),
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.shadowYellow,
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+          BoxShadow(
+            color: AppColors.shadow,
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+        border: Border.all(
+          color: AppColors.borderYellow.withValues(alpha: 0.3),
+          width: 1,
         ),
       ),
       child: Column(
@@ -45,14 +52,14 @@ class ProfileHeader extends StatelessWidget {
               _buildAvatar(isTablet),
               if (onEditPressed != null)
                 Positioned(
-                  bottom: 0,
-                  right: 0,
+                  bottom: 4,
+                  right: 4,
                   child: _buildEditButton(),
                 ),
             ],
           ),
           
-          SizedBox(height: isTablet ? 20 : 16),
+          SizedBox(height: isTablet ? 24 : 20),
           
           // User name
           Text(
@@ -61,36 +68,93 @@ class ProfileHeader extends StatelessWidget {
               fontSize: isTablet ? 28 : 24,
               fontWeight: FontWeight.bold,
               color: AppColors.textPrimary,
+              letterSpacing: -0.5,
             ),
             textAlign: TextAlign.center,
           ),
           
-          SizedBox(height: isTablet ? 8 : 6),
+          SizedBox(height: isTablet ? 10 : 8),
           
-          // User email
-          Text(
-            user.email,
-            style: TextStyle(
-              fontSize: isTablet ? 16 : 14,
-              color: AppColors.textSecondary,
-            ),
-            textAlign: TextAlign.center,
+          // User email with icon
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: AppColors.iconBgTeal,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.email_outlined,
+                  size: isTablet ? 16 : 14,
+                  color: AppColors.secondary,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                user.email,
+                style: TextStyle(
+                  fontSize: isTablet ? 16 : 14,
+                  color: AppColors.textSecondary,
+                  fontWeight: FontWeight.w500,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
           ),
           
           if (user.phone?.isNotEmpty ?? false) ...[
-            SizedBox(height: isTablet ? 6 : 4),
-            Text(
-              user.phone ?? '',
-              style: TextStyle(
-                fontSize: isTablet ? 16 : 14,
-                color: AppColors.textSecondary,
-              ),
-              textAlign: TextAlign.center,
+            SizedBox(height: isTablet ? 10 : 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: AppColors.iconBgPeach,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.phone_outlined,
+                    size: isTablet ? 16 : 14,
+                    color: AppColors.accent,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  user.phone ?? '',
+                  style: TextStyle(
+                    fontSize: isTablet ? 16 : 14,
+                    color: AppColors.textSecondary,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
             ),
           ],
           
+          // Divider
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 20),
+            child: Container(
+              height: 1,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Colors.transparent,
+                    AppColors.borderYellow.withValues(alpha: 0.5),
+                    AppColors.borderYellow.withValues(alpha: 0.5),
+                    Colors.transparent,
+                  ],
+                  stops: const [0.0, 0.3, 0.7, 1.0],
+                ),
+              ),
+            ),
+          ),
+          
           // Credits Display
-          const SizedBox(height: 16),
           CreditDisplayWidget(
             credits: user.credits ?? 0,
             onTap: () => context.go('/payment/packages'),
@@ -111,14 +175,19 @@ class ProfileHeader extends StatelessWidget {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         border: Border.all(
-          color: AppColors.primary.withValues(alpha: 0.3),
-          width: 3,
+          color: AppColors.primary,
+          width: 4,
         ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.2),
-            blurRadius: 20,
+            color: AppColors.shadowYellow,
+            blurRadius: 24,
             offset: const Offset(0, 8),
+          ),
+          BoxShadow(
+            color: AppColors.shadowLight,
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -143,14 +212,14 @@ class ProfileHeader extends StatelessWidget {
     return Container(
       width: size,
       height: size,
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         shape: BoxShape.circle,
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
+            AppColors.primaryLight,
             AppColors.primary,
-            AppColors.secondary,
           ],
         ),
       ),
@@ -158,9 +227,10 @@ class ProfileHeader extends StatelessWidget {
         child: Text(
           initials,
           style: TextStyle(
-            fontSize: size * 0.35,
+            fontSize: size * 0.38,
             fontWeight: FontWeight.bold,
-            color: Colors.white,
+            color: AppColors.textOnPrimary,
+            letterSpacing: 1,
           ),
         ),
       ),
@@ -172,25 +242,32 @@ class ProfileHeader extends StatelessWidget {
     return GestureDetector(
       onTap: onEditPressed,
       child: Container(
-        width: 36,
-        height: 36,
+        width: 40,
+        height: 40,
         decoration: BoxDecoration(
-          color: AppColors.primary,
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              AppColors.secondary,
+              AppColors.secondaryDark,
+            ],
+          ),
           shape: BoxShape.circle,
           border: Border.all(
             color: Colors.white,
-            width: 2,
+            width: 3,
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.1),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
+              color: AppColors.secondary.withValues(alpha: 0.4),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
             ),
           ],
         ),
         child: const Icon(
-          Icons.edit,
+          Icons.edit_rounded,
           color: Colors.white,
           size: 18,
         ),

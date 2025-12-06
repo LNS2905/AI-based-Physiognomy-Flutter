@@ -55,7 +55,7 @@ class _HistoryPageState extends State<HistoryPage> with TickerProviderStateMixin
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.backgroundWarm,
       body: SafeArea(
         child: Stack(
           children: [
@@ -94,94 +94,155 @@ class _HistoryPageState extends State<HistoryPage> with TickerProviderStateMixin
   Widget _buildAppBar() {
     return Container(
       padding: const EdgeInsets.all(AppConstants.defaultPadding),
-      decoration: const BoxDecoration(
-        color: AppColors.surface,
-        border: Border(
-          bottom: BorderSide(
-            color: AppColors.borderLight,
-            width: 1,
-          ),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AppColors.primary.withValues(alpha: 0.15),
+            AppColors.primarySoft,
+          ],
         ),
+        borderRadius: const BorderRadius.only(
+          bottomLeft: Radius.circular(24),
+          bottomRight: Radius.circular(24),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.shadowYellow,
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Row(
         children: [
           // Back button
           const Padding(
-            padding: EdgeInsets.all(8.0),
+            padding: EdgeInsets.all(4.0),
             child: StandardBackButton(),
           ),
           const SizedBox(width: 12),
           
-          // Title
+          // Title with icon
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: AppColors.iconBgYellow,
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.history_rounded,
+              color: AppColors.primaryDark,
+              size: 22,
+            ),
+          ),
+          const SizedBox(width: 12),
           const Expanded(
             child: Text(
               'Lịch sử',
               style: TextStyle(
-                fontSize: 20,
+                fontSize: 22,
                 fontWeight: FontWeight.w700,
                 color: AppColors.textPrimary,
+                letterSpacing: -0.3,
               ),
             ),
           ),
           
           // Search button
-          IconButton(
-            onPressed: () {
-              setState(() {
-                _showSearchBar = !_showSearchBar;
-                if (!_showSearchBar) {
-                  context.read<HistoryProvider>().clearSearch();
-                }
-              });
-            },
-            icon: Icon(
-              _showSearchBar ? Icons.search_off : Icons.search,
-              color: AppColors.textPrimary,
-              size: 20,
-            ),
-            style: IconButton.styleFrom(
-              backgroundColor: _showSearchBar 
-                  ? AppColors.primary.withValues(alpha: 0.1)
-                  : AppColors.surfaceVariant,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+          Container(
+            decoration: BoxDecoration(
+              color: _showSearchBar 
+                  ? AppColors.primary.withValues(alpha: 0.2)
+                  : AppColors.surface,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: _showSearchBar ? AppColors.primary : AppColors.borderLight,
+                width: 1.5,
               ),
-              padding: const EdgeInsets.all(8),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.shadowLight,
+                  blurRadius: 6,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: IconButton(
+              onPressed: () {
+                setState(() {
+                  _showSearchBar = !_showSearchBar;
+                  if (!_showSearchBar) {
+                    context.read<HistoryProvider>().clearSearch();
+                  }
+                });
+              },
+              icon: Icon(
+                _showSearchBar ? Icons.search_off_rounded : Icons.search_rounded,
+                color: _showSearchBar ? AppColors.primary : AppColors.textPrimary,
+                size: 22,
+              ),
             ),
           ),
           const SizedBox(width: 8),
           
           // More options
-          PopupMenuButton<String>(
-            icon: const Icon(
-              Icons.more_vert,
-              color: AppColors.textPrimary,
-              size: 20,
-            ),
-            onSelected: _handleMenuAction,
-            itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: 'refresh',
-                child: Row(
-                  children: [
-                    Icon(Icons.refresh, size: 18),
-                    SizedBox(width: 8),
-                    Text('Làm mới'),
-                  ],
+          Container(
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: AppColors.borderLight, width: 1.5),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.shadowLight,
+                  blurRadius: 6,
+                  offset: const Offset(0, 2),
                 ),
+              ],
+            ),
+            child: PopupMenuButton<String>(
+              icon: const Icon(
+                Icons.more_vert_rounded,
+                color: AppColors.textPrimary,
+                size: 22,
               ),
-              // Clear all option - HIDDEN
-              // const PopupMenuItem(
-              //   value: 'clear_all',
-              //   child: Row(
-              //     children: [
-              //       Icon(Icons.delete_sweep, size: 18, color: AppColors.error),
-              //       SizedBox(width: 8),
-              //       Text('Xóa tất cả', style: TextStyle(color: AppColors.error)),
-              //     ],
-              //   ),
-              // ),
-            ],
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              color: AppColors.surface,
+              elevation: 8,
+              onSelected: _handleMenuAction,
+              itemBuilder: (context) => [
+                PopupMenuItem(
+                  value: 'refresh',
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: AppColors.iconBgTeal,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Icon(
+                          Icons.refresh_rounded, 
+                          size: 18,
+                          color: AppColors.secondary,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      const Text(
+                        'Làm mới',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -192,18 +253,19 @@ class _HistoryPageState extends State<HistoryPage> with TickerProviderStateMixin
     return Consumer<HistoryProvider>(
       builder: (context, provider, child) {
         return Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppConstants.defaultPadding,
-            vertical: AppConstants.smallPadding,
-          ),
-          decoration: const BoxDecoration(
+          margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+          decoration: BoxDecoration(
             color: AppColors.surface,
-            border: Border(
-              bottom: BorderSide(
-                color: AppColors.borderLight,
-                width: 1,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: AppColors.borderLight, width: 1.5),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.shadowLight,
+                blurRadius: 10,
+                offset: const Offset(0, 4),
               ),
-            ),
+            ],
           ),
           child: TextField(
             onChanged: provider.searchHistory,
@@ -211,41 +273,49 @@ class _HistoryPageState extends State<HistoryPage> with TickerProviderStateMixin
               hintText: 'Tìm kiếm trong lịch sử...',
               hintStyle: const TextStyle(
                 color: AppColors.textHint,
-                fontSize: 14,
+                fontSize: 15,
+                fontWeight: FontWeight.w400,
               ),
-              prefixIcon: const Icon(
-                Icons.search,
-                color: AppColors.textSecondary,
-                size: 20,
+              prefixIcon: Container(
+                margin: const EdgeInsets.all(8),
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppColors.iconBgYellow,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.search_rounded,
+                  color: AppColors.primaryDark,
+                  size: 20,
+                ),
               ),
               suffixIcon: provider.searchQuery.isNotEmpty
                   ? IconButton(
                       onPressed: provider.clearSearch,
-                      icon: const Icon(
-                        Icons.clear,
-                        color: AppColors.textSecondary,
-                        size: 20,
+                      icon: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: AppColors.errorLight,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.close_rounded,
+                          color: AppColors.error,
+                          size: 16,
+                        ),
                       ),
                     )
                   : null,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(AppConstants.borderRadius),
-                borderSide: const BorderSide(color: AppColors.borderLight),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(AppConstants.borderRadius),
-                borderSide: const BorderSide(color: AppColors.primary),
-              ),
+              border: InputBorder.none,
               contentPadding: const EdgeInsets.symmetric(
-                horizontal: AppConstants.defaultPadding,
-                vertical: 12,
+                horizontal: 16,
+                vertical: 14,
               ),
-              filled: true,
-              fillColor: AppColors.surfaceVariant,
             ),
             style: const TextStyle(
-              fontSize: 14,
+              fontSize: 15,
               color: AppColors.textPrimary,
+              fontWeight: FontWeight.w500,
             ),
           ),
         );
@@ -255,33 +325,70 @@ class _HistoryPageState extends State<HistoryPage> with TickerProviderStateMixin
 
   Widget _buildTabBar() {
     return Container(
-      decoration: const BoxDecoration(
+      margin: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+      decoration: BoxDecoration(
         color: AppColors.surface,
-        border: Border(
-          bottom: BorderSide(
-            color: AppColors.borderLight,
-            width: 1,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.borderLight, width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.shadowLight,
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
-        ),
-      ),
-      child: TabBar(
-        controller: _tabController,
-        labelColor: AppColors.primary,
-        unselectedLabelColor: AppColors.textSecondary,
-        indicatorColor: AppColors.primary,
-        indicatorWeight: 2,
-        labelStyle: const TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
-        ),
-        unselectedLabelStyle: const TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.normal,
-        ),
-        tabs: const [
-          Tab(text: 'Tất cả'),
-          Tab(text: 'Thống kê'),
         ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(4),
+        child: TabBar(
+          controller: _tabController,
+          labelColor: AppColors.textOnPrimary,
+          unselectedLabelColor: AppColors.textSecondary,
+          indicator: BoxDecoration(
+            color: AppColors.primary,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.shadowYellow,
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          indicatorSize: TabBarIndicatorSize.tab,
+          dividerColor: Colors.transparent,
+          labelStyle: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.3,
+          ),
+          unselectedLabelStyle: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+          ),
+          tabs: [
+            Tab(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: const [
+                  Icon(Icons.list_alt_rounded, size: 18),
+                  SizedBox(width: 8),
+                  Text('Tất cả'),
+                ],
+              ),
+            ),
+            Tab(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: const [
+                  Icon(Icons.bar_chart_rounded, size: 18),
+                  SizedBox(width: 8),
+                  Text('Thống kê'),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -341,9 +448,10 @@ class _HistoryPageState extends State<HistoryPage> with TickerProviderStateMixin
     return RefreshIndicator(
       onRefresh: provider.refreshHistory,
       color: AppColors.primary,
+      backgroundColor: AppColors.surface,
       child: ListView.builder(
         controller: _scrollController,
-        padding: const EdgeInsets.symmetric(vertical: AppConstants.smallPadding),
+        padding: const EdgeInsets.symmetric(vertical: 8),
         itemCount: provider.filteredHistoryItems.length,
         itemBuilder: (context, index) {
           final item = provider.filteredHistoryItems[index];
@@ -371,7 +479,7 @@ class _HistoryPageState extends State<HistoryPage> with TickerProviderStateMixin
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildStatisticsCard(provider),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
               _buildRecentActivity(provider),
             ],
           ),
@@ -382,41 +490,93 @@ class _HistoryPageState extends State<HistoryPage> with TickerProviderStateMixin
 
   Widget _buildStatisticsCard(HistoryProvider provider) {
     return Container(
-      padding: const EdgeInsets.all(AppConstants.defaultPadding),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppConstants.borderRadius),
-        border: Border.all(color: AppColors.borderLight),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: AppColors.borderLight, width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.shadowLight,
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Thống kê tổng quan',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
-            ),
+          // Header with icon
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  gradient: AppColors.primaryGradient,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.shadowYellow,
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: const Icon(
+                  Icons.analytics_rounded,
+                  color: AppColors.textOnPrimary,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 14),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Thống kê tổng quan',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimary,
+                        letterSpacing: -0.3,
+                      ),
+                    ),
+                    SizedBox(height: 2),
+                    Text(
+                      'Tổng hợp hoạt động của bạn',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
           
+          // Stats grid
           Row(
             children: [
               Expanded(
                 child: _buildStatItem(
                   'Tổng cộng',
                   provider.totalItems.toString(),
-                  Icons.history,
+                  Icons.history_rounded,
                   AppColors.primary,
+                  AppColors.iconBgYellow,
                 ),
               ),
+              const SizedBox(width: 12),
               Expanded(
                 child: _buildStatItem(
                   'Yêu thích',
                   provider.favoriteCount.toString(),
-                  Icons.favorite,
+                  Icons.favorite_rounded,
                   AppColors.accent,
+                  AppColors.iconBgPeach,
                 ),
               ),
             ],
@@ -429,16 +589,19 @@ class _HistoryPageState extends State<HistoryPage> with TickerProviderStateMixin
                 child: _buildStatItem(
                   'Khuôn mặt',
                   provider.faceAnalysisCount.toString(),
-                  Icons.face_retouching_natural,
-                  AppColors.primary,
+                  Icons.face_retouching_natural_rounded,
+                  AppColors.primaryDark,
+                  AppColors.iconBgYellow,
                 ),
               ),
+              const SizedBox(width: 12),
               Expanded(
                 child: _buildStatItem(
                   'Vân tay',
                   provider.palmAnalysisCount.toString(),
-                  Icons.back_hand,
+                  Icons.back_hand_rounded,
                   AppColors.secondary,
+                  AppColors.iconBgTeal,
                 ),
               ),
             ],
@@ -448,25 +611,44 @@ class _HistoryPageState extends State<HistoryPage> with TickerProviderStateMixin
           _buildStatItem(
             'Trò chuyện',
             provider.chatConversationCount.toString(),
-            Icons.chat_bubble_outline,
+            Icons.chat_bubble_rounded,
             AppColors.success,
+            AppColors.iconBgGreen,
           ),
         ],
       ),
     );
   }
 
-  Widget _buildStatItem(String label, String value, IconData icon, Color color) {
+  Widget _buildStatItem(String label, String value, IconData icon, Color color, Color bgColor) {
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(8),
+        color: bgColor,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: color.withValues(alpha: 0.2),
+          width: 1,
+        ),
       ),
       child: Row(
         children: [
-          Icon(icon, color: color, size: 20),
-          const SizedBox(width: 8),
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: color.withValues(alpha: 0.2),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Icon(icon, color: color, size: 22),
+          ),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -474,16 +656,19 @@ class _HistoryPageState extends State<HistoryPage> with TickerProviderStateMixin
                 Text(
                   value,
                   style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
+                    fontSize: 22,
+                    fontWeight: FontWeight.w800,
                     color: color,
+                    letterSpacing: -0.5,
                   ),
                 ),
+                const SizedBox(height: 2),
                 Text(
                   label,
                   style: const TextStyle(
-                    fontSize: 12,
+                    fontSize: 13,
                     color: AppColors.textSecondary,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ],
@@ -498,31 +683,105 @@ class _HistoryPageState extends State<HistoryPage> with TickerProviderStateMixin
     final recentItems = provider.getRecentItems(limit: 5);
     
     return Container(
-      padding: const EdgeInsets.all(AppConstants.defaultPadding),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppConstants.borderRadius),
-        border: Border.all(color: AppColors.borderLight),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: AppColors.borderLight, width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.shadowLight,
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Hoạt động gần đây',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
-            ),
+          // Header with icon
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  gradient: AppColors.tealGradient,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.secondary.withValues(alpha: 0.3),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: const Icon(
+                  Icons.schedule_rounded,
+                  color: Colors.white,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 14),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Hoạt động gần đây',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimary,
+                        letterSpacing: -0.3,
+                      ),
+                    ),
+                    SizedBox(height: 2),
+                    Text(
+                      '5 hoạt động mới nhất',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 16),
           
           if (recentItems.isEmpty)
-            const Text(
-              'Chưa có hoạt động nào',
-              style: TextStyle(
-                color: AppColors.textSecondary,
-                fontSize: 14,
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: AppColors.surfaceVariant,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: AppColors.iconBgYellow,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.hourglass_empty_rounded,
+                      color: AppColors.primaryDark,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  const Text(
+                    'Chưa có hoạt động nào',
+                    style: TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
               ),
             )
           else
@@ -713,21 +972,79 @@ class _HistoryPageState extends State<HistoryPage> with TickerProviderStateMixin
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Xóa mục lịch sử'),
-        content: Text('Bạn có chắc chắn muốn xóa "${item.title}"?'),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+        ),
+        backgroundColor: AppColors.surface,
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: AppColors.errorLight,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.delete_outline_rounded,
+                color: AppColors.error,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 12),
+            const Text(
+              'Xóa mục lịch sử',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textPrimary,
+              ),
+            ),
+          ],
+        ),
+        content: Text(
+          'Bạn có chắc chắn muốn xóa "${item.title}"?',
+          style: const TextStyle(
+            color: AppColors.textSecondary,
+            fontSize: 15,
+          ),
+        ),
+        actionsPadding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Hủy'),
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+                side: const BorderSide(color: AppColors.borderLight),
+              ),
+            ),
+            child: const Text(
+              'Hủy',
+              style: TextStyle(
+                color: AppColors.textSecondary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ),
-          TextButton(
+          const SizedBox(width: 8),
+          ElevatedButton(
             onPressed: () {
               Navigator.of(context).pop();
               context.read<HistoryProvider>().deleteHistoryItem(item.id);
             },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.error,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+              elevation: 0,
+            ),
             child: const Text(
               'Xóa',
-              style: TextStyle(color: AppColors.error),
+              style: TextStyle(fontWeight: FontWeight.w600),
             ),
           ),
         ],
@@ -739,21 +1056,79 @@ class _HistoryPageState extends State<HistoryPage> with TickerProviderStateMixin
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Xóa tất cả lịch sử'),
-        content: const Text('Bạn có chắc chắn muốn xóa toàn bộ lịch sử? Hành động này không thể hoàn tác.'),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+        ),
+        backgroundColor: AppColors.surface,
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: AppColors.errorLight,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.delete_sweep_rounded,
+                color: AppColors.error,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 12),
+            const Text(
+              'Xóa tất cả lịch sử',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textPrimary,
+              ),
+            ),
+          ],
+        ),
+        content: const Text(
+          'Bạn có chắc chắn muốn xóa toàn bộ lịch sử? Hành động này không thể hoàn tác.',
+          style: TextStyle(
+            color: AppColors.textSecondary,
+            fontSize: 15,
+          ),
+        ),
+        actionsPadding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Hủy'),
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+                side: const BorderSide(color: AppColors.borderLight),
+              ),
+            ),
+            child: const Text(
+              'Hủy',
+              style: TextStyle(
+                color: AppColors.textSecondary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ),
-          TextButton(
+          const SizedBox(width: 8),
+          ElevatedButton(
             onPressed: () {
               Navigator.of(context).pop();
               context.read<HistoryProvider>().clearAllHistory();
             },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.error,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+              elevation: 0,
+            ),
             child: const Text(
               'Xóa tất cả',
-              style: TextStyle(color: AppColors.error),
+              style: TextStyle(fontWeight: FontWeight.w600),
             ),
           ),
         ],

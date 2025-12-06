@@ -3,14 +3,15 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/fixed_bottom_navigation.dart';
 
-/// Home page that matches the Figma wireframe design
+/// Home page inspired by Cracker Book design
+/// Features: Yellow accent, rounded cards, friendly layout
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.backgroundWarm,
       body: SafeArea(
         child: Stack(
           children: [
@@ -20,43 +21,47 @@ class HomePage extends StatelessWidget {
                 // Header Section
                 _buildHeader(context),
 
-                // Search Bar - HIDDEN
-                // _buildSearchBar(context),
-
                 // Main Content
                 Expanded(
                   child: SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    physics: const BouncingScrollPhysics(),
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 24),
 
-                        // Feature Cards Grid
+                        // Welcome Banner Section
+                        _buildWelcomeBanner(context),
+
+                        const SizedBox(height: 28),
+
+                        // Feature Categories Section
+                        _buildCategorySection(context),
+
+                        const SizedBox(height: 28),
+
+                        // Main Feature Cards Grid
                         _buildFeatureCardsGrid(context),
 
-                        const SizedBox(height: 24),
-
-                        // Banner Section
-                        _buildBannerSection(context),
-
-                        const SizedBox(height: 24),
+                        const SizedBox(height: 28),
 
                         // Daily News Carousel
                         _buildDailyNewsCarousel(context),
 
-                        const SizedBox(height: 24),
+                        const SizedBox(height: 28),
 
-                        // Additional Content
-                        _buildAdditionalContent(context),
+                        // Quick Start Section
+                        _buildQuickStartSection(context),
 
-                        const SizedBox(height: 100), // Space for bottom navigation
+                        const SizedBox(
+                            height: 120), // Space for bottom navigation
                       ],
                     ),
                   ),
                 ),
               ],
             ),
-            
+
             // Fixed Bottom Navigation
             FixedBottomNavigation(currentRoute: '/home'),
           ],
@@ -65,22 +70,16 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  /// Build header section with navigation and profile
+  /// Build header section with app name and profile
   Widget _buildHeader(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isTablet = screenWidth > 600;
-
     return Container(
-      padding: EdgeInsets.all(isTablet ? 20 : 16),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       decoration: const BoxDecoration(
-        color: AppColors.surface,
-        border: Border(
-          bottom: BorderSide(color: AppColors.border, width: 1),
-        ),
+        color: Colors.transparent,
       ),
       child: Row(
         children: [
-          // Title/Logo Area
+          // App Logo/Name
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -88,57 +87,33 @@ class HomePage extends StatelessWidget {
                 Text(
                   'Tướng học AI',
                   style: TextStyle(
-                    fontSize: isTablet ? 20 : 16,
-                    fontWeight: FontWeight.w600,
+                    fontSize: 24,
+                    fontWeight: FontWeight.w700,
                     color: AppColors.textPrimary,
+                    letterSpacing: -0.5,
                   ),
                 ),
+                const SizedBox(height: 4),
                 Text(
-                  'Khám phá những hiểu biết của bạn',
+                  'Khám phá bản thân mỗi ngày',
                   style: TextStyle(
-                    fontSize: isTablet ? 14 : 12,
+                    fontSize: 14,
                     color: AppColors.textSecondary,
+                    fontWeight: FontWeight.w400,
                   ),
                 ),
               ],
             ),
           ),
 
-          // Profile/Settings Icons
+          // Search & Profile Icons
           Row(
             children: [
-              // Notifications button - HIDDEN
-              // Container(
-              //   width: isTablet ? 48 : 40,
-              //   height: isTablet ? 48 : 40,
-              //   decoration: BoxDecoration(
-              //     color: AppColors.surfaceVariant,
-              //     borderRadius: BorderRadius.circular(8),
-              //     border: Border.all(color: AppColors.border),
-              //   ),
-              //   child: Icon(
-              //     Icons.notifications_outlined,
-              //     color: AppColors.textSecondary,
-              //     size: isTablet ? 24 : 20,
-              //   ),
-              // ),
-              // SizedBox(width: isTablet ? 12 : 8),
-              GestureDetector(
+              // Profile Button
+              _buildHeaderIconButton(
+                icon: Icons.person_outline_rounded,
                 onTap: () => context.push('/profile'),
-                child: Container(
-                  width: isTablet ? 48 : 40,
-                  height: isTablet ? 48 : 40,
-                  decoration: BoxDecoration(
-                    color: AppColors.surfaceVariant,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: AppColors.border),
-                  ),
-                  child: Icon(
-                    Icons.person_outline,
-                    color: AppColors.textSecondary,
-                    size: isTablet ? 24 : 20,
-                  ),
-                ),
+                isHighlighted: true,
               ),
             ],
           ),
@@ -147,65 +122,39 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  /// Build search bar section
-  Widget _buildSearchBar(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isTablet = screenWidth > 600;
-
-    return Container(
-      margin: EdgeInsets.all(isTablet ? 20 : 16),
-      padding: EdgeInsets.symmetric(
-        horizontal: isTablet ? 20 : 16,
-        vertical: isTablet ? 16 : 12,
-      ),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Row(
-        children: [
-          Icon(
-            Icons.search,
-            color: AppColors.textSecondary,
-            size: isTablet ? 24 : 20,
+  /// Build header icon button
+  Widget _buildHeaderIconButton({
+    required IconData icon,
+    required VoidCallback onTap,
+    bool isHighlighted = false,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 44,
+        height: 44,
+        decoration: BoxDecoration(
+          color: isHighlighted ? AppColors.primaryLight : AppColors.surface,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: isHighlighted ? AppColors.primary : AppColors.border,
+            width: 1.5,
           ),
-          SizedBox(width: isTablet ? 16 : 12),
-          Expanded(
-            child: Text(
-              'Tìm kiếm tính năng, kết quả...',
-              style: TextStyle(
-                fontSize: isTablet ? 16 : 14,
-                color: AppColors.textHint,
-              ),
-            ),
-          ),
-          Container(
-            width: isTablet ? 40 : 32,
-            height: isTablet ? 40 : 32,
-            decoration: BoxDecoration(
-              color: AppColors.surfaceVariant,
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: Icon(
-              Icons.tune,
-              color: AppColors.textSecondary,
-              size: isTablet ? 20 : 16,
-            ),
-          ),
-        ],
+        ),
+        child: Icon(
+          icon,
+          color: isHighlighted ? AppColors.primaryDark : AppColors.textSecondary,
+          size: 22,
+        ),
       ),
     );
   }
 
-  /// Build banner section
-  Widget _buildBannerSection(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isTablet = screenWidth > 600;
-
+  /// Build welcome banner
+  Widget _buildWelcomeBanner(BuildContext context) {
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: isTablet ? 20 : 16),
-      padding: EdgeInsets.all(isTablet ? 24 : 20),
+      margin: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -215,77 +164,138 @@ class HomePage extends StatelessWidget {
             AppColors.primaryDark,
           ],
         ),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.3),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
+            color: AppColors.primary.withOpacity(0.3),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
       child: Row(
         children: [
           Expanded(
-            flex: 2,
+            flex: 3,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Khám phá con người thật của bạn',
-                  style: TextStyle(
-                    fontSize: isTablet ? 24 : 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    '✨ Khám phá ngay',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
-                SizedBox(height: isTablet ? 12 : 8),
+                const SizedBox(height: 16),
                 Text(
-                  'Phân tích tướng học được hỗ trợ bởi AI tiên tiến để mở khóa những hiểu biết về tính cách và đặc điểm của bạn.',
+                  'Khám phá\ncon người bạn',
                   style: TextStyle(
-                    fontSize: isTablet ? 16 : 14,
-                    color: Colors.white.withValues(alpha: 0.9),
+                    fontSize: 24,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                    height: 1.2,
+                    letterSpacing: -0.5,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'AI phân tích tướng mặt và chỉ tay để khám phá tính cách.',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.white.withOpacity(0.9),
                     height: 1.4,
                   ),
                 ),
-                SizedBox(height: isTablet ? 20 : 16),
-                ElevatedButton(
-                  onPressed: () => context.push('/face-scanning'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: AppColors.primary,
-                    padding: EdgeInsets.symmetric(
-                      horizontal: isTablet ? 24 : 20,
-                      vertical: isTablet ? 14 : 12,
+                const SizedBox(height: 20),
+                GestureDetector(
+                  onTap: () => context.push('/face-scanning'),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 12,
                     ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                  ),
-                  child: Text(
-                    'Bắt đầu phân tích',
-                    style: TextStyle(
-                      fontSize: isTablet ? 16 : 14,
-                      fontWeight: FontWeight.w600,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'Bắt đầu',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.primaryDark,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Icon(
+                          Icons.arrow_forward_rounded,
+                          size: 18,
+                          color: AppColors.primaryDark,
+                        ),
+                      ],
                     ),
                   ),
                 ),
               ],
             ),
           ),
-          SizedBox(width: isTablet ? 20 : 16),
+          const SizedBox(width: 16),
           Expanded(
-            flex: 1,
+            flex: 2,
             child: Container(
-              height: isTablet ? 120 : 100,
+              height: 140,
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(12),
+                color: Colors.white.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(20),
               ),
-              child: Icon(
-                Icons.face_retouching_natural,
-                size: isTablet ? 60 : 50,
-                color: Colors.white,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  // Decorative shapes
+                  Positioned(
+                    top: 20,
+                    right: 20,
+                    child: Container(
+                      width: 30,
+                      height: 30,
+                      decoration: BoxDecoration(
+                        color: AppColors.secondary.withOpacity(0.8),
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 30,
+                    left: 15,
+                    child: Container(
+                      width: 20,
+                      height: 20,
+                      decoration: BoxDecoration(
+                        color: AppColors.accent.withOpacity(0.8),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                    ),
+                  ),
+                  // Main icon
+                  Icon(
+                    Icons.face_retouching_natural_rounded,
+                    size: 60,
+                    color: Colors.white,
+                  ),
+                ],
               ),
             ),
           ),
@@ -294,36 +304,302 @@ class HomePage extends StatelessWidget {
     );
   }
 
+  /// Build category section (horizontal scroll)
+  Widget _buildCategorySection(BuildContext context) {
+    final categories = [
+      {'icon': Icons.face_outlined, 'label': 'Khuôn mặt', 'color': AppColors.iconBgTeal},
+      {'icon': Icons.back_hand_outlined, 'label': 'Chỉ tay', 'color': AppColors.iconBgPeach},
+      {'icon': Icons.auto_awesome_outlined, 'label': 'Tử vi', 'color': AppColors.iconBgBlue},
+      {'icon': Icons.chat_bubble_outline_rounded, 'label': 'AI Chat', 'color': AppColors.iconBgGreen},
+      {'icon': Icons.history_rounded, 'label': 'Lịch sử', 'color': AppColors.iconBgPurple},
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Text(
+            'Danh mục',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textPrimary,
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+        SizedBox(
+          height: 100,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            physics: const BouncingScrollPhysics(),
+            itemCount: categories.length,
+            itemBuilder: (context, index) {
+              final category = categories[index];
+              return Padding(
+                padding: EdgeInsets.only(
+                  right: index == categories.length - 1 ? 0 : 16,
+                ),
+                child: _buildCategoryItem(
+                  context,
+                  icon: category['icon'] as IconData,
+                  label: category['label'] as String,
+                  backgroundColor: category['color'] as Color,
+                  onTap: () {
+                    // Navigate based on category
+                    switch (index) {
+                      case 0:
+                        context.push('/face-scanning');
+                        break;
+                      case 1:
+                        context.push('/palm-scanning');
+                        break;
+                      case 2:
+                        context.push('/tu-vi-input');
+                        break;
+                      case 3:
+                        context.push('/ai-conversation');
+                        break;
+                      case 4:
+                        context.push('/history');
+                        break;
+                    }
+                  },
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Build category item
+  Widget _buildCategoryItem(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required Color backgroundColor,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        children: [
+          Container(
+            width: 64,
+            height: 64,
+            decoration: BoxDecoration(
+              color: backgroundColor,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Icon(
+              icon,
+              size: 28,
+              color: AppColors.textPrimary.withOpacity(0.8),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              color: AppColors.textSecondary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Build feature cards grid section with responsive design
+  Widget _buildFeatureCardsGrid(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isTablet = screenWidth > 600;
+
+    // Define feature cards data
+    final featureCards = [
+      {
+        'icon': Icons.face_retouching_natural_rounded,
+        'title': 'Quét khuôn mặt',
+        'description': 'Phân tích nét mặt với AI',
+        'route': '/face-scanning',
+        'color': AppColors.cardTeal,
+        'iconColor': AppColors.secondary,
+      },
+      {
+        'icon': Icons.back_hand_rounded,
+        'title': 'Quét chỉ tay',
+        'description': 'Đọc vận mệnh qua lòng bàn tay',
+        'route': '/palm-scanning',
+        'color': AppColors.cardPeach,
+        'iconColor': AppColors.accent,
+      },
+      {
+        'icon': Icons.auto_awesome_rounded,
+        'title': 'Lá Số Tử Vi',
+        'description': 'Lập lá số theo ngày sinh',
+        'route': '/tu-vi-input',
+        'color': AppColors.cardBlue,
+        'iconColor': AppColors.info,
+      },
+      {
+        'icon': Icons.chat_bubble_rounded,
+        'title': 'AI Chatbot',
+        'description': 'Trò chuyện với trợ lý AI',
+        'route': '/ai-conversation',
+        'color': AppColors.cardGreen,
+        'iconColor': AppColors.success,
+      },
+    ];
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Tính năng chính',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 16),
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: isTablet ? 4 : 2,
+              crossAxisSpacing: 16,
+              mainAxisSpacing: 16,
+              childAspectRatio: isTablet ? 1.0 : 0.95,
+            ),
+            itemCount: featureCards.length,
+            itemBuilder: (context, index) {
+              final card = featureCards[index];
+              return _buildFeatureCard(
+                context,
+                icon: card['icon'] as IconData,
+                title: card['title'] as String,
+                description: card['description'] as String,
+                backgroundColor: card['color'] as Color,
+                iconColor: card['iconColor'] as Color,
+                onTap: () => context.push(card['route'] as String),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Build individual feature card
+  Widget _buildFeatureCard(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required String description,
+    required Color backgroundColor,
+    required Color iconColor,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: backgroundColor,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: AppColors.border.withOpacity(0.3),
+            width: 1,
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Icon container
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(14),
+                boxShadow: [
+                  BoxShadow(
+                    color: iconColor.withOpacity(0.2),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Icon(
+                icon,
+                color: iconColor,
+                size: 26,
+              ),
+            ),
+            const Spacer(),
+            // Title
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimary,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 4),
+            // Description
+            Text(
+              description,
+              style: TextStyle(
+                fontSize: 12,
+                color: AppColors.textSecondary,
+                height: 1.3,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   /// Build daily news carousel section
   Widget _buildDailyNewsCarousel(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final isTablet = screenWidth > 600;
 
     // Sample news data
     final newsItems = [
       {
-        'title': 'Đột phá AI mới nhất trong phân tích khuôn mặt',
-        'description': 'Các nhà nghiên cứu phát triển thuật toán mới để đánh giá tính cách chính xác hơn thông qua các nét mặt.',
+        'title': 'Tướng học AI - Xu hướng mới',
+        'description': 'Khám phá cách công nghệ AI đang thay đổi cách chúng ta hiểu về tướng học.',
         'category': 'Công nghệ',
-        'readTime': '3 phút đọc',
+        'readTime': '3 phút',
+        'color': AppColors.iconBgYellow,
       },
       {
-        'title': 'Hiểu về tướng học trong bối cảnh hiện đại',
-        'description': 'Cách các thực hành cổ xưa kết hợp với công nghệ tiên tiến để cung cấp hiểu biết về hành vi con người.',
-        'category': 'Khoa học',
-        'readTime': '5 phút đọc',
+        'title': 'Bí mật từ đường chỉ tay',
+        'description': 'Những điều thú vị về việc đọc vận mệnh qua lòng bàn tay.',
+        'category': 'Tâm linh',
+        'readTime': '5 phút',
+        'color': AppColors.iconBgTeal,
       },
       {
-        'title': 'Quyền riêng tư và đạo đức trong phân tích AI',
-        'description': 'Khám phá các cân nhắc đạo đức và biện pháp bảo mật trong phân tích tính cách được hỗ trợ bởi AI.',
-        'category': 'Đạo đức',
-        'readTime': '4 phút đọc',
-      },
-      {
-        'title': 'Câu chuyện thành công: Trải nghiệm người dùng thực tế',
-        'description': 'Khám phá cách người dùng của chúng tôi đã có được những hiểu biết có giá trị về bản thân thông qua phân tích AI.',
-        'category': 'Câu chuyện',
-        'readTime': '6 phút đọc',
+        'title': 'Tử Vi tuần mới',
+        'description': 'Dự báo vận mệnh 12 cung hoàng đạo trong tuần này.',
+        'category': 'Tử vi',
+        'readTime': '4 phút',
+        'color': AppColors.iconBgPeach,
       },
     ];
 
@@ -331,46 +607,45 @@ class HomePage extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: isTablet ? 20 : 16),
+          padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Tin tức hàng ngày',
+                'Tin tức & Bài viết',
                 style: TextStyle(
-                  fontSize: isTablet ? 20 : 18,
-                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
                   color: AppColors.textPrimary,
                 ),
               ),
               TextButton(
-                onPressed: () {
-                  context.push('/news');
-                },
+                onPressed: () => context.push('/news'),
                 child: Text(
                   'Xem tất cả',
                   style: TextStyle(
-                    fontSize: isTablet ? 16 : 14,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
                     color: AppColors.primary,
-                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
             ],
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 16),
         SizedBox(
-          height: isTablet ? 220 : 200,
+          height: 180,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
-            padding: EdgeInsets.symmetric(horizontal: isTablet ? 20 : 16),
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            physics: const BouncingScrollPhysics(),
             itemCount: newsItems.length,
             itemBuilder: (context, index) {
               return Container(
-                width: screenWidth * 0.8, // 80% of screen width
+                width: screenWidth * 0.75,
                 margin: EdgeInsets.only(
-                  right: index == newsItems.length - 1 ? 0 : 12,
+                  right: index == newsItems.length - 1 ? 0 : 16,
                 ),
                 child: _buildNewsCard(context, newsItems[index]),
               );
@@ -382,343 +657,104 @@ class HomePage extends StatelessWidget {
   }
 
   /// Build individual news card
-  Widget _buildNewsCard(BuildContext context, Map<String, String> newsItem) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isTablet = screenWidth > 600;
-
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.border),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.shadow,
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () {
-            // Navigate to news detail page
-            // For demo, we'll use the first article ID
-            context.push('/news/1');
-          },
-          borderRadius: BorderRadius.circular(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-          // News image placeholder
-          Container(
-            height: isTablet ? 100 : 80,
-            decoration: BoxDecoration(
-              color: AppColors.surfaceVariant,
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(16),
-                topRight: Radius.circular(16),
-              ),
-            ),
-            child: Center(
-              child: Icon(
-                Icons.article_outlined,
-                size: isTablet ? 40 : 32,
-                color: AppColors.textHint,
-              ),
-            ),
-          ),
-
-          Expanded(
-            child: Padding(
-              padding: EdgeInsets.all(isTablet ? 16 : 12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Category and read time
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: AppColors.primary.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          newsItem['category'] ?? '',
-                          style: TextStyle(
-                            fontSize: isTablet ? 12 : 10,
-                            color: AppColors.primary,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                      const Spacer(),
-                      Text(
-                        newsItem['readTime'] ?? '',
-                        style: TextStyle(
-                          fontSize: isTablet ? 12 : 10,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  SizedBox(height: isTablet ? 8 : 6),
-
-                  // Title
-                  Text(
-                    newsItem['title'] ?? '',
-                    style: TextStyle(
-                      fontSize: isTablet ? 16 : 14,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-
-                  SizedBox(height: isTablet ? 6 : 4),
-
-                  // Description
-                  Expanded(
-                    child: Text(
-                      newsItem['description'] ?? '',
-                      style: TextStyle(
-                        fontSize: isTablet ? 14 : 12,
-                        color: AppColors.textSecondary,
-                        height: 1.3,
-                      ),
-                      maxLines: 3,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  /// Build feature cards grid section with responsive design
-  Widget _buildFeatureCardsGrid(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    
-    // Enhanced responsive breakpoints
-    final isLargeTablet = screenWidth > 900;  // Large tablets/Desktop
-    final isTablet = screenWidth > 600;       // Regular tablets
-
-    // Define feature cards data - 5 main features
-    final featureCards = [
-      {
-        'icon': Icons.face_retouching_natural,
-        'title': 'Quét khuôn mặt',
-        'description': 'Phân tích các nét mặt',
-        'route': '/face-scanning',
-      },
-      {
-        'icon': Icons.back_hand,
-        'title': 'Quét đường chỉ tay', 
-        'description': 'Phân tích đường chỉ tay',
-        'route': '/palm-scanning',
-      },
-      {
-        'icon': Icons.auto_awesome,
-        'title': 'Lá Số Tử Vi',
-        'description': 'Lập lá số tử vi',
-        'route': '/tu-vi-input',
-      },
-      {
-        'icon': Icons.chat_bubble_outline,
-        'title': 'AI Chatbot',
-        'description': 'Trò chuyện với trợ lý AI',
-        'route': '/ai-conversation',
-      },
-      {
-        'icon': Icons.history,
-        'title': 'Lịch sử',
-        'description': 'Xem lịch sử phân tích',
-        'route': '/history',
-      },
-    ];
-
-    if (isLargeTablet) {
-      // Large tablets: 5 columns in single row
-      return GridView.builder(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 5,
-          crossAxisSpacing: 20,
-          mainAxisSpacing: 20,
-          childAspectRatio: 0.85,
-        ),
-        itemCount: featureCards.length,
-        itemBuilder: (context, index) {
-          final card = featureCards[index];
-          return _buildFeatureCard(
-            context,
-            icon: card['icon'] as IconData,
-            title: card['title'] as String,
-            description: card['description'] as String,
-            onTap: () => context.push(card['route'] as String),
-          );
-        },
-      );
-    } else if (isTablet) {
-      // Regular tablets: 3x2 grid for 5 cards (3 on first row, 2 on second)
-      return GridView.builder(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 3,
-          crossAxisSpacing: 16,
-          mainAxisSpacing: 16,
-          childAspectRatio: 1.1,
-        ),
-        itemCount: featureCards.length,
-        itemBuilder: (context, index) {
-          final card = featureCards[index];
-          return _buildFeatureCard(
-            context,
-            icon: card['icon'] as IconData,
-            title: card['title'] as String,
-            description: card['description'] as String,
-            onTap: () => context.push(card['route'] as String),
-          );
-        },
-      );
-    } else {
-      // Mobile: 2x3 grid layout for 5 features (2-2-1 pattern)
-      return Column(
-        children: [
-          // First row - Face & Palm scanning
-          Row(
-            children: [
-              Expanded(
-                child: _buildFeatureCard(
-                  context,
-                  icon: Icons.face_retouching_natural,
-                  title: 'Quét khuôn mặt',
-                  description: 'Phân tích các nét mặt',
-                  onTap: () => context.push('/face-scanning'),
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: _buildFeatureCard(
-                  context,
-                  icon: Icons.back_hand,
-                  title: 'Quét đường chỉ tay',
-                  description: 'Phân tích đường chỉ tay',
-                  onTap: () => context.push('/palm-scanning'),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          
-          // Second row - Tu Vi & Chatbot
-          Row(
-            children: [
-              Expanded(
-                child: _buildFeatureCard(
-                  context,
-                  icon: Icons.auto_awesome,
-                  title: 'Lá Số Tử Vi',
-                  description: 'Lập lá số tử vi',
-                  onTap: () => context.push('/tu-vi-input'),
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: _buildFeatureCard(
-                  context,
-                  icon: Icons.chat_bubble_outline,
-                  title: 'AI Chatbot',
-                  description: 'Trò chuyện với trợ lý AI',
-                  onTap: () => context.push('/ai-conversation'),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          
-          // Third row - History (full width)
-          SizedBox(
-            width: double.infinity,
-            child: _buildFeatureCard(
-              context,
-              icon: Icons.history,
-              title: 'Lịch sử',
-              description: 'Xem lịch sử phân tích',
-              onTap: () => context.push('/history'),
-            ),
-          ),
-        ],
-      );
-    }
-  }
-
-  /// Build individual feature card
-  Widget _buildFeatureCard(
-    BuildContext context, {
-    required IconData icon,
-    required String title,
-    required String description,
-    required VoidCallback onTap,
-  }) {
+  Widget _buildNewsCard(BuildContext context, Map<String, dynamic> newsItem) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: () => context.push('/news/1'),
       child: Container(
-        height: 120,
-        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: AppColors.surface,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.border),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: AppColors.border.withOpacity(0.5)),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.shadowLight,
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // News image/banner area
             Container(
-              width: 40,
-              height: 40,
+              height: 80,
               decoration: BoxDecoration(
-                color: AppColors.surfaceVariant,
-                borderRadius: BorderRadius.circular(8),
+                color: newsItem['color'] as Color,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(20),
+                  topRight: Radius.circular(20),
+                ),
               ),
-              child: Icon(
-                icon,
-                color: AppColors.textSecondary,
-                size: 20,
+              child: Center(
+                child: Icon(
+                  Icons.article_outlined,
+                  size: 32,
+                  color: AppColors.textPrimary.withOpacity(0.4),
+                ),
               ),
             ),
-            const SizedBox(height: 8),
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
+
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Category and read time
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.primaryLight,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            newsItem['category'] as String,
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: AppColors.primaryDark,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                        const Spacer(),
+                        Icon(
+                          Icons.access_time_rounded,
+                          size: 14,
+                          color: AppColors.textTertiary,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          newsItem['readTime'] as String,
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: AppColors.textTertiary,
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 10),
+
+                    // Title
+                    Text(
+                      newsItem['title'] as String,
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textPrimary,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
               ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              description,
-              style: TextStyle(
-                fontSize: 10,
-                color: AppColors.textSecondary,
-              ),
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
             ),
           ],
         ),
@@ -726,54 +762,77 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  /// Build additional content section
-  Widget _buildAdditionalContent(BuildContext context) {
+  /// Build quick start section
+  Widget _buildQuickStartSection(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.border),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.border.withOpacity(0.5)),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          Text(
-            'Bắt đầu ngay hôm nay',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
+          // Icon
+          Container(
+            width: 56,
+            height: 56,
+            decoration: BoxDecoration(
+              color: AppColors.iconBgYellow,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Icon(
+              Icons.lightbulb_outline_rounded,
+              color: AppColors.primaryDark,
+              size: 28,
             ),
           ),
-          const SizedBox(height: 8),
-          Text(
-            'Bắt đầu hành trình khám phá bản thân với phân tích tướng học được hỗ trợ bởi AI tiên tiến của chúng tôi.',
-            style: TextStyle(
-              fontSize: 14,
-              color: AppColors.textSecondary,
-              height: 1.4,
-            ),
-          ),
-          const SizedBox(height: 16),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () => context.push('/face-scanning'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+          const SizedBox(width: 16),
+          // Text content
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Bắt đầu ngay hôm nay',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimary,
+                  ),
                 ),
+                const SizedBox(height: 4),
+                Text(
+                  'Khám phá bản thân với công nghệ AI tiên tiến.',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 12),
+          // Arrow button
+          GestureDetector(
+            onTap: () => context.push('/face-scanning'),
+            child: Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: AppColors.primary,
+                borderRadius: BorderRadius.circular(12),
               ),
-              child: const Text('Bắt đầu quét'),
+              child: Icon(
+                Icons.arrow_forward_rounded,
+                color: AppColors.textOnPrimary,
+                size: 22,
+              ),
             ),
           ),
         ],
       ),
     );
   }
-
 }

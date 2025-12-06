@@ -59,18 +59,10 @@ class _PalmScanPageState extends State<PalmScanPage> {
             provider.resetLoadingState();
           },
           child: Scaffold(
+            backgroundColor: AppColors.backgroundWarm,
             body: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.white,
-                    AppColors.surfaceVariant.withOpacity(0.3),
-                    Colors.white,
-                  ],
-                  stops: const [0.0, 0.5, 1.0],
-                ),
+              decoration: const BoxDecoration(
+                gradient: AppColors.warmGradient,
               ),
               child: SafeArea(
                 child: Stack(
@@ -83,12 +75,12 @@ class _PalmScanPageState extends State<PalmScanPage> {
                           // Header Section
                           _buildHeader(context),
 
-                          const SizedBox(height: 12),
+                          const SizedBox(height: 16),
 
                           // Main Content Section
                           _buildMainContent(provider),
 
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 20),
 
                           // Gender Selector
                           if (_selectedGender != null)
@@ -102,17 +94,17 @@ class _PalmScanPageState extends State<PalmScanPage> {
                               helpText: 'Chọn giới tính để xác định tay phân tích (có thể xem cho bạn bè)',
                             ),
 
-                          const SizedBox(height: 12),
+                          const SizedBox(height: 16),
 
                           // AI Disclaimer
                           _buildAIDisclaimer(),
 
-                          const SizedBox(height: 12),
+                          const SizedBox(height: 16),
 
                           // Tab Navigation
                           _buildTabNavigation(),
 
-                          const SizedBox(height: 12),
+                          const SizedBox(height: 16),
 
                           // Tab Content
                           _buildTabContent(),
@@ -138,86 +130,74 @@ class _PalmScanPageState extends State<PalmScanPage> {
   Widget _buildHeader(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 32),
+      padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
 
           // Top bar with back button and title
-          SizedBox(
-            height: 40,
-            child: Row(
-              children: [
-                const StandardBackButton(),
-                const SizedBox(width: 16),
-                const Expanded(
-                  child: Text(
-                    'Quét đường chỉ tay',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                ),
-                // History button - HIDDEN
-                // GestureDetector(
-                //   onTap: () => context.push('/palm-analysis-history'),
-                //   child: Container(
-                //     width: 40,
-                //     height: 40,
-                //     decoration: BoxDecoration(
-                //       color: AppColors.secondary,
-                //       borderRadius: BorderRadius.circular(12),
-                //       boxShadow: [
-                //         BoxShadow(
-                //           color: AppColors.secondary.withOpacity(0.3),
-                //           blurRadius: 8,
-                //           offset: const Offset(0, 2),
-                //         ),
-                //       ],
-                //     ),
-                //     child: const Center(
-                //       child: Icon(
-                //         Icons.history,
-                //         size: 20,
-                //         color: Colors.white,
-                //       ),
-                //     ),
-                //   ),
-                // ),
-                // const SizedBox(width: 8),
-                // User Guide button
-                GestureDetector(
-                  onTap: () => context.push('/user-guide'),
-                  child: Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: AppColors.primary,
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.primary.withOpacity(0.3),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: const Center(
-                      child: Icon(
-                        Icons.help_outline,
-                        size: 20,
-                        color: Colors.white,
+          Row(
+            children: [
+              const StandardBackButton(),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Quét đường chỉ tay',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimary,
+                        letterSpacing: -0.3,
                       ),
                     ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Phân tích vân tay bằng AI',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: AppColors.textSecondary,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // User Guide button with pastel background
+              GestureDetector(
+                onTap: () => context.push('/user-guide'),
+                child: Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: AppColors.iconBgYellow,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: AppColors.borderYellow,
+                      width: 1,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.shadowYellow,
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: const Center(
+                    child: Icon(
+                      Icons.help_outline_rounded,
+                      size: 22,
+                      color: AppColors.primaryDark,
+                    ),
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-
         ],
       ),
     );
@@ -225,7 +205,7 @@ class _PalmScanPageState extends State<PalmScanPage> {
 
   Widget _buildMainContent(FaceScanProvider provider) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 60),
+      padding: const EdgeInsets.symmetric(horizontal: 40),
       child: PalmAnalysisDemo(
         onTap: () => _handleBeginAnalysis(provider),
       ),
@@ -234,60 +214,97 @@ class _PalmScanPageState extends State<PalmScanPage> {
 
   Widget _buildAIDisclaimer() {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 32),
+      margin: const EdgeInsets.symmetric(horizontal: 24),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Colors.amber.withOpacity(0.1),
-            Colors.orange.withOpacity(0.05),
+            AppColors.warningLight,
+            AppColors.warningLight.withOpacity(0.6),
           ],
         ),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: Colors.orange.withOpacity(0.3),
+          color: AppColors.warning.withOpacity(0.3),
           width: 1,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.warning.withOpacity(0.1),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(
-            Icons.warning_amber_rounded,
-            color: Colors.orange.shade700,
-            size: 20,
+          // Icon with circle background
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: AppColors.warning.withOpacity(0.15),
+              shape: BoxShape.circle,
+            ),
+            child: const Center(
+              child: Icon(
+                Icons.warning_amber_rounded,
+                color: AppColors.warning,
+                size: 20,
+              ),
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                const Text(
                   'LƯU Ý QUAN TRỌNG',
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
-                    color: Colors.orange.shade900,
+                    color: AppColors.textPrimary,
+                    letterSpacing: 0.5,
                   ),
                 ),
                 const SizedBox(height: 6),
                 Text(
                   'Phân tích vân tay này được tạo bởi AI và chỉ mang tính giải trí, tham khảo. Kết quả không có cơ sở khoa học và không nên được sử dụng để đưa ra các quyết định quan trọng trong cuộc sống.',
                   style: TextStyle(
-                    fontSize: 11,
-                    color: Colors.orange.shade800,
-                    height: 1.4,
+                    fontSize: 12,
+                    color: AppColors.textSecondary,
+                    height: 1.5,
                   ),
                 ),
-                const SizedBox(height: 6),
-                Text(
-                  'Theo truyền thống: Nam xem tay trái, Nữ xem tay phải.',
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontStyle: FontStyle.italic,
-                    color: Colors.orange.shade700,
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: AppColors.iconBgPeach,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.info_outline_rounded,
+                        size: 14,
+                        color: AppColors.accent,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Nam xem tay trái • Nữ xem tay phải',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.accentDark,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -300,7 +317,7 @@ class _PalmScanPageState extends State<PalmScanPage> {
 
   Widget _buildTabNavigation() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 32),
+      padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Consumer<FaceScanProvider>(
         builder: (context, provider, child) {
           return PalmScanTabNavigation(
@@ -314,7 +331,7 @@ class _PalmScanPageState extends State<PalmScanPage> {
 
   Widget _buildTabContent() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 32),
+      padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Consumer<FaceScanProvider>(
         builder: (context, provider, child) {
           switch (provider.selectedTab) {
@@ -339,84 +356,89 @@ class _PalmScanPageState extends State<PalmScanPage> {
     return GestureDetector(
       onTap: _handleUploadPhoto,
       child: Container(
-        width: 376,
-        height: 80,
+        width: double.infinity,
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Colors.white,
-              AppColors.surfaceVariant.withOpacity(0.3),
-            ],
-          ),
-          borderRadius: BorderRadius.circular(20),
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 20,
-              offset: const Offset(0, 10),
+              color: AppColors.shadow,
+              blurRadius: 16,
+              offset: const Offset(0, 4),
             ),
           ],
           border: Border.all(
-            color: AppColors.primary.withOpacity(0.2),
+            color: AppColors.borderLight,
             width: 1,
           ),
         ),
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Row(
-            children: [
-              // Icon
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
+        child: Row(
+          children: [
+            // Icon with pastel background
+            Container(
+              width: 52,
+              height: 52,
+              decoration: BoxDecoration(
+                color: AppColors.iconBgTeal,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: const Center(
                 child: Icon(
                   Icons.cloud_upload_outlined,
-                  size: 20,
-                  color: AppColors.primary,
+                  size: 26,
+                  color: AppColors.secondary,
                 ),
               ),
+            ),
 
-              const SizedBox(width: 12),
+            const SizedBox(width: 16),
 
-              // Text content
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text(
-                      'Tải ảnh lên',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
-                      ),
+            // Text content
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Tải ảnh lên',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary,
                     ),
-                    const SizedBox(height: 2),
-                    const Text(
-                      'Chọn một ảnh vân tay từ thư viện để phân tích',
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: AppColors.textSecondary,
-                      ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Chọn một ảnh vân tay từ thư viện để phân tích',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: AppColors.textSecondary,
+                      height: 1.4,
                     ),
-                  ],
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(width: 12),
+
+            // Arrow icon with background
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: AppColors.iconBgTeal,
+                shape: BoxShape.circle,
+              ),
+              child: const Center(
+                child: Icon(
+                  Icons.arrow_forward_rounded,
+                  size: 18,
+                  color: AppColors.secondary,
                 ),
               ),
-
-              // Arrow icon
-              Icon(
-                Icons.arrow_forward_ios,
-                size: 16,
-                color: AppColors.primary,
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -426,105 +448,119 @@ class _PalmScanPageState extends State<PalmScanPage> {
     return GestureDetector(
       onTap: () => context.push('/user-guide'),
       child: Container(
-        width: 376,
-        height: 80,
+        width: double.infinity,
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Colors.white,
-              AppColors.surfaceVariant.withValues(alpha: 0.3),
-            ],
-          ),
-          borderRadius: BorderRadius.circular(20),
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.1),
-              blurRadius: 20,
-              offset: const Offset(0, 10),
+              color: AppColors.shadow,
+              blurRadius: 16,
+              offset: const Offset(0, 4),
             ),
           ],
           border: Border.all(
-            color: AppColors.primary.withValues(alpha: 0.2),
+            color: AppColors.borderLight,
             width: 1,
           ),
         ),
         child: Stack(
           children: [
             // Main content
-            Padding(
-              padding: const EdgeInsets.all(12),
-              child: Row(
-                children: [
-                  // Icon
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+            Row(
+              children: [
+                // Icon with pastel background
+                Container(
+                  width: 52,
+                  height: 52,
+                  decoration: BoxDecoration(
+                    color: AppColors.iconBgPurple,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Center(
                     child: Icon(
-                      Icons.help_outline,
-                      size: 20,
-                      color: AppColors.primary,
+                      Icons.menu_book_rounded,
+                      size: 26,
+                      color: Colors.purple.shade400,
                     ),
                   ),
+                ),
 
-                  const SizedBox(width: 12),
+                const SizedBox(width: 16),
 
-                  // Text content
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text(
-                          'Hướng dẫn sử dụng',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textPrimary,
-                          ),
+                // Text content
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Hướng dẫn sử dụng',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textPrimary,
                         ),
-                        const SizedBox(height: 2),
-                        const Text(
-                          'Hướng dẫn từng bước để quét đường chỉ tay',
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: AppColors.textSecondary,
-                          ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Hướng dẫn từng bước để quét đường chỉ tay',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: AppColors.textSecondary,
+                          height: 1.4,
                         ),
-                      ],
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(width: 12),
+
+                // Arrow icon with background
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: AppColors.iconBgPurple,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Center(
+                    child: Icon(
+                      Icons.arrow_forward_rounded,
+                      size: 18,
+                      color: Colors.purple.shade400,
                     ),
                   ),
-
-                  // Arrow icon
-                  Icon(
-                    Icons.arrow_forward_ios,
-                    size: 16,
-                    color: AppColors.primary,
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
 
-            // Tap to view indicator
+            // Tap to view badge
             Positioned(
-              bottom: 6,
-              right: 12,
+              bottom: 0,
+              right: 0,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                 decoration: BoxDecoration(
-                  color: AppColors.primary,
-                  borderRadius: BorderRadius.circular(6),
+                  gradient: const LinearGradient(
+                    colors: [AppColors.primary, AppColors.primaryDark],
+                  ),
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.shadowYellow,
+                      blurRadius: 6,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
                 child: const Text(
                   'Nhấn để xem',
                   style: TextStyle(
-                    fontSize: 9,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.white,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textOnPrimary,
                   ),
                 ),
               ),

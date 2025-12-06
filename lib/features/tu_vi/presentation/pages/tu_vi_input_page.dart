@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../data/models/tu_vi_chart_request.dart';
 import '../providers/tu_vi_provider.dart';
 import '../../../auth/presentation/providers/enhanced_auth_provider.dart';
@@ -115,10 +116,10 @@ class _TuViInputPageState extends State<TuViInputPage> {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: ColorScheme.light(
-              primary: const Color(0xFFFFC107),
-              onPrimary: Colors.black87,
-              surface: Colors.white,
-              onSurface: Colors.black87,
+              primary: AppColors.primary,
+              onPrimary: AppColors.textOnPrimary,
+              surface: AppColors.surface,
+              onSurface: AppColors.textPrimary,
             ),
           ),
           child: child!,
@@ -171,7 +172,7 @@ class _TuViInputPageState extends State<TuViInputPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(validationError),
-          backgroundColor: Colors.red,
+          backgroundColor: AppColors.error,
         ),
       );
       return;
@@ -188,7 +189,7 @@ class _TuViInputPageState extends State<TuViInputPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(provider.errorMessage ?? 'Đã xảy ra lỗi'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.error,
           ),
         );
       }
@@ -200,42 +201,64 @@ class _TuViInputPageState extends State<TuViInputPage> {
     final provider = Provider.of<TuViProvider>(context);
 
     return Scaffold(
+      backgroundColor: AppColors.backgroundWarm,
       appBar: AppBar(
-        title: const Text('Lập Lá Số Tử Vi'),
-        backgroundColor: const Color(0xFFFFC107),
-        foregroundColor: Colors.black87,
+        title: const Text(
+          'Lập Lá Số Tử Vi',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+          ),
+        ),
+        backgroundColor: AppColors.primary,
+        foregroundColor: AppColors.textOnPrimary,
         elevation: 0,
+        centerTitle: true,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         child: Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // Info card
-              Card(
-                color: Colors.blue.shade50,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+              Container(
+                decoration: BoxDecoration(
+                  color: AppColors.infoLight,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: AppColors.info.withValues(alpha: 0.3),
+                    width: 1,
+                  ),
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Row(
-                    children: [
-                      Icon(Icons.info_outline, color: Colors.blue.shade700),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          'Nhập thông tin để lập lá số tử vi của bạn',
-                          style: TextStyle(
-                            color: Colors.blue.shade900,
-                            fontSize: 14,
-                          ),
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: AppColors.info.withValues(alpha: 0.15),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.info_outline_rounded,
+                        color: AppColors.info,
+                        size: 22,
+                      ),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Text(
+                        'Nhập thông tin để lập lá số tử vi của bạn',
+                        style: TextStyle(
+                          color: AppColors.info,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
 
@@ -244,10 +267,17 @@ class _TuViInputPageState extends State<TuViInputPage> {
               // Self/Other Toggle
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade100,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.grey.shade300),
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.shadow,
+                      blurRadius: 10,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
+                padding: const EdgeInsets.all(6),
                 child: Row(
                   children: [
                     Expanded(
@@ -258,29 +288,40 @@ class _TuViInputPageState extends State<TuViInputPage> {
                             _fillUserInfo();
                           });
                         },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 12),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
                           decoration: BoxDecoration(
-                            color: _isForSelf ? const Color(0xFFFFC107) : Colors.transparent,
-                            borderRadius: BorderRadius.circular(11),
+                            color: _isForSelf ? AppColors.primary : Colors.transparent,
+                            borderRadius: BorderRadius.circular(16),
                             boxShadow: _isForSelf
                                 ? [
                                     BoxShadow(
-                                      color: Colors.black.withOpacity(0.1),
-                                      blurRadius: 4,
+                                      color: AppColors.shadowYellow,
+                                      blurRadius: 8,
                                       offset: const Offset(0, 2),
                                     )
                                   ]
                                 : null,
                           ),
-                          child: Center(
-                            child: Text(
-                              'Bản thân',
-                              style: TextStyle(
-                                fontWeight: _isForSelf ? FontWeight.bold : FontWeight.normal,
-                                color: _isForSelf ? Colors.black87 : Colors.grey.shade700,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.person_rounded,
+                                size: 20,
+                                color: _isForSelf ? AppColors.textOnPrimary : AppColors.textSecondary,
                               ),
-                            ),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Bản thân',
+                                style: TextStyle(
+                                  fontWeight: _isForSelf ? FontWeight.bold : FontWeight.w500,
+                                  color: _isForSelf ? AppColors.textOnPrimary : AppColors.textSecondary,
+                                  fontSize: 15,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
@@ -293,29 +334,40 @@ class _TuViInputPageState extends State<TuViInputPage> {
                             _clearUserInfo();
                           });
                         },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 12),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
                           decoration: BoxDecoration(
-                            color: !_isForSelf ? const Color(0xFFFFC107) : Colors.transparent,
-                            borderRadius: BorderRadius.circular(11),
+                            color: !_isForSelf ? AppColors.primary : Colors.transparent,
+                            borderRadius: BorderRadius.circular(16),
                             boxShadow: !_isForSelf
                                 ? [
                                     BoxShadow(
-                                      color: Colors.black.withOpacity(0.1),
-                                      blurRadius: 4,
+                                      color: AppColors.shadowYellow,
+                                      blurRadius: 8,
                                       offset: const Offset(0, 2),
                                     )
                                   ]
                                 : null,
                           ),
-                          child: Center(
-                            child: Text(
-                              'Người khác',
-                              style: TextStyle(
-                                fontWeight: !_isForSelf ? FontWeight.bold : FontWeight.normal,
-                                color: !_isForSelf ? Colors.black87 : Colors.grey.shade700,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.people_rounded,
+                                size: 20,
+                                color: !_isForSelf ? AppColors.textOnPrimary : AppColors.textSecondary,
                               ),
-                            ),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Người khác',
+                                style: TextStyle(
+                                  fontWeight: !_isForSelf ? FontWeight.bold : FontWeight.w500,
+                                  color: !_isForSelf ? AppColors.textOnPrimary : AppColors.textSecondary,
+                                  fontSize: 15,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
@@ -326,186 +378,412 @@ class _TuViInputPageState extends State<TuViInputPage> {
 
               const SizedBox(height: 24),
 
-              // Name input
-              TextFormField(
-                controller: _nameController,
-                decoration: InputDecoration(
-                  labelText: 'Họ và tên',
-                  hintText: 'VD: Nguyễn Văn A',
-                  prefixIcon: const Icon(Icons.person_outline),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  filled: true,
-                  fillColor: Colors.grey.shade50,
-                ),
-                textCapitalization: TextCapitalization.words,
-              ),
-
-              const SizedBox(height: 16),
-
-              // Date inputs
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    flex: 2,
-                    child: TextFormField(
-                      controller: _dayController,
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        labelText: 'Ngày',
-                        filled: true,
-                        fillColor: Colors.grey.shade50,
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) return 'Thiếu';
-                        final n = int.tryParse(value);
-                        if (n == null || n < 1 || n > 31) return 'Sai';
-                        return null;
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    flex: 2,
-                    child: TextFormField(
-                      controller: _monthController,
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        labelText: 'Tháng',
-                        filled: true,
-                        fillColor: Colors.grey.shade50,
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) return 'Thiếu';
-                        final n = int.tryParse(value);
-                        if (n == null || n < 1 || n > 12) return 'Sai';
-                        return null;
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    flex: 3,
-                    child: TextFormField(
-                      controller: _yearController,
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        labelText: 'Năm',
-                        filled: true,
-                        fillColor: Colors.grey.shade50,
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) return 'Thiếu';
-                        final n = int.tryParse(value);
-                        if (n == null || n < 1900 || n > 2100) return 'Sai';
-                        return null;
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Container(
-                    height: 56, // Match default height of text fields
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade50,
-                      border: Border.all(color: Colors.grey.shade500),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: IconButton(
-                      onPressed: () => _selectDate(context),
-                      icon: const Icon(Icons.calendar_today),
-                      color: Colors.grey.shade700,
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 16),
-
-              // Hour branch dropdown
-              DropdownButtonFormField<int>(
-                value: _selectedHourBranch,
-                decoration: InputDecoration(
-                  labelText: 'Giờ sinh',
-                  prefixIcon: const Icon(Icons.access_time),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  filled: true,
-                  fillColor: Colors.grey.shade50,
-                ),
-                items: _hourBranches
-                    .map((branch) => DropdownMenuItem<int>(
-                          value: branch['value'] as int,
-                          child: Text(
-                            '${branch['label']} (${branch['time']})',
-                            style: const TextStyle(fontSize: 15),
-                          ),
-                        ))
-                    .toList(),
-                onChanged: (value) {
-                  if (value != null) {
-                    setState(() => _selectedHourBranch = value);
-                  }
-                },
-              ),
-
-              const SizedBox(height: 16),
-
-              // Gender selection
+              // Main Form Card
               Container(
                 decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey.shade400),
-                  borderRadius: BorderRadius.circular(12),
-                  color: Colors.grey.shade50,
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.shadow,
+                      blurRadius: 15,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.all(20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Giới tính',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey.shade700,
-                        fontWeight: FontWeight.w500,
-                      ),
+                    // Section Title - Personal Info
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: AppColors.iconBgYellow,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Icon(
+                            Icons.person_outline_rounded,
+                            color: AppColors.primaryDark,
+                            size: 20,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          'Thông tin cá nhân',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                      ],
                     ),
+                    const SizedBox(height: 16),
+
+                    // Name input
+                    TextFormField(
+                      controller: _nameController,
+                      decoration: InputDecoration(
+                        labelText: 'Họ và tên',
+                        hintText: 'VD: Nguyễn Văn A',
+                        prefixIcon: Icon(
+                          Icons.badge_outlined,
+                          color: AppColors.textSecondary,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide(color: AppColors.border),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide(color: AppColors.border),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide(color: AppColors.primary, width: 2),
+                        ),
+                        filled: true,
+                        fillColor: AppColors.surfaceVariant,
+                        labelStyle: TextStyle(color: AppColors.textSecondary),
+                        hintStyle: TextStyle(color: AppColors.textHint),
+                      ),
+                      textCapitalization: TextCapitalization.words,
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    // Divider
+                    Divider(color: AppColors.divider, height: 1),
+                    const SizedBox(height: 20),
+
+                    // Section Title - Birth Info
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: AppColors.iconBgTeal,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Icon(
+                            Icons.cake_outlined,
+                            color: AppColors.secondaryDark,
+                            size: 20,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          'Ngày sinh',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Date inputs
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          flex: 2,
+                          child: TextFormField(
+                            controller: _dayController,
+                            keyboardType: TextInputType.number,
+                            decoration: InputDecoration(
+                              labelText: 'Ngày',
+                              filled: true,
+                              fillColor: AppColors.surfaceVariant,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16),
+                                borderSide: BorderSide(color: AppColors.border),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16),
+                                borderSide: BorderSide(color: AppColors.border),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16),
+                                borderSide: BorderSide(color: AppColors.primary, width: 2),
+                              ),
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
+                              labelStyle: TextStyle(color: AppColors.textSecondary, fontSize: 14),
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) return 'Thiếu';
+                              final n = int.tryParse(value);
+                              if (n == null || n < 1 || n > 31) return 'Sai';
+                              return null;
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          flex: 2,
+                          child: TextFormField(
+                            controller: _monthController,
+                            keyboardType: TextInputType.number,
+                            decoration: InputDecoration(
+                              labelText: 'Tháng',
+                              filled: true,
+                              fillColor: AppColors.surfaceVariant,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16),
+                                borderSide: BorderSide(color: AppColors.border),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16),
+                                borderSide: BorderSide(color: AppColors.border),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16),
+                                borderSide: BorderSide(color: AppColors.primary, width: 2),
+                              ),
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
+                              labelStyle: TextStyle(color: AppColors.textSecondary, fontSize: 14),
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) return 'Thiếu';
+                              final n = int.tryParse(value);
+                              if (n == null || n < 1 || n > 12) return 'Sai';
+                              return null;
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          flex: 3,
+                          child: TextFormField(
+                            controller: _yearController,
+                            keyboardType: TextInputType.number,
+                            decoration: InputDecoration(
+                              labelText: 'Năm',
+                              filled: true,
+                              fillColor: AppColors.surfaceVariant,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16),
+                                borderSide: BorderSide(color: AppColors.border),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16),
+                                borderSide: BorderSide(color: AppColors.border),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16),
+                                borderSide: BorderSide(color: AppColors.primary, width: 2),
+                              ),
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
+                              labelStyle: TextStyle(color: AppColors.textSecondary, fontSize: 14),
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) return 'Thiếu';
+                              final n = int.tryParse(value);
+                              if (n == null || n < 1900 || n > 2100) return 'Sai';
+                              return null;
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Container(
+                          height: 56,
+                          width: 56,
+                          decoration: BoxDecoration(
+                            color: AppColors.iconBgYellow,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: AppColors.borderYellow),
+                          ),
+                          child: IconButton(
+                            onPressed: () => _selectDate(context),
+                            icon: Icon(
+                              Icons.calendar_month_rounded,
+                              color: AppColors.primaryDark,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    // Hour branch dropdown
+                    DropdownButtonFormField<int>(
+                      value: _selectedHourBranch,
+                      decoration: InputDecoration(
+                        labelText: 'Giờ sinh',
+                        prefixIcon: Icon(
+                          Icons.schedule_rounded,
+                          color: AppColors.textSecondary,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide(color: AppColors.border),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide(color: AppColors.border),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide(color: AppColors.primary, width: 2),
+                        ),
+                        filled: true,
+                        fillColor: AppColors.surfaceVariant,
+                        labelStyle: TextStyle(color: AppColors.textSecondary),
+                      ),
+                      dropdownColor: AppColors.surface,
+                      items: _hourBranches
+                          .map((branch) => DropdownMenuItem<int>(
+                                value: branch['value'] as int,
+                                child: Text(
+                                  '${branch['label']} (${branch['time']})',
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    color: AppColors.textPrimary,
+                                  ),
+                                ),
+                              ))
+                          .toList(),
+                      onChanged: (value) {
+                        if (value != null) {
+                          setState(() => _selectedHourBranch = value);
+                        }
+                      },
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    // Divider
+                    Divider(color: AppColors.divider, height: 1),
+                    const SizedBox(height: 20),
+
+                    // Section Title - Gender
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: AppColors.iconBgPeach,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Icon(
+                            Icons.wc_rounded,
+                            color: AppColors.accentDark,
+                            size: 20,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          'Giới tính',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+
+                    // Gender selection - Modern Style
                     Row(
                       children: [
                         Expanded(
-                          child: RadioListTile<int>(
-                            title: const Text('Nam'),
-                            value: 1,
-                            groupValue: _selectedGender,
-                            onChanged: (value) {
-                              if (value != null) {
-                                setState(() => _selectedGender = value);
-                              }
-                            },
-                            contentPadding: EdgeInsets.zero,
-                            activeColor: const Color(0xFFFFC107),
+                          child: GestureDetector(
+                            onTap: () => setState(() => _selectedGender = 1),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 200),
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              decoration: BoxDecoration(
+                                color: _selectedGender == 1 
+                                    ? AppColors.iconBgBlue 
+                                    : AppColors.surfaceVariant,
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: _selectedGender == 1 
+                                      ? AppColors.info 
+                                      : AppColors.border,
+                                  width: _selectedGender == 1 ? 2 : 1,
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.male_rounded,
+                                    color: _selectedGender == 1 
+                                        ? AppColors.info 
+                                        : AppColors.textSecondary,
+                                    size: 24,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'Nam',
+                                    style: TextStyle(
+                                      fontWeight: _selectedGender == 1 
+                                          ? FontWeight.bold 
+                                          : FontWeight.w500,
+                                      color: _selectedGender == 1 
+                                          ? AppColors.info 
+                                          : AppColors.textSecondary,
+                                      fontSize: 15,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
                         ),
+                        const SizedBox(width: 12),
                         Expanded(
-                          child: RadioListTile<int>(
-                            title: const Text('Nữ'),
-                            value: -1,
-                            groupValue: _selectedGender,
-                            onChanged: (value) {
-                              if (value != null) {
-                                setState(() => _selectedGender = value);
-                              }
-                            },
-                            contentPadding: EdgeInsets.zero,
-                            activeColor: const Color(0xFFFFC107),
+                          child: GestureDetector(
+                            onTap: () => setState(() => _selectedGender = -1),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 200),
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              decoration: BoxDecoration(
+                                color: _selectedGender == -1 
+                                    ? AppColors.iconBgPeach 
+                                    : AppColors.surfaceVariant,
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: _selectedGender == -1 
+                                      ? AppColors.accent 
+                                      : AppColors.border,
+                                  width: _selectedGender == -1 ? 2 : 1,
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.female_rounded,
+                                    color: _selectedGender == -1 
+                                        ? AppColors.accent 
+                                        : AppColors.textSecondary,
+                                    size: 24,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'Nữ',
+                                    style: TextStyle(
+                                      fontWeight: _selectedGender == -1 
+                                          ? FontWeight.bold 
+                                          : FontWeight.w500,
+                                      color: _selectedGender == -1 
+                                          ? AppColors.accent 
+                                          : AppColors.textSecondary,
+                                      fontSize: 15,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
                         ),
                       ],
@@ -516,65 +794,116 @@ class _TuViInputPageState extends State<TuViInputPage> {
 
               const SizedBox(height: 16),
 
-              // Calendar type toggle
-              Card(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+              // Calendar type toggle card
+              Container(
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.shadow,
+                      blurRadius: 10,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
-                child: SwitchListTile(
-                  title: const Text(
+                child: ListTile(
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  leading: Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: _isSolarCalendar 
+                          ? AppColors.iconBgYellow 
+                          : AppColors.iconBgPurple,
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Icon(
+                      _isSolarCalendar 
+                          ? Icons.wb_sunny_rounded 
+                          : Icons.nightlight_round,
+                      color: _isSolarCalendar 
+                          ? AppColors.primaryDark 
+                          : Colors.purple.shade400,
+                      size: 22,
+                    ),
+                  ),
+                  title: Text(
                     'Loại lịch',
-                    style: TextStyle(fontWeight: FontWeight.w500),
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary,
+                      fontSize: 15,
+                    ),
                   ),
                   subtitle: Text(
-                    _isSolarCalendar ? 'Dương lịch' : 'Âm lịch',
-                    style: TextStyle(color: Colors.grey.shade600),
+                    _isSolarCalendar ? 'Dương lịch (Gregorian)' : 'Âm lịch (Lunar)',
+                    style: TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 13,
+                    ),
                   ),
-                  value: _isSolarCalendar,
-                  onChanged: (value) => setState(() => _isSolarCalendar = value),
-                  activeColor: const Color(0xFFFFC107),
-                  secondary: Icon(
-                    _isSolarCalendar ? Icons.wb_sunny : Icons.nightlight_round,
-                    color: const Color(0xFFFFC107),
+                  trailing: Switch(
+                    value: _isSolarCalendar,
+                    onChanged: (value) => setState(() => _isSolarCalendar = value),
+                    activeColor: AppColors.primary,
+                    activeTrackColor: AppColors.primaryLight,
                   ),
                 ),
               ),
 
-              const SizedBox(height: 32),
+              const SizedBox(height: 28),
 
               // Submit button
-              SizedBox(
-                height: 56,
+              Container(
+                height: 60,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  gradient: AppColors.primaryGradient,
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.shadowYellow,
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
                 child: ElevatedButton(
                   onPressed: provider.isLoading ? null : _submitForm,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFFFC107),
-                    foregroundColor: Colors.black87,
+                    backgroundColor: Colors.transparent,
+                    shadowColor: Colors.transparent,
+                    foregroundColor: AppColors.textOnPrimary,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(20),
                     ),
-                    elevation: 2,
+                    elevation: 0,
                   ),
                   child: provider.isLoading
-                      ? const SizedBox(
-                          height: 24,
-                          width: 24,
+                      ? SizedBox(
+                          height: 26,
+                          width: 26,
                           child: CircularProgressIndicator(
-                            strokeWidth: 2.5,
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(Colors.black87),
+                            strokeWidth: 3,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              AppColors.textOnPrimary,
+                            ),
                           ),
                         )
-                      : const Row(
+                      : Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.auto_awesome, size: 24),
-                            SizedBox(width: 12),
+                            Icon(
+                              Icons.auto_awesome_rounded,
+                              size: 26,
+                              color: AppColors.textOnPrimary,
+                            ),
+                            const SizedBox(width: 12),
                             Text(
                               'Lập Lá Số',
                               style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
+                                color: AppColors.textOnPrimary,
                               ),
                             ),
                           ],
@@ -586,14 +915,28 @@ class _TuViInputPageState extends State<TuViInputPage> {
 
               // Note
               Center(
-                child: Text(
-                  'Lá số sẽ được lưu tự động',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey.shade600,
-                  ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.check_circle_outline_rounded,
+                      size: 16,
+                      color: AppColors.success,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      'Lá số sẽ được lưu tự động',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: AppColors.textSecondary,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
                 ),
               ),
+              
+              const SizedBox(height: 20),
             ],
           ),
         ),

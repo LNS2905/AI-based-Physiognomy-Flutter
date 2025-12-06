@@ -86,10 +86,14 @@ class HttpService {
     Map<String, dynamic>? body,
     Map<String, String>? headers,
     Map<String, dynamic>? queryParameters,
+    Duration? timeout,
   }) async {
     try {
       final uri = _buildUri(endpoint, queryParameters);
       AppLogger.logRequest('POST', uri.toString(), body);
+
+      // Use custom timeout if provided, otherwise use default
+      final requestTimeout = timeout ?? AppConstants.requestTimeout;
 
       return await _executeWithRetry(
         () async {
@@ -97,7 +101,7 @@ class HttpService {
           final requestBody = body != null ? jsonEncode(body) : null;
           return _client
               .post(uri, headers: requestHeaders, body: requestBody)
-              .timeout(AppConstants.requestTimeout);
+              .timeout(requestTimeout);
         },
         'POST',
         uri.toString(),
@@ -485,15 +489,33 @@ class HttpService {
     }
   }
 
-  /// Execute request with automatic token refresh on 401
+  /// Execute request with automatic token refresh on 401 and retry on connection errors
   Future<Map<String, dynamic>> _executeWithRetry(
     Future<http.Response> Function() request,
     String method,
-    String url,
-  ) async {
+    String url, {
+    int maxRetries = 3,
+    int currentRetry = 0,
+  }) async {
     try {
       final response = await request();
       return _handleResponse(response, method, url);
+    } on http.ClientException catch (e) {
+      // Handle "Connection closed while receiving data" error
+      if (currentRetry < maxRetries && 
+          e.message.contains('Connection closed')) {
+        final delay = Duration(seconds: (currentRetry + 1) * 2); // Exponential backoff: 2s, 4s, 6s
+        AppLogger.warning('HttpService: Connection closed, retrying in ${delay.inSeconds}s (attempt ${currentRetry + 1}/$maxRetries)');
+        await Future.delayed(delay);
+        return _executeWithRetry(
+          request,
+          method,
+          url,
+          maxRetries: maxRetries,
+          currentRetry: currentRetry + 1,
+        );
+      }
+      rethrow;
     } on AuthException catch (e) {
       if (e.code == 'UNAUTHORIZED' && !_isRefreshing) {
         AppLogger.info('HttpService: Received 401, attempting token refresh');

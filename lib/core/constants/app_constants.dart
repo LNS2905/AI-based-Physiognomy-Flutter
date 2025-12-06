@@ -40,6 +40,9 @@ class AppConstants {
 
   static const Duration requestTimeout = Duration(seconds: 120); // Increased for Cloudinary processing
   static const Duration connectTimeout = Duration(seconds: 15);
+  
+  // Extended timeout for long-running AI operations (Tu Vi analysis, face/palm analysis)
+  static const Duration aiAnalysisTimeout = Duration(seconds: 300); // 5 minutes for AI analysis
 
   // Cloudinary Configuration
   static const String cloudinaryCloudName = 'dsfmzrwc1';

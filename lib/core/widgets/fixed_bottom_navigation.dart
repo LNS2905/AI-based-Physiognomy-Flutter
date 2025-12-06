@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../theme/app_colors.dart';
 
-/// Fixed bottom navigation bar with 4 main navigation items
-/// Uses transparent background and floating style
+/// Fixed bottom navigation bar with modern floating design
+/// Inspired by Cracker Book UI - clean, rounded, with subtle shadows
 class FixedBottomNavigation extends StatelessWidget {
   final String currentRoute;
   final EdgeInsets? padding;
-  
+
   const FixedBottomNavigation({
     super.key,
     required this.currentRoute,
@@ -21,7 +21,7 @@ class FixedBottomNavigation extends StatelessWidget {
       left: 0,
       right: 0,
       child: Container(
-        padding: padding ?? const EdgeInsets.only(bottom: 16),
+        padding: padding ?? const EdgeInsets.only(bottom: 24, top: 8),
         child: _buildBottomNavigation(context),
       ),
     );
@@ -29,43 +29,48 @@ class FixedBottomNavigation extends StatelessWidget {
 
   Widget _buildBottomNavigation(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 32),
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+      margin: const EdgeInsets.symmetric(horizontal: 24),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(25),
+        color: AppColors.navBackground,
+        borderRadius: BorderRadius.circular(28),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
+            color: AppColors.shadowMedium,
+            blurRadius: 24,
+            offset: const Offset(0, 8),
+            spreadRadius: 0,
           ),
         ],
-        border: Border.all(
-          color: AppColors.primary.withOpacity(0.1),
-          width: 1,
-        ),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          _buildBottomNavItem(
-            Icons.home_outlined,
+          _buildNavItem(
+            context,
+            icon: Icons.home_rounded,
+            label: 'Trang chủ',
             isActive: _isActive('/home'),
             onTap: () => _navigateToHome(context),
           ),
-          _buildBottomNavItem(
-            Icons.face_outlined,
+          _buildNavItem(
+            context,
+            icon: Icons.face_retouching_natural_rounded,
+            label: 'Quét',
             isActive: _isActive('/face-scanning') || _isActive('/palm-scanning'),
             onTap: () => _navigateToScan(context),
           ),
-          _buildBottomNavItem(
-            Icons.chat_bubble_outline,
+          _buildNavItem(
+            context,
+            icon: Icons.auto_awesome_rounded,
+            label: 'Tử vi',
             isActive: _isActive('/tu-vi-input'),
             onTap: () => _navigateToTuVi(context),
           ),
-          _buildBottomNavItem(
-            Icons.person_outline,
+          _buildNavItem(
+            context,
+            icon: Icons.person_rounded,
+            label: 'Hồ sơ',
             isActive: _isActive('/profile'),
             onTap: () => _navigateToProfile(context),
           ),
@@ -74,36 +79,47 @@ class FixedBottomNavigation extends StatelessWidget {
     );
   }
 
-  Widget _buildBottomNavItem(IconData icon, {required bool isActive, required VoidCallback onTap}) {
+  Widget _buildNavItem(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required bool isActive,
+    required VoidCallback onTap,
+  }) {
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        width: 45,
-        height: 45,
-        decoration: BoxDecoration(
-          gradient: isActive
-              ? LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [AppColors.primary, AppColors.primaryDark],
-                )
-              : null,
-          color: isActive ? null : Colors.transparent,
-          borderRadius: BorderRadius.circular(15),
-          boxShadow: isActive
-              ? [
-                  BoxShadow(
-                    color: AppColors.primary.withOpacity(0.3),
-                    blurRadius: 10,
-                    offset: const Offset(0, 5),
-                  ),
-                ]
-              : null,
+      behavior: HitTestBehavior.opaque,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeInOut,
+        padding: EdgeInsets.symmetric(
+          horizontal: isActive ? 16 : 12,
+          vertical: 10,
         ),
-        child: Icon(
-          icon,
-          size: isActive ? 22 : 20,
-          color: isActive ? Colors.white : AppColors.textSecondary,
+        decoration: BoxDecoration(
+          color: isActive ? AppColors.primary : Colors.transparent,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 24,
+              color: isActive ? AppColors.textOnPrimary : AppColors.navInactive,
+            ),
+            if (isActive) ...[
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textOnPrimary,
+                ),
+              ),
+            ],
+          ],
         ),
       ),
     );
@@ -111,13 +127,13 @@ class FixedBottomNavigation extends StatelessWidget {
 
   bool _isActive(String route) {
     // Handle special cases
-    if (currentRoute.startsWith('/face-scanning') || 
-        currentRoute.startsWith('/palm-scanning') || 
+    if (currentRoute.startsWith('/face-scanning') ||
+        currentRoute.startsWith('/palm-scanning') ||
         currentRoute.startsWith('/camera') ||
         currentRoute.startsWith('/palm-camera')) {
       return route == '/face-scanning';
     }
-    
+
     if (currentRoute.startsWith('/tu-vi')) {
       return route == '/tu-vi-input';
     }
@@ -182,7 +198,7 @@ class ScreenWithFixedNavigation extends StatelessWidget {
           padding: EdgeInsets.only(bottom: bottomPadding ?? 100),
           child: child,
         ),
-        
+
         // Fixed bottom navigation
         FixedBottomNavigation(
           currentRoute: currentRoute,

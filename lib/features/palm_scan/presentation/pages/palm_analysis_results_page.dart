@@ -72,14 +72,6 @@ class _PalmAnalysisResultsPageState extends State<PalmAnalysisResultsPage>
               );
             },
           ),
-          IconButton(
-            onPressed: () => _sharePalmResults(context),
-            icon: const Icon(
-              Icons.share_outlined,
-              color: AppColors.primary,
-            ),
-            tooltip: 'Chia sẻ',
-          ),
         ],
         bottom: TabBar(
           controller: _tabController,
@@ -758,16 +750,5 @@ class _PalmAnalysisResultsPageState extends State<PalmAnalysisResultsPage>
         );
       }
     }
-  }
-
-  /// Share palm analysis results
-  void _sharePalmResults(BuildContext context) {
-    // TODO: Implement share functionality for palm analysis
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Tính năng chia sẻ kết quả vân tay sẽ được cập nhật sớm'),
-        backgroundColor: AppColors.primary,
-      ),
-    );
   }
 }

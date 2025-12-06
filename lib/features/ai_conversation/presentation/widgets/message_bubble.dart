@@ -72,38 +72,27 @@ class MessageBubble extends StatelessWidget {
         ),
         padding: const EdgeInsets.symmetric(
           horizontal: 16,
-          vertical: 10,
+          vertical: 12,
         ),
         decoration: BoxDecoration(
-          gradient: isUser
-              ? LinearGradient(
-                  colors: [AppColors.primary, AppColors.primaryDark],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                )
-              : null,
-          color: isUser ? null : AppColors.surface,
+          // Cracker Book style: solid colors, no gradients for bubbles
+          color: isUser ? AppColors.chatUserBubble : AppColors.chatBotBubble,
           borderRadius: BorderRadius.only(
             topLeft: const Radius.circular(20),
             topRight: const Radius.circular(20),
-            bottomLeft: Radius.circular(isUser ? 20 : 4),
-            bottomRight: Radius.circular(isUser ? 4 : 20),
+            bottomLeft: Radius.circular(isUser ? 20 : 6),
+            bottomRight: Radius.circular(isUser ? 6 : 20),
           ),
-          border: isUser
-              ? null
-              : Border.all(
-                  color: AppColors.border,
-                  width: 1,
-                ),
-          boxShadow: isUser
-              ? [
-                  BoxShadow(
-                    color: AppColors.primary.withValues(alpha: 0.3),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ]
-              : null,
+          // Subtle shadow for depth
+          boxShadow: [
+            BoxShadow(
+              color: isUser 
+                  ? AppColors.shadowYellow 
+                  : AppColors.shadow,
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -126,21 +115,33 @@ class MessageBubble extends StatelessWidget {
           data: message.content,
           styleSheet: MarkdownStyleSheet(
             p: TextStyle(
-              fontSize: 13,
+              fontSize: 14,
               fontWeight: FontWeight.w400,
-              color: isUser ? Colors.white : const Color(0xFF333333),
-              height: 1.4,
+              // Cracker Book: dark text on both bubbles for readability
+              color: isUser ? AppColors.chatUserText : AppColors.chatBotText,
+              height: 1.5,
             ),
             strong: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: isUser ? Colors.white : const Color(0xFF333333),
+              fontWeight: FontWeight.w600,
+              color: isUser ? AppColors.chatUserText : AppColors.chatBotText,
             ),
             em: TextStyle(
               fontStyle: FontStyle.italic,
-              color: isUser ? Colors.white : const Color(0xFF333333),
+              color: isUser ? AppColors.chatUserText : AppColors.chatBotText,
             ),
             listBullet: TextStyle(
-              color: isUser ? Colors.white : const Color(0xFF333333),
+              color: isUser ? AppColors.chatUserText : AppColors.chatBotText,
+            ),
+            code: TextStyle(
+              backgroundColor: isUser 
+                  ? AppColors.primaryDark.withValues(alpha: 0.2) 
+                  : AppColors.border,
+              color: isUser ? AppColors.chatUserText : AppColors.chatBotText,
+              fontSize: 13,
+            ),
+            blockquote: TextStyle(
+              color: AppColors.textSecondary,
+              fontStyle: FontStyle.italic,
             ),
           ),
         );
@@ -152,15 +153,14 @@ class MessageBubble extends StatelessWidget {
               height: 200,
               width: double.infinity,
               decoration: BoxDecoration(
-                color: AppColors.background,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: AppColors.border),
+                color: AppColors.surfaceVariant,
+                borderRadius: BorderRadius.circular(12),
               ),
               child: const Center(
                 child: Icon(
-                  Icons.image,
+                  Icons.image_rounded,
                   size: 48,
-                  color: AppColors.textSecondary,
+                  color: AppColors.textTertiary,
                 ),
               ),
             ),
@@ -169,7 +169,7 @@ class MessageBubble extends StatelessWidget {
               Text(
                 message.content,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: isUser ? Colors.white : AppColors.textPrimary,
+                  color: isUser ? AppColors.chatUserText : AppColors.chatBotText,
                 ),
               ),
             ],
@@ -195,18 +195,18 @@ class MessageBubble extends StatelessWidget {
       child: Center(
         child: Container(
           padding: const EdgeInsets.symmetric(
-            horizontal: 12,
-            vertical: 6,
+            horizontal: 16,
+            vertical: 8,
           ),
           decoration: BoxDecoration(
-            color: AppColors.background,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.border),
+            color: AppColors.surfaceYellow.withValues(alpha: 0.5),
+            borderRadius: BorderRadius.circular(20),
           ),
           child: Text(
             message.content,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: AppColors.textSecondary,
+              fontWeight: FontWeight.w500,
             ),
             textAlign: TextAlign.center,
           ),
@@ -217,39 +217,31 @@ class MessageBubble extends StatelessWidget {
 
   Widget _buildAvatar(BuildContext context, bool isUser) {
     return Container(
-      width: 32,
-      height: 32,
+      width: 36,
+      height: 36,
       decoration: BoxDecoration(
-        gradient: isUser
-            ? null
-            : LinearGradient(
-                colors: [AppColors.primary, AppColors.primaryDark],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-        color: isUser ? AppColors.primaryLight : null,
+        // Cracker Book style: pastel circle backgrounds
+        color: isUser ? AppColors.iconBgPeach : AppColors.iconBgTeal,
         shape: BoxShape.circle,
-        border: Border.all(
-          color: isUser ? AppColors.primary : Colors.transparent,
-          width: 1.5,
-        ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.2),
+            color: AppColors.shadowLight,
             blurRadius: 4,
-            offset: const Offset(0, 1),
+            offset: const Offset(0, 2),
           ),
         ],
       ),
       child: Center(
-        child: Text(
-          isUser ? '👤' : '星',
-          style: TextStyle(
-            fontSize: isUser ? 16 : 14,
-            fontWeight: FontWeight.bold,
-            color: isUser ? AppColors.primary : Colors.white,
-          ),
-        ),
+        child: isUser
+            ? const Icon(
+                Icons.person_rounded,
+                size: 20,
+                color: AppColors.accent,
+              )
+            : const Text(
+                '🌟',
+                style: TextStyle(fontSize: 18),
+              ),
       ),
     );
   }
@@ -263,9 +255,9 @@ class MessageBubble extends StatelessWidget {
     return Text(
       displayText,
       style: TextStyle(
-        fontSize: 10,
+        fontSize: 11,
         fontWeight: FontWeight.w400,
-        color: const Color(0xFF999999),
+        color: AppColors.textTertiary,
       ),
       textAlign: isUser ? TextAlign.right : TextAlign.left,
     );
@@ -282,8 +274,8 @@ class MessageBubble extends StatelessWidget {
             strokeWidth: 2,
             valueColor: AlwaysStoppedAnimation<Color>(
               message.sender == MessageSender.user
-                  ? Colors.white.withValues(alpha: 0.7)
-                  : AppColors.primary,
+                  ? AppColors.textSecondary
+                  : AppColors.secondary,
             ),
           ),
         ),
@@ -291,9 +283,7 @@ class MessageBubble extends StatelessWidget {
         Text(
           'Sending...',
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: message.sender == MessageSender.user
-                ? Colors.white.withValues(alpha: 0.7)
-                : AppColors.textSecondary,
+            color: AppColors.textTertiary,
             fontSize: 10,
           ),
         ),

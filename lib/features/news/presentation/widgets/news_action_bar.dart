@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 
-/// Action bar for news articles with like, bookmark, share, and comment actions
+/// Action bar for news articles with like and bookmark actions
 /// Designed with Bagua-inspired styling
 class NewsActionBar extends StatelessWidget {
   final bool isLiked;
   final bool isBookmarked;
   final VoidCallback onLike;
   final VoidCallback onBookmark;
-  final VoidCallback onShare;
-  final VoidCallback onComment;
 
   const NewsActionBar({
     super.key,
@@ -17,8 +15,6 @@ class NewsActionBar extends StatelessWidget {
     required this.isBookmarked,
     required this.onLike,
     required this.onBookmark,
-    required this.onShare,
-    required this.onComment,
   });
 
   @override
@@ -42,7 +38,7 @@ class NewsActionBar extends StatelessWidget {
         ],
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           _buildActionButton(
             icon: isLiked ? Icons.favorite : Icons.favorite_outline,
@@ -58,22 +54,6 @@ class NewsActionBar extends StatelessWidget {
             isActive: isBookmarked,
             onTap: onBookmark,
             activeColor: AppColors.primary,
-          ),
-          _buildDivider(),
-          _buildActionButton(
-            icon: Icons.share_outlined,
-            label: 'Chia sẻ',
-            isActive: false,
-            onTap: onShare,
-            activeColor: AppColors.secondary,
-          ),
-          _buildDivider(),
-          _buildActionButton(
-            icon: Icons.comment_outlined,
-            label: 'Bình luận',
-            isActive: false,
-            onTap: onComment,
-            activeColor: AppColors.info,
           ),
         ],
       ),

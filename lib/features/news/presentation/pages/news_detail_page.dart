@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/bagua_logo.dart';
@@ -146,24 +145,6 @@ class _NewsDetailPageState extends State<NewsDetailPage> {
           isWhiteVariant: true,
         ),
       ),
-      actions: [
-        IconButton(
-          icon: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: AppColors.textPrimary.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Icon(
-              Icons.share,
-              color: AppColors.textOnPrimary,
-              size: 20,
-            ),
-          ),
-          onPressed: _shareArticle,
-        ),
-        const SizedBox(width: 8),
-      ],
       flexibleSpace: FlexibleSpaceBar(
         background: Container(
           decoration: BoxDecoration(
@@ -403,10 +384,6 @@ class _NewsDetailPageState extends State<NewsDetailPage> {
         });
         HapticFeedback.lightImpact();
       },
-      onShare: _shareArticle,
-      onComment: () {
-        // TODO: Implement comments
-      },
     );
   }
 
@@ -419,11 +396,6 @@ class _NewsDetailPageState extends State<NewsDetailPage> {
     return RelatedArticlesSection(
       articles: relatedArticles,
     );
-  }
-
-  void _shareArticle() {
-    // TODO: Implement share functionality
-    HapticFeedback.lightImpact();
   }
 
   String _formatCount(int count) {

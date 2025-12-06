@@ -135,16 +135,7 @@ class AnalysisResultsPage extends StatelessWidget {
                   ),
                 ),
               ),
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: IconButton(
-                  icon: const Icon(Icons.share, color: Colors.white),
-                  onPressed: () => _shareResults(context),
-                ),
-              ),
+              const SizedBox(width: 48),
             ],
           ),
           const SizedBox(height: 20),
@@ -828,15 +819,6 @@ class AnalysisResultsPage extends StatelessWidget {
                     ),
                   ),
                 ),
-                Builder(
-                  builder: (context) => IconButton(
-                    icon: Icon(
-                      Icons.download_outlined,
-                      color: AppColors.textSecondary,
-                    ),
-                    onPressed: () => _downloadImage(context, imageUrl),
-                  ),
-                ),
               ],
             ),
           ),
@@ -972,16 +954,6 @@ class AnalysisResultsPage extends StatelessWidget {
             ),
           );
         },
-      ),
-    );
-  }
-
-  void _downloadImage(BuildContext context, String imageUrl) {
-    // TODO: Implement image download functionality
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Tính năng tải xuống sẽ được cập nhật sớm'),
-        backgroundColor: AppColors.primary,
       ),
     );
   }
@@ -1124,94 +1096,45 @@ class AnalysisResultsPage extends StatelessWidget {
           const SizedBox(height: 16),
 
           // Secondary Actions
-          Row(
-            children: [
-              Expanded(
-                child: Container(
-                  height: 50,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: AppColors.primary.withOpacity(0.3),
-                      width: 1,
-                    ),
-                  ),
-                  child: OutlinedButton(
-                    onPressed: () => _shareResults(context),
-                    style: OutlinedButton.styleFrom(
-                      backgroundColor: Colors.transparent,
-                      side: BorderSide.none,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.share_outlined,
-                          color: AppColors.primary,
-                          size: 18,
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          'Chia sẻ',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.primary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+          Container(
+            height: 50,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: AppColors.textSecondary.withOpacity(0.3),
+                width: 1,
+              ),
+            ),
+            child: OutlinedButton(
+              onPressed: () => _analyzeAgain(context),
+              style: OutlinedButton.styleFrom(
+                backgroundColor: Colors.transparent,
+                side: BorderSide.none,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Container(
-                  height: 50,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: AppColors.textSecondary.withOpacity(0.3),
-                      width: 1,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.refresh_outlined,
+                    color: AppColors.textSecondary,
+                    size: 18,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    'Phân tích lại',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textSecondary,
                     ),
                   ),
-                  child: OutlinedButton(
-                    onPressed: () => _analyzeAgain(context),
-                    style: OutlinedButton.styleFrom(
-                      backgroundColor: Colors.transparent,
-                      side: BorderSide.none,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.refresh_outlined,
-                          color: AppColors.textSecondary,
-                          size: 18,
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          'Phân tích lại',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+                ],
               ),
-            ],
+            ),
           ),
         ],
       ),
@@ -1279,16 +1202,6 @@ class AnalysisResultsPage extends StatelessWidget {
         );
       }
     }
-  }
-
-  void _shareResults(BuildContext context) {
-    // TODO: Implement share functionality
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Tính năng chia sẻ sẽ được cập nhật sớm'),
-        backgroundColor: AppColors.primary,
-      ),
-    );
   }
 
   // Helper methods for data processing

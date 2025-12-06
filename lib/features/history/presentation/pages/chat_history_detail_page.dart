@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -354,21 +355,6 @@ class _ChatHistoryDetailPageState extends State<ChatHistoryDetailPage> {
               ),
             ),
           ),
-          const SizedBox(width: 12),
-          
-          // Share conversation button
-          IconButton(
-            onPressed: _shareConversation,
-            icon: const Icon(Icons.share),
-            style: IconButton.styleFrom(
-              backgroundColor: AppColors.surfaceVariant,
-              foregroundColor: AppColors.textPrimary,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              padding: const EdgeInsets.all(12),
-            ),
-          ),
         ],
       ),
     );
@@ -410,7 +396,7 @@ class _ChatHistoryDetailPageState extends State<ChatHistoryDetailPage> {
   }
 
   void _copyMessage(ChatMessageModel message) {
-    // TODO: Implement copy to clipboard
+    Clipboard.setData(ClipboardData(text: message.content));
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Đã sao chép tin nhắn'),
@@ -447,15 +433,5 @@ class _ChatHistoryDetailPageState extends State<ChatHistoryDetailPage> {
   void _continueConversation() {
     // Navigate to AI conversation page with this conversation
     context.push('${AppConstants.aiConversationRoute}?id=${_historyItem!.conversation.id}');
-  }
-
-  void _shareConversation() {
-    // TODO: Implement conversation sharing
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Tính năng chia sẻ sẽ được triển khai sớm'),
-        backgroundColor: AppColors.info,
-      ),
-    );
   }
 }

@@ -189,9 +189,11 @@ class ChatRepository {
       );
 
       // Tu Vi API endpoint with /api/v1 prefix (ngrok backend)
+      // Use extended timeout for AI analysis operations
       final response = await _httpService.post(
         '/api/v1/tuvi/analyze-json',
         body: request.toJson(),
+        timeout: AppConstants.aiAnalysisTimeout, // 5 minutes for AI analysis
       );
 
       // Backend response format:
