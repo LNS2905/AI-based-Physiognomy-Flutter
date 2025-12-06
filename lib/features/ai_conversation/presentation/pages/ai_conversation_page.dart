@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/error_handler.dart';
-import '../../../../core/widgets/fixed_bottom_navigation.dart';
 import '../../../../core/widgets/standard_back_button.dart';
 import '../../../auth/presentation/providers/enhanced_auth_provider.dart';
 import '../providers/chat_provider.dart';
@@ -11,7 +11,6 @@ import '../../data/models/chat_message_model.dart';
 import '../widgets/message_bubble.dart';
 import '../widgets/typing_indicator.dart';
 import '../widgets/chat_input_field.dart';
-import '../widgets/quick_suggestion_buttons.dart';
 
 /// AI Conversation page for chatting with AI assistant
 class AIConversationPage extends StatefulWidget {
@@ -65,6 +64,9 @@ class _AIConversationPageState extends State<AIConversationPage>
 
   void _initializeChat() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      // CRITICAL: Check if widget is still mounted before accessing context
+      if (!mounted) return;
+      
       final chatProvider = context.read<ChatProvider>();
       final authProvider = context.read<EnhancedAuthProvider>();
       final currentUser = authProvider.currentUser;
@@ -182,20 +184,15 @@ class _AIConversationPageState extends State<AIConversationPage>
                 child: _buildMessagesList(),
               ),
               _buildInputArea(),
-              const SizedBox(height: 100), // Space for fixed navigation
             ],
           ),
           
-          // Floating action button (if needed)
           if (_showScrollToBottom)
             Positioned(
               right: 16,
-              bottom: 120, // Above the fixed navigation
+              bottom: 100, // Moved higher to avoid covering input area
               child: _buildScrollToBottomFab(),
             ),
-          
-          // Fixed Bottom Navigation
-          FixedBottomNavigation(currentRoute: '/ai-conversation'),
         ],
       ),
     );
@@ -455,21 +452,13 @@ class _AIConversationPageState extends State<AIConversationPage>
 
     // Add initial AI greeting if no messages
     if (chatProvider.messages.isEmpty) {
-      count += 1; // AI greeting
-      count += 1; // Quick suggestions
+      count += 1; // AI greeting only (quick suggestions removed)
       return count;
     }
 
-    // Count messages and special items
+    // Count messages
     for (int i = 0; i < chatProvider.messages.length; i++) {
       count += 1; // Message
-
-      // Only show quick suggestions after first AI message if user hasn't sent any message
-      if (i == 0 && 
-          chatProvider.messages.length == 1 && 
-          chatProvider.messages[i].sender == MessageSender.ai) {
-        count += 1;
-      }
     }
 
     // Add typing indicator if AI is typing
@@ -484,8 +473,6 @@ class _AIConversationPageState extends State<AIConversationPage>
     if (chatProvider.messages.isEmpty) {
       if (index == 0) {
         return _buildInitialAIGreeting();
-      } else if (index == 1) {
-        return _buildInitialQuickSuggestions();
       }
     }
 
@@ -501,22 +488,7 @@ class _AIConversationPageState extends State<AIConversationPage>
       }
       currentIndex++;
 
-      // Only show quick suggestions after first AI message AND if user hasn't sent any message yet
-      // (messages.length == 1 means only the AI welcome message exists)
-      if (i == 0 && 
-          chatProvider.messages.length == 1 && 
-          chatProvider.messages[i].sender == MessageSender.ai) {
-        if (currentIndex == index) {
-          return QuickSuggestionButtons(
-            suggestions: ['Phân tích 14 chính tinh', 'Giải thích Đại Hạn'],
-            onSuggestionTap: (suggestion) {
-              _messageController.text = suggestion;
-              _onSendMessage();
-            },
-          );
-        }
-        currentIndex++;
-      }
+      // Quick suggestions removed - users can type their own questions
     }
 
     // Typing indicator
@@ -539,16 +511,6 @@ class _AIConversationPageState extends State<AIConversationPage>
     return MessageBubble(
       message: greetingMessage,
       showTimestamp: true,
-    );
-  }
-
-  Widget _buildInitialQuickSuggestions() {
-    return QuickSuggestionButtons(
-      suggestions: ['Giải thích Cung Mệnh', 'Phân tích 12 cung'],
-      onSuggestionTap: (suggestion) {
-        _messageController.text = suggestion;
-        _onSendMessage();
-      },
     );
   }
 
@@ -732,31 +694,23 @@ class _AIConversationPageState extends State<AIConversationPage>
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Không đủ tín dụng'),
-        content: const Text('Bạn cần ít nhất 1 tín dụng để gửi tin nhắn. Vui lòng nạp thêm.'),
+        title: const Text('Thông báo'),
+        content: const Text('Tài khoản đã hết tín dụng để sử dụng AI Chatbot. Vui lòng nạp thêm tín dụng.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Đóng'),
+            style: TextButton.styleFrom(foregroundColor: AppColors.textSecondary),
+            child: const Text('Hủy'),
           ),
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
-              // Navigate to payment page (Profile page has the payment/credits section)
-              // Assuming MainWrapper or Home handles the navigation to Profile via index or route
-              // Or context.push('/profile');
-              // Checking routes in AppConstants: profileRoute = '/profile'
-              // Use GoRouter if available, otherwise Navigator
-               try {
-                 // Try to find GoRouter
-                 // context.push('/profile'); 
-                 // Since I don't have the imports handy for GoRouter here (it is imported but...), 
-                 // let's use the Named route if registered
-                 Navigator.of(context).pushNamed('/profile');
-               } catch (e) {
-                 // Fallback
-               }
+              context.pushNamed('payment-packages');
             },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+            ),
             child: const Text('Nạp ngay'),
           ),
         ],

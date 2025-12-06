@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../providers/payment_provider.dart';
 
+import '../../../../features/auth/presentation/providers/enhanced_auth_provider.dart';
+
 class PaymentStatusPage extends StatefulWidget {
   final bool isSuccess;
   final int? credits;
@@ -24,8 +26,17 @@ class _PaymentStatusPageState extends State<PaymentStatusPage> {
     super.initState();
     if (widget.isSuccess) {
       // Refresh credits when payment is successful
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        context.read<PaymentProvider>().refreshCredits();
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        final paymentProvider = context.read<PaymentProvider>();
+        await paymentProvider.refreshCredits();
+        
+        if (mounted) {
+           final newCredits = paymentProvider.currentCredits;
+           // Optimistic update
+           context.read<EnhancedAuthProvider>().updateUserCredits(newCredits);
+           // Full refresh
+           context.read<EnhancedAuthProvider>().refreshUserData();
+        }
       });
     }
   }

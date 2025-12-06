@@ -65,6 +65,7 @@ class ProfileQuickAccess extends StatelessWidget {
                 ),
               ),
               
+              /*
               SizedBox(width: isTablet ? 16 : 12),
               
               Expanded(
@@ -77,6 +78,7 @@ class ProfileQuickAccess extends StatelessWidget {
                   isTablet: isTablet,
                 ),
               ),
+              */
             ],
           ),
         ],

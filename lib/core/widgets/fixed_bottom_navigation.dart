@@ -61,8 +61,8 @@ class FixedBottomNavigation extends StatelessWidget {
           ),
           _buildBottomNavItem(
             Icons.chat_bubble_outline,
-            isActive: _isActive('/ai-conversation'),
-            onTap: () => _navigateToChat(context),
+            isActive: _isActive('/tu-vi-input'),
+            onTap: () => _navigateToTuVi(context),
           ),
           _buildBottomNavItem(
             Icons.person_outline,
@@ -118,9 +118,8 @@ class FixedBottomNavigation extends StatelessWidget {
       return route == '/face-scanning';
     }
     
-    if (currentRoute.startsWith('/ai-conversation') || 
-        currentRoute.startsWith('/chatbot')) {
-      return route == '/ai-conversation';
+    if (currentRoute.startsWith('/tu-vi')) {
+      return route == '/tu-vi-input';
     }
 
     if (currentRoute.startsWith('/profile')) {
@@ -146,9 +145,9 @@ class FixedBottomNavigation extends StatelessWidget {
     }
   }
 
-  void _navigateToChat(BuildContext context) {
-    if (!_isActive('/ai-conversation')) {
-      context.push('/ai-conversation');
+  void _navigateToTuVi(BuildContext context) {
+    if (!_isActive('/tu-vi-input')) {
+      context.push('/tu-vi-input');
     }
   }
 

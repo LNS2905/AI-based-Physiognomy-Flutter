@@ -31,8 +31,8 @@ class HistoryProvider extends BaseProvider {
   bool _hasInitialized = false;
   StreamSubscription? _authStateSubscription;
   
-  // Disposal tracking
-  bool _isDisposed = false;
+  // Disposal tracking for HistoryProvider-specific operations
+  bool _historyDisposed = false;
 
   HistoryProvider({required EnhancedAuthProvider authProvider})
       : _authProvider = authProvider,
@@ -60,7 +60,7 @@ class HistoryProvider extends BaseProvider {
   void setError(String message) {
     _errorMessage = message;
     setLoading(false);
-    if (!_isDisposed) {
+    if (!_historyDisposed) {
       notifyListeners();
     }
   }
@@ -68,7 +68,7 @@ class HistoryProvider extends BaseProvider {
   @override
   void clearError() {
     _errorMessage = null;
-    if (!_isDisposed) {
+    if (!_historyDisposed) {
       notifyListeners();
     }
   }
@@ -83,28 +83,49 @@ class HistoryProvider extends BaseProvider {
   /// Setup authentication state listener
   void _setupAuthListener() {
     // Listen to auth provider changes
-    _authProvider.addListener(_onAuthStateChanged);
-
-    // Check initial auth state
-    _onAuthStateChanged();
+    // Use try-catch to handle edge cases where auth provider might be in inconsistent state
+    try {
+      _authProvider.addListener(_onAuthStateChanged);
+      
+      // Check initial auth state (delayed to avoid issues during construction)
+      Future.microtask(() {
+        if (!_historyDisposed) {
+          _onAuthStateChanged();
+        }
+      });
+    } catch (e) {
+      AppLogger.warning('HistoryProvider: Error setting up auth listener: $e');
+    }
   }
 
   /// Handle authentication state changes
   void _onAuthStateChanged() {
-    AppLogger.info('HistoryProvider: Auth state changed - authenticated: ${_authProvider.isAuthenticated}, hasInitialized: $_hasInitialized');
+    // CRITICAL: Check if disposed before doing anything
+    // Use try-catch to handle any edge cases where provider is in inconsistent state
+    try {
+      if (_historyDisposed) {
+        // Silently return - this can happen during normal dispose flow
+        return;
+      }
+      
+      AppLogger.info('HistoryProvider: Auth state changed - authenticated: ${_authProvider.isAuthenticated}, hasInitialized: $_hasInitialized');
 
-    if (_authProvider.isAuthenticated && !_hasInitialized) {
-      AppLogger.info('HistoryProvider: Auth state ready, initializing history');
-      _hasInitialized = true;
-      _initializeHistory();
-    } else if (_authProvider.isAuthenticated && _hasInitialized && _allHistoryItems.isEmpty) {
-      // Retry loading if auth is ready but we have no data (could be from previous failure)
-      AppLogger.info('HistoryProvider: Auth ready and no data, retrying history load');
-      _initializeHistory();
-    } else if (!_authProvider.isAuthenticated && _hasInitialized) {
-      AppLogger.info('HistoryProvider: Auth state lost, clearing history');
-      _hasInitialized = false;
-      _clearHistory();
+      if (_authProvider.isAuthenticated && !_hasInitialized) {
+        AppLogger.info('HistoryProvider: Auth state ready, initializing history');
+        _hasInitialized = true;
+        _initializeHistory();
+      } else if (_authProvider.isAuthenticated && _hasInitialized && _allHistoryItems.isEmpty) {
+        // Retry loading if auth is ready but we have no data (could be from previous failure)
+        AppLogger.info('HistoryProvider: Auth ready and no data, retrying history load');
+        _initializeHistory();
+      } else if (!_authProvider.isAuthenticated && _hasInitialized) {
+        AppLogger.info('HistoryProvider: Auth state lost, clearing history');
+        _hasInitialized = false;
+        _clearHistory();
+      }
+    } catch (e) {
+      // Catch any errors that might occur if provider is in inconsistent state
+      AppLogger.warning('HistoryProvider._onAuthStateChanged error (likely disposed): $e');
     }
   }
 
@@ -112,11 +133,17 @@ class HistoryProvider extends BaseProvider {
   Future<void> _initializeHistory() async {
     try {
       // Check if provider is disposed before proceeding
-      if (!_isDisposed) {
-        await loadHistory();
-        AppLogger.info('HistoryProvider: History initialized successfully');
-      }
+      if (_historyDisposed) return;
+      
+      await loadHistory();
+      
+      // CRITICAL: Check disposed again after async operation
+      if (_historyDisposed) return;
+      
+      AppLogger.info('HistoryProvider: History initialized successfully');
     } catch (e) {
+      // CRITICAL: Check disposed before logging (logger might trigger UI updates)
+      if (_historyDisposed) return;
       AppLogger.error('HistoryProvider: Failed to initialize history', e);
     }
   }
@@ -125,7 +152,7 @@ class HistoryProvider extends BaseProvider {
   void _clearHistory() {
     _allHistoryItems.clear();
     _filteredHistoryItems.clear();
-    if (!_isDisposed) {
+    if (!_historyDisposed) {
       notifyListeners();
     }
     AppLogger.info('HistoryProvider: History cleared');
@@ -134,6 +161,9 @@ class HistoryProvider extends BaseProvider {
   /// Initialize history provider (legacy method for backward compatibility)
   Future<void> initialize() async {
     AppLogger.info('HistoryProvider: Initialize called');
+    
+    // CRITICAL: Check disposed first
+    if (_historyDisposed) return;
 
     // Wait for auth to be ready if it's still initializing
     if (!_authProvider.hasInitialized) {
@@ -141,10 +171,16 @@ class HistoryProvider extends BaseProvider {
       // Wait up to 5 seconds for auth to initialize
       int attempts = 0;
       while (!_authProvider.hasInitialized && attempts < 50) {
+        // CRITICAL: Check disposed in loop
+        if (_historyDisposed) return;
+        
         await Future.delayed(const Duration(milliseconds: 100));
         attempts++;
       }
     }
+
+    // CRITICAL: Check disposed after async wait
+    if (_historyDisposed) return;
 
     if (_authProvider.isAuthenticated) {
       AppLogger.info('HistoryProvider: Auth ready, loading history');
@@ -157,6 +193,9 @@ class HistoryProvider extends BaseProvider {
 
   /// Load history items with authentication check
   Future<void> loadHistory() async {
+    // CRITICAL: Check disposed first
+    if (_historyDisposed) return;
+    
     // Check authentication before making API call
     if (!_authProvider.isAuthenticated) {
       AppLogger.warning('HistoryProvider: Cannot load history - user not authenticated');
@@ -169,6 +208,9 @@ class HistoryProvider extends BaseProvider {
       operationName: 'loadHistory',
     );
 
+    // CRITICAL: Check disposed after async operation
+    if (_historyDisposed) return;
+
     if (result != null) {
       _allHistoryItems = result;
 
@@ -176,7 +218,7 @@ class HistoryProvider extends BaseProvider {
       _applyFilters();
 
       AppLogger.info('Loaded ${_allHistoryItems.length} history items from API');
-      if (!_isDisposed) {
+      if (!_historyDisposed) {
         notifyListeners();
       }
     } else {
@@ -184,7 +226,7 @@ class HistoryProvider extends BaseProvider {
       AppLogger.error('Failed to load history from API');
       _allHistoryItems = [];
       _applyFilters();
-      if (!_isDisposed) {
+      if (!_historyDisposed) {
         notifyListeners();
       }
     }
@@ -204,7 +246,7 @@ class HistoryProvider extends BaseProvider {
     // Debounce search to avoid excessive filtering
     _searchDebounceTimer?.cancel();
     _searchDebounceTimer = Timer(const Duration(milliseconds: 300), () {
-      if (!_isDisposed) {
+      if (!_historyDisposed) {
         _applyFilters();
         notifyListeners();
       }
@@ -219,7 +261,7 @@ class HistoryProvider extends BaseProvider {
     _isSearching = false;
     _searchDebounceTimer?.cancel();
     _applyFilters();
-    if (!_isDisposed) {
+    if (!_historyDisposed) {
       notifyListeners();
     }
     AppLogger.info('Search cleared');
@@ -229,7 +271,7 @@ class HistoryProvider extends BaseProvider {
   void updateFilter(HistoryFilterConfig newConfig) {
     _filterConfig = newConfig;
     _applyFilters();
-    if (!_isDisposed) {
+    if (!_historyDisposed) {
       notifyListeners();
     }
     AppLogger.info('Filter updated: ${newConfig.filterDisplayName}');
@@ -239,7 +281,7 @@ class HistoryProvider extends BaseProvider {
   void setFilter(HistoryFilter filter) {
     _filterConfig = _filterConfig.copyWith(filter: filter);
     _applyFilters();
-    if (!_isDisposed) {
+    if (!_historyDisposed) {
       notifyListeners();
     }
     AppLogger.info('Filter set to: ${filter.name}');
@@ -249,7 +291,7 @@ class HistoryProvider extends BaseProvider {
   void setSort(HistorySort sort) {
     _filterConfig = _filterConfig.copyWith(sort: sort);
     _applyFilters();
-    if (!_isDisposed) {
+    if (!_historyDisposed) {
       notifyListeners();
     }
     AppLogger.info('Sort set to: ${sort.name}');
@@ -266,7 +308,7 @@ class HistoryProvider extends BaseProvider {
       
       _allHistoryItems[itemIndex] = updatedItem;
       _applyFilters();
-      if (!_isDisposed) {
+      if (!_historyDisposed) {
         notifyListeners();
       }
 
@@ -282,7 +324,7 @@ class HistoryProvider extends BaseProvider {
     try {
       _allHistoryItems.removeWhere((item) => item.id == itemId);
       _applyFilters();
-      if (!_isDisposed) {
+      if (!_historyDisposed) {
         notifyListeners();
       }
 
@@ -298,7 +340,7 @@ class HistoryProvider extends BaseProvider {
     try {
       _allHistoryItems.clear();
       _filteredHistoryItems.clear();
-      if (!_isDisposed) {
+      if (!_historyDisposed) {
         notifyListeners();
       }
 
@@ -337,6 +379,9 @@ class HistoryProvider extends BaseProvider {
 
   /// Get palm analysis detail from server by ID
   Future<PalmAnalysisServerModel?> getPalmAnalysisDetail(int analysisId) async {
+    // CRITICAL: Check disposed first
+    if (_historyDisposed) return null;
+    
     try {
       AppLogger.info('Getting palm analysis detail for ID: $analysisId');
 
@@ -344,6 +389,9 @@ class HistoryProvider extends BaseProvider {
         () => _palmAnalysisHistoryService.getPalmAnalysisById(analysisId),
         operationName: 'getPalmAnalysisDetail',
       );
+
+      // CRITICAL: Check disposed after async operation
+      if (_historyDisposed) return null;
 
       if (result != null) {
         AppLogger.info('Palm analysis detail retrieved successfully');
@@ -353,6 +401,7 @@ class HistoryProvider extends BaseProvider {
         return null;
       }
     } catch (e) {
+      if (_historyDisposed) return null;
       AppLogger.error('Exception in getPalmAnalysisDetail', e);
       return null;
     }
@@ -360,6 +409,9 @@ class HistoryProvider extends BaseProvider {
 
   /// Get all facial analysis history from server
   Future<List<FacialAnalysisServerModel>> getFacialAnalysisHistory() async {
+    // CRITICAL: Check disposed first
+    if (_historyDisposed) return [];
+    
     try {
       AppLogger.info('Getting facial analysis history from server');
 
@@ -367,6 +419,9 @@ class HistoryProvider extends BaseProvider {
         () => _facialAnalysisHistoryService.getFacialAnalysisHistory(),
         operationName: 'getFacialAnalysisHistory',
       );
+
+      // CRITICAL: Check disposed after async operation
+      if (_historyDisposed) return [];
 
       if (result != null) {
         AppLogger.info('Facial analysis history retrieved: ${result.length} items');
@@ -376,6 +431,7 @@ class HistoryProvider extends BaseProvider {
         return [];
       }
     } catch (e) {
+      if (_historyDisposed) return [];
       AppLogger.error('Exception in getFacialAnalysisHistory', e);
       return [];
     }
@@ -383,6 +439,9 @@ class HistoryProvider extends BaseProvider {
 
   /// Get all palm analysis history from server
   Future<List<PalmAnalysisServerModel>> getPalmAnalysisHistory() async {
+    // CRITICAL: Check disposed first
+    if (_historyDisposed) return [];
+    
     try {
       AppLogger.info('Getting palm analysis history from server');
 
@@ -390,6 +449,9 @@ class HistoryProvider extends BaseProvider {
         () => _palmAnalysisHistoryService.getPalmAnalysisHistory(),
         operationName: 'getPalmAnalysisHistory',
       );
+
+      // CRITICAL: Check disposed after async operation
+      if (_historyDisposed) return [];
 
       if (result != null) {
         AppLogger.info('Palm analysis history retrieved: ${result.length} items');
@@ -399,6 +461,7 @@ class HistoryProvider extends BaseProvider {
         return [];
       }
     } catch (e) {
+      if (_historyDisposed) return [];
       AppLogger.error('Exception in getPalmAnalysisHistory', e);
       return [];
     }
@@ -493,10 +556,20 @@ class HistoryProvider extends BaseProvider {
 
   @override
   void dispose() {
-    _isDisposed = true;
+    AppLogger.info('HistoryProvider.dispose() called - removing auth listener');
+    // CRITICAL: Set disposed flag FIRST to prevent any callbacks
+    _historyDisposed = true;
+    
+    // Remove listener in try-catch to handle edge cases
+    try {
+      _authProvider.removeListener(_onAuthStateChanged);
+    } catch (e) {
+      AppLogger.warning('HistoryProvider: Error removing auth listener: $e');
+    }
+    
     _searchDebounceTimer?.cancel();
     _authStateSubscription?.cancel();
-    _authProvider.removeListener(_onAuthStateChanged);
+    AppLogger.info('HistoryProvider.dispose() completed');
     super.dispose();
   }
 }

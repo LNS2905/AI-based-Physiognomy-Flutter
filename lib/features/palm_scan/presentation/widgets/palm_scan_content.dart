@@ -127,7 +127,7 @@ class _PalmScanContentState extends State<PalmScanContent>
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           const Text(
-                            'Quét vân tay',
+                            'Quét đường chỉ tay',
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,

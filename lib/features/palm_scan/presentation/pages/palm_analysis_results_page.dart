@@ -1,10 +1,10 @@
 
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/logger.dart';
-import '../../../../core/widgets/fixed_bottom_navigation.dart';
 import '../../data/models/palm_analysis_response_model.dart';
 import '../../../face_scan/presentation/providers/face_scan_provider.dart';
 
@@ -96,19 +96,13 @@ class _PalmAnalysisResultsPageState extends State<PalmAnalysisResultsPage>
         children: [
           SafeArea(
             bottom: true,
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 100),
-              child: TabBarView(
-                controller: _tabController,
-                children: [
-                  _buildInterpretationTab(),
-                  _buildImagesTab(),
-                ],
-              ),
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                _buildInterpretationTab(),
+                _buildImagesTab(),
+              ],
             ),
-          ),
-          FixedBottomNavigation(
-            currentRoute: '/palm-analysis-results',
           ),
         ],
       ),
@@ -556,33 +550,58 @@ class _PalmAnalysisResultsPageState extends State<PalmAnalysisResultsPage>
               bottomLeft: Radius.circular(12),
               bottomRight: Radius.circular(12),
             ),
-            child: CachedNetworkImage(
-              imageUrl: imagePath,
-              width: double.infinity,
-              fit: BoxFit.cover,
-              placeholder: (context, url) => Container(
-                height: 200,
-                color: AppColors.background,
-                child: const Center(
-                  child: CircularProgressIndicator(),
-                ),
-              ),
-              errorWidget: (context, url, error) => Container(
-                height: 200,
-                color: AppColors.background,
-                child: const Center(
-                  child: Icon(
-                    Icons.error,
-                    color: AppColors.error,
-                    size: 48,
-                  ),
-                ),
-              ),
-            ),
+            child: _buildImage(imagePath),
           ),
         ],
       ),
     );
+  }
+
+  Widget _buildImage(String imagePath) {
+    if (imagePath.startsWith('data:image')) {
+      final base64String = imagePath.split(',')[1];
+      final bytes = base64Decode(base64String);
+      return Image.memory(
+        bytes,
+        width: double.infinity,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) => Container(
+          height: 200,
+          color: AppColors.background,
+          child: const Center(
+            child: Icon(
+              Icons.error,
+              color: AppColors.error,
+              size: 48,
+            ),
+          ),
+        ),
+      );
+    } else {
+      return CachedNetworkImage(
+        imageUrl: imagePath,
+        width: double.infinity,
+        fit: BoxFit.cover,
+        placeholder: (context, url) => Container(
+          height: 200,
+          color: AppColors.background,
+          child: const Center(
+            child: CircularProgressIndicator(),
+          ),
+        ),
+        errorWidget: (context, url, error) => Container(
+          height: 200,
+          color: AppColors.background,
+          child: const Center(
+            child: Icon(
+              Icons.error,
+              color: AppColors.error,
+              size: 48,
+            ),
+          ),
+        ),
+      );
+    }
   }
 
   Widget _buildEmptyCard(String message) {

@@ -4,7 +4,10 @@ import '../../../../core/theme/app_colors.dart';
 /// Palm analysis demo widget with animated hand outline and scanning effects
 /// Matches the design pattern of FaceAnalysisDemo for consistency
 class PalmAnalysisDemo extends StatefulWidget {
-  const PalmAnalysisDemo({super.key});
+  /// Callback when the demo is tapped to start analysis
+  final VoidCallback? onTap;
+
+  const PalmAnalysisDemo({super.key, this.onTap});
 
   @override
   State<PalmAnalysisDemo> createState() => _PalmAnalysisDemoState();
@@ -79,21 +82,23 @@ class _PalmAnalysisDemoState extends State<PalmAnalysisDemo>
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 320,
-      height: 280,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Stack(
+    return GestureDetector(
+      onTap: widget.onTap,
+      child: Container(
+        width: 320,
+        height: 280,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Stack(
         children: [
           // Main hand outline with pulse animation - oval shape like a pill
           Center(
@@ -240,7 +245,7 @@ class _PalmAnalysisDemoState extends State<PalmAnalysisDemo>
                         ),
                         const SizedBox(width: 6),
                         const Text(
-                          'AI ANALYSIS DEMO',
+                          'PHÂN TÍCH AI',
                           style: TextStyle(
                             fontSize: 12,
                             color: AppColors.primary,
@@ -251,7 +256,7 @@ class _PalmAnalysisDemoState extends State<PalmAnalysisDemo>
                     ),
                     const SizedBox(height: 4),
                     const Text(
-                      'Analyzing palm lines\nfor destiny insights',
+                      'Nhấn để bắt đầu\nphân tích đường chỉ tay',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 9,
@@ -265,6 +270,7 @@ class _PalmAnalysisDemoState extends State<PalmAnalysisDemo>
             ),
           ),
         ],
+      ),
       ),
     );
   }

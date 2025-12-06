@@ -10,6 +10,9 @@ import '../../data/repositories/chat_repository.dart';
 /// Provider for managing AI chat state and operations
 class ChatProvider extends BaseProvider {
   final ChatRepository _repository;
+  
+  // Track disposal state for ChatProvider-specific async operations
+  bool _chatDisposed = false;
 
   ChatProvider({ChatRepository? repository})
       : _repository = repository ?? ChatRepository();
@@ -38,15 +41,17 @@ class ChatProvider extends BaseProvider {
 
   /// Initialize chat provider with user
   Future<void> initialize(User user) async {
+    if (_chatDisposed) return;
     AppLogger.info('Initializing chat provider for user: ${user.id}');
     _currentUser = user;
-    notifyListeners();
+    _safeNotifyListeners();
   }
 
   /// Set current user
   void setUser(User user) {
+    if (_chatDisposed) return;
     _currentUser = user;
-    notifyListeners();
+    _safeNotifyListeners();
   }
 
   /// Create a new conversation
@@ -54,6 +59,8 @@ class ChatProvider extends BaseProvider {
     int? chartId,
     Map<String, dynamic>? chartData,
   }) async {
+    if (_chatDisposed) return false;
+    
     if (_currentUser == null) {
       AppLogger.error('Cannot create conversation: No user set');
       return false;
@@ -69,6 +76,9 @@ class ChatProvider extends BaseProvider {
       () => _repository.startConversation(userId.toString(), chartId: chartId),
       operationName: 'createNewConversation',
     );
+
+    // Check if disposed after async operation
+    if (_chatDisposed) return false;
 
     if (result != null) {
       _currentConversationId = result['conversation_id'] as int;
@@ -93,7 +103,7 @@ class ChatProvider extends BaseProvider {
       }
 
       AppLogger.info('Created new conversation: $_currentConversationId with Tu Vi chart: ${_currentChartData != null}');
-      notifyListeners();
+      _safeNotifyListeners();
       return true;
     }
     return false;
@@ -102,10 +112,13 @@ class ChatProvider extends BaseProvider {
   /// Send initial analysis request to transmit chart data
   Future<void> _sendInitialAnalysis() async {
     if (_currentChartData == null) return;
+    
+    // CRITICAL: Check if disposed before starting async operation
+    if (_chatDisposed) return;
 
     // Show AI typing indicator
     _setAiTyping(true);
-    notifyListeners();
+    _safeNotifyListeners();
 
     try {
       // Prompt for the AI to introduce the chart
@@ -119,6 +132,9 @@ class ChatProvider extends BaseProvider {
         operationName: 'analyzeTuViJson_initial',
         showLoading: false,
       );
+
+      // CRITICAL: Check if disposed after async operation
+      if (_chatDisposed) return;
 
       _setAiTyping(false);
 
@@ -138,15 +154,17 @@ class ChatProvider extends BaseProvider {
 
         _messages.add(aiMessage);
         AppLogger.info('Received initial Tu Vi greeting (${analysisResult.processingTime})');
-        notifyListeners();
+        _safeNotifyListeners();
       } else {
         // Fallback if analysis fails
         _addWelcomeMessage(null); // Pass null to show generic greeting or handle error
       }
     } catch (e) {
       AppLogger.error('Failed to send initial analysis', e);
-      _setAiTyping(false);
-      _addWelcomeMessage(null);
+      if (!_chatDisposed) {
+        _setAiTyping(false);
+        _addWelcomeMessage(null);
+      }
     }
   }
 
@@ -189,9 +207,11 @@ Bạn muốn hỏi tôi điều gì?''';
 
   /// Select an existing conversation and load its history
   Future<void> selectConversation(int conversationId) async {
+    if (_chatDisposed) return;
+    
     _currentConversationId = conversationId;
     _messages = [];
-    notifyListeners();
+    _safeNotifyListeners();
 
     // Load conversation history from API
     final result = await executeApiOperation(
@@ -199,15 +219,20 @@ Bạn muốn hỏi tôi điều gì?''';
       operationName: 'selectConversation',
     );
 
+    // Check if disposed after async operation
+    if (_chatDisposed) return;
+
     if (result != null) {
       _messages = result;
       AppLogger.info('Loaded conversation with ${_messages.length} messages');
-      notifyListeners();
+      _safeNotifyListeners();
     }
   }
 
   /// Fetch list of conversations for current user
   Future<void> fetchUserConversations() async {
+    if (_chatDisposed) return;
+    
     if (_currentUser == null) {
       AppLogger.error('Cannot fetch conversations: No user set');
       return;
@@ -218,12 +243,15 @@ Bạn muốn hỏi tôi điều gì?''';
       operationName: 'fetchUserConversations',
     );
 
+    // Check if disposed after async operation
+    if (_chatDisposed) return;
+
     if (result != null) {
       _conversationIds = result;
       // Sort descending (newest first) - assuming IDs are incremental
       _conversationIds.sort((a, b) => b.compareTo(a));
       AppLogger.info('Loaded ${_conversationIds.length} conversations');
-      notifyListeners();
+      _safeNotifyListeners();
     }
   }
 
@@ -231,6 +259,9 @@ Bạn muốn hỏi tôi điều gì?''';
   Future<bool> sendMessage(String message) async {
     final trimmedMessage = message.trim();
     if (trimmedMessage.isEmpty) return false;
+    
+    // CRITICAL: Check if disposed
+    if (_chatDisposed) return false;
 
     // Create new conversation if none exists
     if (_currentConversationId == null) {
@@ -240,6 +271,9 @@ Bạn muốn hỏi tôi điều gì?''';
         return false;
       }
     }
+    
+    // Check again after async operation
+    if (_chatDisposed) return false;
 
     // Create user message
     final userMessage = ChatMessageModel.user(
@@ -251,7 +285,7 @@ Bạn muốn hỏi tôi điều gì?''';
     _messages.add(userMessage);
     _currentMessage = '';
     _setAiTyping(true);
-    notifyListeners();
+    _safeNotifyListeners();
 
     // If we have Tu Vi chart data, use the fast analyze-json endpoint
     if (_currentChartData != null) {
@@ -263,6 +297,9 @@ Bạn muốn hỏi tôi điều gì?''';
         operationName: 'analyzeTuViJson',
         showLoading: false,
       );
+
+      // Check if disposed after async operation
+      if (_chatDisposed) return false;
 
       _setAiTyping(false);
 
@@ -281,7 +318,7 @@ Bạn muốn hỏi tôi điều gì?''';
 
         _messages.add(aiMessage);
         AppLogger.info('Received Tu Vi analysis (${analysisResult.processingTime})');
-        notifyListeners();
+        _safeNotifyListeners();
         return true;
       }
 
@@ -301,6 +338,9 @@ Bạn muốn hỏi tôi điều gì?''';
       showLoading: false,
     );
 
+    // Check if disposed after async operation
+    if (_chatDisposed) return false;
+
     _setAiTyping(false);
 
     if (result != null) {
@@ -317,7 +357,7 @@ Bạn muốn hỏi tôi điều gì?''';
       }
 
       AppLogger.info('Received AI response: ${result.id}');
-      notifyListeners();
+      _safeNotifyListeners();
       return true;
     }
 
@@ -326,30 +366,34 @@ Bạn muốn hỏi tôi điều gì?''';
 
   /// Update current message being typed
   void updateCurrentMessage(String message) {
+    if (_chatDisposed) return;
     _currentMessage = message;
     _setTyping(message.isNotEmpty);
-    notifyListeners();
+    _safeNotifyListeners();
   }
 
   /// Clear current message
   void clearCurrentMessage() {
+    if (_chatDisposed) return;
     _currentMessage = '';
     _setTyping(false);
-    notifyListeners();
+    _safeNotifyListeners();
   }
 
   /// Clear current conversation (start fresh)
   void clearConversation() {
+    if (_chatDisposed) return;
     _currentConversationId = null;
     _messages = [];
     _currentMessage = '';
     _currentChartData = null;
-    notifyListeners();
+    _safeNotifyListeners();
     AppLogger.info('Cleared conversation');
   }
 
   /// Set typing indicator
   void _setTyping(bool typing) {
+    if (_chatDisposed) return;
     if (_isTyping != typing) {
       _isTyping = typing;
       
@@ -357,8 +401,10 @@ Bạn muốn hỏi tôi điều gì?''';
       _typingTimer?.cancel();
       if (typing) {
         _typingTimer = Timer(const Duration(seconds: 3), () {
-          _isTyping = false;
-          notifyListeners();
+          if (!_chatDisposed) {
+            _isTyping = false;
+            _safeNotifyListeners();
+          }
         });
       }
     }
@@ -366,9 +412,10 @@ Bạn muốn hỏi tôi điều gì?''';
 
   /// Set AI typing indicator
   void _setAiTyping(bool typing) {
+    if (_chatDisposed) return;
     if (_isAiTyping != typing) {
       _isAiTyping = typing;
-      notifyListeners();
+      _safeNotifyListeners();
     }
   }
 
@@ -390,8 +437,16 @@ Bạn muốn hỏi tôi điều gì?''';
     return '${timestamp}_$random';
   }
 
+  /// Safe notify listeners - only if not disposed
+  void _safeNotifyListeners() {
+    if (!_chatDisposed) {
+      notifyListeners();
+    }
+  }
+
   @override
   void dispose() {
+    _chatDisposed = true;
     _typingTimer?.cancel();
     super.dispose();
   }

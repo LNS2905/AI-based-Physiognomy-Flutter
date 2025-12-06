@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:camera/camera.dart';
@@ -28,6 +29,8 @@ class _CameraScreenState extends State<CameraScreen>
   bool _isInitializing = true;
   bool _isCapturing = false;
   String? _errorMessage;
+  bool _showInstructions = true;
+  Timer? _instructionTimer;
 
   @override
   void initState() {
@@ -39,12 +42,24 @@ class _CameraScreenState extends State<CameraScreen>
       DeviceOrientation.portraitUp,
     ]);
 
+    // Start timer to hide instructions after 3 seconds
+    _instructionTimer = Timer(const Duration(seconds: 3), () {
+      if (mounted) {
+        setState(() {
+          _showInstructions = false;
+        });
+      }
+    });
+
     _initializeCamera();
   }
 
   @override
   void dispose() {
     AppLogger.info('Disposing CameraScreen');
+
+    // Cancel instruction timer
+    _instructionTimer?.cancel();
 
     WidgetsBinding.instance.removeObserver(this);
 
@@ -500,23 +515,24 @@ class _CameraScreenState extends State<CameraScreen>
       right: 0,
       child: Column(
         children: [
-          // Face Detection Guide
-          Container(
-            margin: const EdgeInsets.symmetric(horizontal: 32),
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.black54,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Text(
-              'Đặt khuôn mặt vào trong khung và chụp gương mặt chính diện',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 14,
+          // Face Detection Guide - only show for first 3 seconds
+          if (_showInstructions)
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 32),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.black54,
+                borderRadius: BorderRadius.circular(12),
               ),
-              textAlign: TextAlign.center,
+              child: const Text(
+                'Đặt khuôn mặt vào trong khung và chụp gương mặt chính diện',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                ),
+                textAlign: TextAlign.center,
+              ),
             ),
-          ),
           
           const SizedBox(height: 32),
           

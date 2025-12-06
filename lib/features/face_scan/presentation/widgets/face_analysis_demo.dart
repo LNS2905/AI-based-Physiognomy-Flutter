@@ -3,7 +3,10 @@ import '../../../../core/theme/app_colors.dart';
 
 /// Widget that displays the face analysis demo area with beautiful animations
 class FaceAnalysisDemo extends StatefulWidget {
-  const FaceAnalysisDemo({super.key});
+  /// Callback when the demo is tapped to start analysis
+  final VoidCallback? onTap;
+
+  const FaceAnalysisDemo({super.key, this.onTap});
 
   @override
   State<FaceAnalysisDemo> createState() => _FaceAnalysisDemoState();
@@ -56,29 +59,31 @@ class _FaceAnalysisDemoState extends State<FaceAnalysisDemo>
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 320,
-      height: 280,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Colors.white,
-            AppColors.surfaceVariant,
+    return GestureDetector(
+      onTap: widget.onTap,
+      child: Container(
+        width: 320,
+        height: 280,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Colors.white,
+              AppColors.surfaceVariant,
+            ],
+          ),
+          border: Border.all(color: AppColors.primary.withOpacity(0.3), width: 2),
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.primary.withOpacity(0.1),
+              blurRadius: 20,
+              offset: const Offset(0, 10),
+            ),
           ],
         ),
-        border: Border.all(color: AppColors.primary.withOpacity(0.3), width: 2),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withOpacity(0.1),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
-      child: Stack(
+        child: Stack(
         children: [
           // Main face outline with pulse animation - căn giữa hoàn toàn
           Center(
@@ -179,7 +184,7 @@ class _FaceAnalysisDemoState extends State<FaceAnalysisDemo>
                         ),
                         const SizedBox(width: 6),
                         const Text(
-                          'AI ANALYSIS DEMO',
+                          'PHÂN TÍCH AI',
                           style: TextStyle(
                             fontSize: 12,
                             color: AppColors.primary,
@@ -190,7 +195,7 @@ class _FaceAnalysisDemoState extends State<FaceAnalysisDemo>
                     ),
                     const SizedBox(height: 4),
                     const Text(
-                      'Analyzing facial features\nfor personality insights',
+                      'Nhấn để bắt đầu\nphân tích khuôn mặt',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 9,
@@ -206,6 +211,7 @@ class _FaceAnalysisDemoState extends State<FaceAnalysisDemo>
 
 
         ],
+      ),
       ),
     );
   }

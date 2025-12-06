@@ -10,7 +10,7 @@ class ApiConfig {
   
   // Face Analysis API Configuration
   // Updated with VPS backend URL
-  static const String faceAnalysisApiUrl = 'https://inspired-bear-emerging.ngrok-free.app/analyze-face/';
+  static const String faceAnalysisApiUrl = 'http://160.250.180.132:8001/analyze-face/';
   
   // Alternative URLs for different environments
   static const String faceAnalysisApiUrlLocal = 'http://localhost:8000/analyze-face/';

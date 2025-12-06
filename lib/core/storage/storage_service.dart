@@ -88,9 +88,19 @@ class StorageService {
     }
   }
 
+  /// Ensure storage is initialized
+  static Future<void> _ensureInitialized() async {
+    if (_prefs == null) {
+      AppLogger.warning('StorageService not initialized, attempting to initialize now...');
+      await init();
+    }
+  }
+
   /// Store regular data (preferences, settings, etc.)
   static Future<void> store(String key, dynamic value) async {
     try {
+      await _ensureInitialized();
+
       if (_prefs == null) {
         throw const CacheException(message: 'Storage not initialized');
       }
@@ -124,7 +134,10 @@ class StorageService {
   static T? get<T>(String key) {
     try {
       if (_prefs == null) {
-        throw const CacheException(message: 'Storage not initialized');
+        // We cannot await here as this method is synchronous.
+        // If this happens, it means init() was not called or failed.
+        AppLogger.error('StorageService.get called but storage is not initialized');
+        return null; 
       }
 
       final value = _prefs!.get(key);
@@ -151,6 +164,8 @@ class StorageService {
   /// Remove regular data
   static Future<void> remove(String key) async {
     try {
+      await _ensureInitialized();
+
       if (_prefs == null) {
         throw const CacheException(message: 'Storage not initialized');
       }
@@ -169,6 +184,8 @@ class StorageService {
   /// Clear all regular storage
   static Future<void> clear() async {
     try {
+      await _ensureInitialized();
+      
       if (_prefs == null) {
         throw const CacheException(message: 'Storage not initialized');
       }

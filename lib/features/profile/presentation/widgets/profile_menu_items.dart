@@ -5,6 +5,7 @@ import '../../../../core/widgets/logout_button.dart';
 import '../providers/profile_provider.dart';
 
 /// Profile menu items widget displaying navigation options
+// Currently empty as extra menu items are not ready
 class ProfileMenuItems extends StatelessWidget {
   final List<ProfileMenuItem> menuItems;
 
@@ -15,10 +16,7 @@ class ProfileMenuItems extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isTablet = screenWidth > 600;
-
-    // Hide the entire options section
+    // Hide the entire options section until features are ready
     return const SizedBox.shrink();
   }
 }
@@ -27,13 +25,13 @@ class ProfileMenuItems extends StatelessWidget {
 class ProfileQuickActions extends StatelessWidget {
   final VoidCallback? onEditProfile;
   final VoidCallback? onViewHistory;
-  final VoidCallback? onSettings;
+  // Removed onSettings callback to hide the button
 
   const ProfileQuickActions({
     super.key,
     this.onEditProfile,
     this.onViewHistory,
-    this.onSettings,
+    // this.onSettings,
   });
 
   @override
@@ -73,6 +71,8 @@ class ProfileQuickActions extends StatelessWidget {
               ),
             ),
           
+          // Settings button hidden
+          /*
           if (onViewHistory != null && onSettings != null)
             SizedBox(width: isTablet ? 16 : 12),
           
@@ -86,6 +86,7 @@ class ProfileQuickActions extends StatelessWidget {
                 isTablet: isTablet,
               ),
             ),
+          */
         ],
       ),
     );

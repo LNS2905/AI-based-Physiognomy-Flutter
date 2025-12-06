@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/logger.dart';
+import '../../../../core/utils/error_handler.dart';
 import '../../../../core/widgets/standard_back_button.dart';
 import '../../../auth/presentation/providers/enhanced_auth_provider.dart';
 import '../../data/models/credit_package_model.dart';
@@ -36,16 +37,18 @@ class _PaymentPackagesPageState extends State<PaymentPackagesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.background,
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
         leading: const StandardBackButton(),
-        title: const Text('Nạp tín dụng'),
+        title: const Text('Nạp Tín Dụng', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold)),
         centerTitle: true,
         elevation: 0,
       ),
       body: Consumer2<PaymentProvider, EnhancedAuthProvider>(
         builder: (context, paymentProvider, authProvider, _) {
           return SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -65,13 +68,14 @@ class _PaymentPackagesPageState extends State<PaymentPackagesPage> {
                   'Nhập số tiền cần nạp',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
                       ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'Số tiền tối thiểu: \$5.00',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.grey[600],
+                        color: AppColors.textSecondary,
                       ),
                 ),
                 const SizedBox(height: 16),
@@ -90,9 +94,19 @@ class _PaymentPackagesPageState extends State<PaymentPackagesPage> {
                       hintText: 'Nhập số tiền (vd: 10)',
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: AppColors.border),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: AppColors.border),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: AppColors.primary, width: 2),
                       ),
                       filled: true,
-                      fillColor: Colors.grey[50],
+                      fillColor: AppColors.surface,
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
@@ -127,6 +141,8 @@ class _PaymentPackagesPageState extends State<PaymentPackagesPage> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     backgroundColor: AppColors.primary,
+                    elevation: 2,
+                    shadowColor: AppColors.primary.withOpacity(0.4),
                   ),
                   child: paymentProvider.isLoading
                       ? const SizedBox(
@@ -138,7 +154,7 @@ class _PaymentPackagesPageState extends State<PaymentPackagesPage> {
                           ),
                         )
                       : const Text(
-                          'Nạp ngay',
+                          'Nạp Ngay',
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
@@ -156,31 +172,43 @@ class _PaymentPackagesPageState extends State<PaymentPackagesPage> {
 
   Widget _buildCurrentCreditsCard(BuildContext context, int credits) {
     return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      elevation: 6,
+      shadowColor: AppColors.shadow,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Container(
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [AppColors.primary, AppColors.primary.withOpacity(0.7)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          borderRadius: BorderRadius.circular(16),
+          gradient: AppColors.primaryGradient,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.primary.withOpacity(0.3),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         padding: const EdgeInsets.all(24),
         child: Column(
           children: [
-            const Icon(
-              Icons.account_balance_wallet,
-              color: Colors.white,
-              size: 48,
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.account_balance_wallet,
+                color: Colors.white,
+                size: 32,
+              ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             const Text(
               'Tín dụng hiện tại',
               style: TextStyle(
-                color: Colors.white,
+                color: Colors.white70,
                 fontSize: 16,
+                fontWeight: FontWeight.w500,
               ),
             ),
             const SizedBox(height: 8),
@@ -190,14 +218,16 @@ class _PaymentPackagesPageState extends State<PaymentPackagesPage> {
                 color: Colors.white,
                 fontSize: 48,
                 fontWeight: FontWeight.bold,
+                letterSpacing: -1,
               ),
             ),
             const SizedBox(height: 4),
             const Text(
-              'tín dụng',
+              'Tín dụng',
               style: TextStyle(
-                color: Colors.white70,
-                fontSize: 14,
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ],
@@ -209,32 +239,42 @@ class _PaymentPackagesPageState extends State<PaymentPackagesPage> {
   Widget _buildInfoSection(BuildContext context) {
     return Card(
       elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      shadowColor: AppColors.shadowLight,
+      color: AppColors.surface,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                Icon(Icons.info_outline, color: AppColors.primary),
-                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(Icons.info_outline, color: AppColors.primary, size: 20),
+                ),
+                const SizedBox(width: 12),
                 Text(
-                  'Thông tin nạp tín dụng',
+                  'Thông tin quy đổi',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
                       ),
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             _buildInfoItem(
               context,
               'Tỷ giá: \$1 USD = 10 Tín dụng',
               Icons.currency_exchange,
               isHighlighted: true,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             _buildInfoItem(
               context,
               'Nạp tối thiểu: \$5.00',
@@ -257,15 +297,15 @@ class _PaymentPackagesPageState extends State<PaymentPackagesPage> {
         Icon(
           icon,
           size: 20,
-          color: isHighlighted ? Colors.green : AppColors.textSecondary,
+          color: isHighlighted ? AppColors.success : AppColors.textSecondary,
         ),
         const SizedBox(width: 12),
         Expanded(
           child: Text(
             text,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: isHighlighted ? Colors.green : AppColors.textSecondary,
-                  fontWeight: isHighlighted ? FontWeight.w600 : FontWeight.normal,
+                  color: isHighlighted ? AppColors.success : AppColors.textSecondary,
+                  fontWeight: isHighlighted ? FontWeight.bold : FontWeight.normal,
                 ),
           ),
         ),
@@ -296,14 +336,15 @@ class _PaymentPackagesPageState extends State<PaymentPackagesPage> {
       showDialog(
         context: context,
         barrierDismissible: false,
-        builder: (context) => const Center(
+        builder: (context) => Center(
           child: Card(
-            child: Padding(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            child: const Padding(
               padding: EdgeInsets.all(24),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  CircularProgressIndicator(),
+                  CircularProgressIndicator(color: AppColors.primary),
                   SizedBox(height: 16),
                   Text('Đang khởi tạo thanh toán...'),
                 ],
@@ -320,7 +361,7 @@ class _PaymentPackagesPageState extends State<PaymentPackagesPage> {
       if (email == null) {
         if (context.mounted) {
           Navigator.of(context).pop(); // Close loading
-          _showErrorDialog(context, 'Không tìm thấy email người dùng. Vui lòng đăng nhập lại.');
+          ErrorHandler.handleError(context, 'Không tìm thấy email người dùng. Vui lòng đăng nhập lại.');
         }
         return;
       }
@@ -335,7 +376,7 @@ class _PaymentPackagesPageState extends State<PaymentPackagesPage> {
 
       if (!initSuccess) {
         if (context.mounted) {
-          _showErrorDialog(
+          ErrorHandler.handleError(
             context,
             paymentProvider.errorMessage ?? 'Khởi tạo thanh toán thất bại.',
           );
@@ -349,7 +390,7 @@ class _PaymentPackagesPageState extends State<PaymentPackagesPage> {
         final userId = context.read<EnhancedAuthProvider>().currentUser?.id;
         if (userId == null) {
            if (context.mounted) {
-            _showErrorDialog(context, 'Không tìm thấy ID người dùng. Vui lòng đăng nhập lại.');
+            ErrorHandler.handleError(context, 'Không tìm thấy ID người dùng. Vui lòng đăng nhập lại.');
            }
            return;
         }
@@ -358,14 +399,19 @@ class _PaymentPackagesPageState extends State<PaymentPackagesPage> {
         
         if (presentSuccess) {
           // Payment successful
+          
+          // Wait for the payment sheet to fully close and Flutter to resume rendering
+          await Future.delayed(const Duration(milliseconds: 500));
+          
           if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Thanh toán thành công! Tín dụng đã được cập nhật.'),
-                backgroundColor: Colors.green,
-              ),
-            );
+            ErrorHandler.showSuccess(context, 'Thanh toán thành công! Tín dụng đã được cập nhật.');
+            
+            // Optimistic update using the value from PaymentProvider
+            context.read<EnhancedAuthProvider>().updateUserCredits(paymentProvider.currentCredits);
+            
+            // Then refresh data from server to be consistent
             context.read<EnhancedAuthProvider>().refreshUserData();
+            
             // Clear input
             _amountController.clear();
           }
@@ -373,7 +419,7 @@ class _PaymentPackagesPageState extends State<PaymentPackagesPage> {
           // Payment failed or cancelled
           if (context.mounted && paymentProvider.errorMessage != null) {
              if (paymentProvider.errorMessage != 'Payment canceled') {
-                _showErrorDialog(context, paymentProvider.errorMessage!);
+                ErrorHandler.handleError(context, paymentProvider.errorMessage!);
              }
           }
         }
@@ -381,24 +427,8 @@ class _PaymentPackagesPageState extends State<PaymentPackagesPage> {
     } catch (e) {
       AppLogger.error('Payment error: $e');
       if (context.mounted) {
-        _showErrorDialog(context, e.toString());
+        ErrorHandler.handleError(context, e);
       }
     }
-  }
-
-  void _showErrorDialog(BuildContext context, String message) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Lỗi thanh toán'),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
   }
 }

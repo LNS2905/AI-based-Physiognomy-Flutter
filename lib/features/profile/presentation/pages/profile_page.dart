@@ -355,33 +355,22 @@ class _ProfilePageState extends State<ProfilePage> {
           onPressed: () => _showLogoutConfirmation(),
           tooltip: 'Đăng xuất',
         ),
-        IconButton(
-          icon: Icon(
-            Icons.more_vert,
-            color: AppColors.textPrimary,
-            size: isTablet ? 28 : 24,
-          ),
-          onPressed: () => _showMoreOptions(),
-        ),
+        // Hide more options menu as features are not ready
+        // IconButton(
+        //   icon: Icon(
+        //     Icons.more_vert,
+        //     color: AppColors.textPrimary,
+        //     size: isTablet ? 28 : 24,
+        //   ),
+        //   onPressed: () => _showMoreOptions(),
+        // ),
       ],
     );
   }
 
   /// Show edit profile dialog
   void _showEditProfileDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Chỉnh sửa hồ sơ'),
-        content: const Text('Tính năng chỉnh sửa hồ sơ sẽ được triển khai trong phiên bản tiếp theo.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Đóng'),
-          ),
-        ],
-      ),
-    );
+    context.push('/edit-profile');
   }
 
   /// Navigate to history page
@@ -391,18 +380,9 @@ class _ProfilePageState extends State<ProfilePage> {
 
   /// Navigate to settings page
   void _navigateToSettings() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Cài đặt'),
-        content: const Text('Tính năng cài đặt sẽ được triển khai trong phiên bản tiếp theo.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Đóng'),
-          ),
-        ],
-      ),
+    ErrorHandler.showInfo(
+      context,
+      'Tính năng cài đặt sẽ được triển khai trong phiên bản tiếp theo.',
     );
   }
 

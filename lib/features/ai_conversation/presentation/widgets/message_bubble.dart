@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../data/models/chat_message_model.dart';
@@ -121,13 +122,26 @@ class MessageBubble extends StatelessWidget {
   Widget _buildMessageContent(BuildContext context, bool isUser) {
     switch (message.type) {
       case MessageType.text:
-        return Text(
-          message.content,
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w400,
-            color: isUser ? Colors.white : const Color(0xFF333333),
-            height: 1.4,
+        return MarkdownBody(
+          data: message.content,
+          styleSheet: MarkdownStyleSheet(
+            p: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w400,
+              color: isUser ? Colors.white : const Color(0xFF333333),
+              height: 1.4,
+            ),
+            strong: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: isUser ? Colors.white : const Color(0xFF333333),
+            ),
+            em: TextStyle(
+              fontStyle: FontStyle.italic,
+              color: isUser ? Colors.white : const Color(0xFF333333),
+            ),
+            listBullet: TextStyle(
+              color: isUser ? Colors.white : const Color(0xFF333333),
+            ),
           ),
         );
       case MessageType.image:

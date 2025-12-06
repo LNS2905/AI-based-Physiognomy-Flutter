@@ -101,13 +101,20 @@ class MyApp extends StatelessWidget {
         // History Provider
         ChangeNotifierProxyProvider<EnhancedAuthProvider, HistoryProvider>(
           create: (context) {
+            AppLogger.info('HistoryProvider CREATE called');
             final authProvider = context.read<EnhancedAuthProvider>();
             return HistoryProvider(authProvider: authProvider);
           },
           update: (context, authProvider, previous) {
-            // Dispose previous provider if it exists
-            previous?.dispose();
-            return HistoryProvider(authProvider: authProvider);
+            // IMPORTANT: Do NOT dispose previous manually!
+            // ChangeNotifierProxyProvider handles disposal automatically.
+            // Just return the existing provider - it already listens to auth changes internally.
+            if (previous == null) {
+              AppLogger.warning('HistoryProvider UPDATE called with NULL previous - creating new instance');
+              return HistoryProvider(authProvider: authProvider);
+            }
+            AppLogger.info('HistoryProvider UPDATE called - reusing existing instance');
+            return previous;
           },
         ),
 
@@ -149,14 +156,14 @@ class MyApp extends StatelessWidget {
         // Global error handling
         builder: (context, child) {
           // Disable all UI warnings in debug mode
-          ErrorWidget.builder = (FlutterErrorDetails details) {
-            // Log error for debugging
-            AppLogger.error('Flutter Error', details.exception, details.stack);
+          // ErrorWidget.builder = (FlutterErrorDetails details) {
+          //   // Log error for debugging
+          //   AppLogger.error('Flutter Error', details.exception, details.stack);
 
-            // In debug mode, suppress UI warnings and return empty widget
-            // This will hide all visual error indicators
-            return const SizedBox.shrink();
-          };
+          //   // In debug mode, suppress UI warnings and return empty widget
+          //   // This will hide all visual error indicators
+          //   return const SizedBox.shrink();
+          // };
 
           // Wrap child to prevent text scaling warnings
           return MediaQuery(

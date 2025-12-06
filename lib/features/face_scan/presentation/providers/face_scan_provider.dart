@@ -634,9 +634,12 @@ class FaceScanProvider extends BaseProvider {
       );
     }).toList() ?? <FacialMetricDto>[];
 
+    // Use Vietnamese fallback instead of English
+    final resultText = analysis?.result ?? 'Không có dữ liệu phân tích khuôn mặt từ hệ thống. Vui lòng thử lại.';
+
     return FacialAnalysisDto(
       userId: _authProvider!.userId.toString(),
-      resultText: analysis?.result ?? 'Face analysis completed',
+      resultText: resultText,
       faceShape: faceShape,
       harmonyScore: harmonyScore,
       probabilities: probabilities,
@@ -649,127 +652,211 @@ class FaceScanProvider extends BaseProvider {
 
   /// Convert PalmAnalysisResponseModel to PalmAnalysisDto
   PalmAnalysisDto _convertToPalmAnalysisDto(PalmAnalysisResponseModel analysisResult) {
-    // Generate interpretations from available data
+    // Extract real data from palm_interpretation
     final interpretations = _generateInterpretationsFromPalmData(analysisResult);
-
-    // Generate life aspects from available data
     final lifeAspects = _generateLifeAspectsFromPalmData(analysisResult);
-
-    // Generate summary text from available data
     final summaryText = _generateSummaryTextFromPalmData(analysisResult);
+
+    // Count detected lines from interpretations
+    int heartLine = 0, headLine = 0, lifeLine = 0, fateLine = 0;
+    for (final interp in interpretations) {
+      switch (interp.lineType.toLowerCase()) {
+        case 'heart':
+          heartLine = 1;
+          break;
+        case 'head':
+          headLine = 1;
+          break;
+        case 'life':
+          lifeLine = 1;
+          break;
+        case 'fate':
+          fateLine = 1;
+          break;
+      }
+    }
 
     return PalmAnalysisDto(
       userId: _authProvider!.userId!.toDouble(),
       annotatedImage: analysisResult.annotatedImageUrl ?? '',
       targetLines: 'heart,head,life,fate',
-      imageHeight: 480.0, // Standard image dimensions from analysis
+      imageHeight: 480.0,
       imageWidth: 640.0,
       imageChannels: 3.0,
       summaryText: summaryText,
       interpretations: interpretations,
       lifeAspects: lifeAspects,
-      palmLinesDetected: analysisResult.handsDetected.toDouble(),
-      detectedHeartLine: 1.0, // Based on interpretations generated
-      detectedHeadLine: 1.0,
-      detectedLifeLine: 1.0,
-      detectedFateLine: analysisResult.handsDetected > 0 ? 1.0 : 0.0,
+      palmLinesDetected: interpretations.length.toDouble(),
+      detectedHeartLine: heartLine.toDouble(),
+      detectedHeadLine: headLine.toDouble(),
+      detectedLifeLine: lifeLine.toDouble(),
+      detectedFateLine: fateLine.toDouble(),
     );
   }
 
-  /// Generate interpretations from palm analysis data
+  /// Extract interpretations from palm analysis data - REAL DATA ONLY
   List<InterpretationDto> _generateInterpretationsFromPalmData(PalmAnalysisResponseModel analysisResult) {
-    final interpretations = <InterpretationDto>[];
+    try {
+      // Extract palm_interpretation from response
+      final palmInterpretation = _extractPalmInterpretation(analysisResult);
+      
+      if (palmInterpretation == null) {
+        AppLogger.warning('palm_interpretation not found in API response');
+        return [];
+      }
 
-    // Heart line interpretation
-    interpretations.add(InterpretationDto(
-      lineType: 'heart',
-      pattern: 'curved',
-      meaning: 'Indicates emotional stability and capacity for love',
-      lengthPx: 120.0,
-      confidence: 0.85,
-    ));
+      // Extract detailed_analysis
+      final detailedAnalysis = palmInterpretation['detailed_analysis'] as Map<String, dynamic>?;
+      
+      if (detailedAnalysis == null) {
+        AppLogger.warning('detailed_analysis not found in palm_interpretation');
+        return [];
+      }
 
-    // Head line interpretation
-    interpretations.add(InterpretationDto(
-      lineType: 'head',
-      pattern: 'straight',
-      meaning: 'Shows logical thinking and analytical mind',
-      lengthPx: 110.0,
-      confidence: 0.80,
-    ));
-
-    // Life line interpretation
-    interpretations.add(InterpretationDto(
-      lineType: 'life',
-      pattern: 'deep',
-      meaning: 'Indicates vitality and life energy',
-      lengthPx: 130.0,
-      confidence: 0.90,
-    ));
-
-    // Fate line interpretation if hands detected
-    if (analysisResult.handsDetected > 0) {
-      interpretations.add(InterpretationDto(
-        lineType: 'fate',
-        pattern: 'clear',
-        meaning: 'Shows potential for career success and life direction',
-        lengthPx: 100.0,
-        confidence: 0.75,
-      ));
+      return _extractInterpretationsFromDetailedAnalysis(detailedAnalysis);
+    } catch (e) {
+      AppLogger.error('Failed to extract interpretations from palm data', e);
+      return [];
     }
+  }
 
+  /// Extract palm_interpretation from response
+  Map<String, dynamic>? _extractPalmInterpretation(PalmAnalysisResponseModel result) {
+    try {
+      final handsData = result.analysis?.palmDetection?.handsData;
+      if (handsData != null && handsData.isNotEmpty) {
+        final firstHand = handsData[0];
+        if (firstHand is HandDataModel) {
+          final palmInterp = firstHand.additionalData?['palm_interpretation'];
+          if (palmInterp is Map<String, dynamic>) {
+            return palmInterp;
+          }
+        }
+      }
+    } catch (e) {
+      AppLogger.error('Failed to extract palm_interpretation', e);
+    }
+    return null;
+  }
+
+  /// Extract interpretations from detailed_analysis map
+  List<InterpretationDto> _extractInterpretationsFromDetailedAnalysis(Map<String, dynamic> detailedAnalysis) {
+    final interpretations = <InterpretationDto>[];
+    
+    // Map of line types to extract
+    final lineTypes = ['life_line', 'head_line', 'heart_line', 'fate_line'];
+    
+    for (final lineKey in lineTypes) {
+      if (detailedAnalysis.containsKey(lineKey)) {
+        try {
+          final lineData = detailedAnalysis[lineKey] as Map<String, dynamic>?;
+          if (lineData != null) {
+            final pattern = lineData['pattern'] as String? ?? '';
+            final meaning = lineData['meaning'] as String? ?? '';
+            
+            if (pattern.isNotEmpty || meaning.isNotEmpty) {
+              // Convert line_key format to simple format (e.g., 'life_line' -> 'life')
+              final lineType = lineKey.replaceAll('_line', '');
+              
+              interpretations.add(InterpretationDto(
+                lineType: lineType,
+                pattern: pattern,
+                meaning: meaning,
+                lengthPx: 100.0, // Default value
+                confidence: 0.85, // Default value
+              ));
+            }
+          }
+        } catch (e) {
+          AppLogger.error('Failed to extract $lineKey interpretation', e);
+        }
+      }
+    }
+    
     return interpretations;
   }
 
-  /// Generate life aspects from palm analysis data
+  /// Extract life aspects from palm analysis data - REAL DATA ONLY
   List<LifeAspectDto> _generateLifeAspectsFromPalmData(PalmAnalysisResponseModel analysisResult) {
+    try {
+      // Extract palm_interpretation from response
+      final palmInterpretation = _extractPalmInterpretation(analysisResult);
+      
+      if (palmInterpretation == null) {
+        AppLogger.warning('palm_interpretation not found for life aspects');
+        return [];
+      }
+
+      // Extract life_aspects
+      final lifeAspectsData = palmInterpretation['life_aspects'] as Map<String, dynamic>?;
+      
+      if (lifeAspectsData == null) {
+        AppLogger.warning('life_aspects not found in palm_interpretation');
+        return [];
+      }
+
+      return _extractLifeAspectsFromMap(lifeAspectsData);
+    } catch (e) {
+      AppLogger.error('Failed to extract life aspects from palm data', e);
+      return [];
+    }
+  }
+
+  /// Extract life aspects from life_aspects map
+  List<LifeAspectDto> _extractLifeAspectsFromMap(Map<String, dynamic> lifeAspectsData) {
     final lifeAspects = <LifeAspectDto>[];
-
-    // Health aspect based on palm analysis
-    lifeAspects.add(LifeAspectDto(
-      aspect: 'health',
-      content: 'Based on palm analysis, health indicators show positive signs. Palm structure suggests good vitality and energy levels.',
-    ));
-
-    // Career aspect based on palm lines
-    lifeAspects.add(LifeAspectDto(
-      aspect: 'career',
-      content: 'Career prospects appear favorable based on palm lines. Hand structure indicates potential for professional success.',
-    ));
-
-    // Relationships aspect based on emotional indicators
-    lifeAspects.add(LifeAspectDto(
-      aspect: 'relationships',
-      content: 'Relationship patterns suggest emotional stability. Palm features indicate capacity for meaningful connections.',
-    ));
-
-    // Personality aspect based on overall analysis
-    lifeAspects.add(LifeAspectDto(
-      aspect: 'personality',
-      content: 'Overall palm analysis suggests balanced personality traits and emotional intelligence.',
-    ));
-
+    
+    // Map of aspect types to extract
+    final aspectTypes = ['health', 'career', 'relationships', 'personality'];
+    
+    for (final aspectKey in aspectTypes) {
+      if (lifeAspectsData.containsKey(aspectKey)) {
+        try {
+          final aspectData = lifeAspectsData[aspectKey];
+          String content = '';
+          
+          // Handle both List and String formats
+          if (aspectData is List) {
+            content = aspectData.join(' ');
+          } else if (aspectData is String) {
+            content = aspectData;
+          }
+          
+          if (content.isNotEmpty) {
+            lifeAspects.add(LifeAspectDto(
+              aspect: aspectKey,
+              content: content,
+            ));
+          }
+        } catch (e) {
+          AppLogger.error('Failed to extract $aspectKey aspect', e);
+        }
+      }
+    }
+    
     return lifeAspects;
   }
 
-  /// Generate summary text from palm analysis data
+  /// Extract summary text from palm analysis data - REAL DATA ONLY
   String _generateSummaryTextFromPalmData(PalmAnalysisResponseModel analysisResult) {
-    final buffer = StringBuffer();
-
-    buffer.write('Palm analysis completed successfully. ');
-
-    if (analysisResult.handsDetected > 0) {
-      buffer.write('Detected ${analysisResult.handsDetected} hand(s). ');
+    try {
+      // Extract palm_interpretation from response
+      final palmInterpretation = _extractPalmInterpretation(analysisResult);
+      
+      if (palmInterpretation != null) {
+        final summaryText = palmInterpretation['summary_text'] as String?;
+        if (summaryText != null && summaryText.isNotEmpty) {
+          return summaryText;
+        }
+      }
+      
+      AppLogger.warning('summary_text not found in palm_interpretation');
+    } catch (e) {
+      AppLogger.error('Failed to extract summary text from palm data', e);
     }
-
-    if (analysisResult.measurementsSummary != null) {
-      final summary = analysisResult.measurementsSummary!;
-      buffer.write('Palm measurements: ${summary.averagePalmWidth.toStringAsFixed(1)}mm width, ${summary.averageHandLength.toStringAsFixed(1)}mm length. ');
-    }
-
-    buffer.write('Analysis provides insights into personality traits and life patterns based on traditional palmistry principles.');
-
-    return buffer.toString();
+    
+    // Return Vietnamese error message - NO FAKE DATA
+    return 'Không có dữ liệu phân tích chi tiết từ hệ thống. Vui lòng thử lại.';
   }
 
   @override

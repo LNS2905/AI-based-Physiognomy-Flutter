@@ -4,6 +4,7 @@ import '../../../../core/network/api_result.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/errors/exceptions.dart';
 import '../../../../core/utils/logger.dart';
+import '../../../../core/constants/app_constants.dart';
 import '../models/chat_request_model.dart';
 import '../models/chat_message_model.dart';
 import '../models/chat_start_model.dart';
@@ -14,7 +15,9 @@ class ChatRepository {
   final HttpService _httpService;
 
   ChatRepository({HttpService? httpService})
-      : _httpService = httpService ?? HttpService();
+      : _httpService = httpService ?? HttpService(
+          baseUrl: AppConstants.chatbotBaseUrl, // Use chatbot backend (port 5003)
+        );
 
   /// Start a new conversation
   /// Returns a map with conversationId and optional welcome message
@@ -148,6 +151,8 @@ class ChatRepository {
         '/api/v1/chat/user/$userId/conversations',
       );
 
+      AppLogger.info('getUserConversations raw response: $response');
+
       // Backend response format:
       // {
       //   "success": true,
@@ -157,9 +162,11 @@ class ChatRepository {
       List<int> conversationIds = [];
       if (response.containsKey('conversation_ids') && response['conversation_ids'] is List) {
         conversationIds = List<int>.from(response['conversation_ids']);
+      } else {
+        AppLogger.warning('conversation_ids not found in response. Keys: ${response.keys}');
       }
 
-      AppLogger.info('Fetched ${conversationIds.length} conversations');
+      AppLogger.info('Fetched ${conversationIds.length} conversations: $conversationIds');
       return Success(conversationIds);
     } catch (e) {
       AppLogger.error('Failed to fetch user conversations', e);

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:camera/camera.dart';
@@ -32,12 +33,24 @@ class _PalmCameraScreenState extends State<PalmCameraScreen> {
   bool _isCapturing = false;
   bool _isInitializing = true;
   String? _errorMessage;
+  bool _showInstructions = true;
+  Timer? _instructionTimer;
 
   @override
   void initState() {
     super.initState();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
     _initializeCamera();
+    
+    // Start timer to hide instructions after 3 seconds
+    _instructionTimer = Timer(const Duration(seconds: 3), () {
+      if (mounted) {
+        setState(() {
+          _showInstructions = false;
+        });
+      }
+    });
+    
     AppLogger.info('PalmCameraScreen initialized with gender: ${widget.gender}');
   }
 
@@ -68,7 +81,7 @@ class _PalmCameraScreenState extends State<PalmCameraScreen> {
         _errorMessage = null;
       });
 
-      // Start camera (this will create the controller)
+      // Start camera (default front camera)
       await _cameraService.startCamera();
 
       if (mounted) {
@@ -90,6 +103,9 @@ class _PalmCameraScreenState extends State<PalmCameraScreen> {
   @override
   void dispose() {
     AppLogger.info('Disposing PalmCameraScreen');
+
+    // Cancel instruction timer
+    _instructionTimer?.cancel();
 
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
@@ -246,11 +262,16 @@ class _PalmCameraScreenState extends State<PalmCameraScreen> {
             children: [
               // Palm scanner image overlay
               Center(
-                child: Image.asset(
-                  'palm-scanner-scaleup.png',
-                  width: MediaQuery.of(context).size.width * 2.0,
-                  height: MediaQuery.of(context).size.height * 1.4,
-                  fit: BoxFit.contain,
+                child: Transform(
+                  alignment: Alignment.center,
+                  transform: Matrix4.identity()
+                    ..scale(widget.gender == Gender.male ? -1.0 : 1.0, 1.0),
+                  child: Image.asset(
+                    'palm-scanner-scaleup.png',
+                    width: MediaQuery.of(context).size.width * 2.0,
+                    height: MediaQuery.of(context).size.height * 1.4,
+                    fit: BoxFit.contain,
+                  ),
                 ),
               ),
 
@@ -281,6 +302,22 @@ class _PalmCameraScreenState extends State<PalmCameraScreen> {
   }
 
 
+
+  Future<void> _switchCamera() async {
+    try {
+      await _cameraService.switchCamera();
+      setState(() {});
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Không thể chuyển camera: ${e.toString()}'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
+  }
 
   Widget _buildTopControls() {
     return Row(
@@ -319,8 +356,21 @@ class _PalmCameraScreenState extends State<PalmCameraScreen> {
           ),
         ),
         
-        // Placeholder for symmetry
-        const SizedBox(width: 50),
+        // Switch Camera Button
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.black.withOpacity(0.5),
+            borderRadius: BorderRadius.circular(25),
+          ),
+          child: IconButton(
+            onPressed: _switchCamera,
+            icon: const Icon(
+              Icons.flip_camera_ios,
+              color: Colors.white,
+              size: 24,
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -329,15 +379,16 @@ class _PalmCameraScreenState extends State<PalmCameraScreen> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        // Instructions
-        Container(
-          margin: const EdgeInsets.symmetric(horizontal: 32),
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.7),
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Column(
+        // Instructions - only show for first 3 seconds
+        if (_showInstructions)
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 32),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.7),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Column(
             children: [
               const Text(
                 'Hướng dẫn chụp vân tay:',

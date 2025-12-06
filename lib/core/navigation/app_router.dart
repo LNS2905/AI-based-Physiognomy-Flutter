@@ -27,6 +27,7 @@ import '../../features/history/presentation/pages/history_page.dart';
 import '../../features/history/presentation/pages/face_analysis_history_detail_page.dart';
 import '../../features/history/presentation/pages/palm_analysis_history_detail_page.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
+import '../../features/profile/presentation/pages/edit_profile_page.dart';
 import '../../features/history/presentation/pages/chat_history_detail_page.dart';
 import '../../features/testing/presentation/pages/new_api_test_page.dart';
 import '../../features/testing/presentation/pages/tu_vi_test_page.dart';
@@ -294,6 +295,15 @@ class AppRouter {
         path: AppConstants.profileRoute,
         name: 'profile',
         builder: (context, state) => const ProfilePage().withAuthGuard(
+          redirectRoute: AppConstants.introRoute,
+        ),
+      ),
+
+      // Edit Profile Route (Protected)
+      GoRoute(
+        path: '/edit-profile',
+        name: 'edit-profile',
+        builder: (context, state) => const EditProfilePage().withAuthGuard(
           redirectRoute: AppConstants.introRoute,
         ),
       ),

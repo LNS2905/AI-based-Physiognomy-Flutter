@@ -523,7 +523,7 @@ class HomePage extends StatelessWidget {
       },
       {
         'icon': Icons.back_hand,
-        'title': 'Quét vân tay', 
+        'title': 'Quét đường chỉ tay', 
         'description': 'Phân tích đường chỉ tay',
         'route': '/palm-scanning',
       },
@@ -614,7 +614,7 @@ class HomePage extends StatelessWidget {
                 child: _buildFeatureCard(
                   context,
                   icon: Icons.back_hand,
-                  title: 'Quét vân tay',
+                  title: 'Quét đường chỉ tay',
                   description: 'Phân tích đường chỉ tay',
                   onTap: () => context.push('/palm-scanning'),
                 ),

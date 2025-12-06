@@ -69,7 +69,7 @@ AppRouter.pushTuViResult(chartId);
 1. Thêm feature card "Lá Số Tử Vi" vào danh sách feature cards
 2. Cập nhật responsive layout:
    - **Mobile**: Grid 2x3 (2-2-1 pattern)
-     - Row 1: Quét khuôn mặt, Quét vân tay
+     - Row 1: Quét khuôn mặt, Quét đường chỉ tay
      - Row 2: Lá Số Tử Vi, AI Chatbot  
      - Row 3: Lịch sử (centered)
    - **Tablet**: Grid 3 cột (3-2 pattern cho 5 cards)

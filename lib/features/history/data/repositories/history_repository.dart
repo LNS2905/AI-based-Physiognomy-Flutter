@@ -220,11 +220,15 @@ class HistoryRepository {
       // 1. Get list of conversation IDs
       final conversationIdsResult = await _chatRepository.getUserConversations(userId.toString());
       
+      AppLogger.info('Chat history API result type: ${conversationIdsResult.runtimeType}');
+      
       if (conversationIdsResult is! Success<List<int>>) {
+        AppLogger.error('Failed to get conversation IDs: ${conversationIdsResult.failure?.message}');
         return Error(conversationIdsResult.failure!);
       }
 
       final conversationIds = (conversationIdsResult as Success<List<int>>).data;
+      AppLogger.info('Found ${conversationIds.length} conversation IDs: $conversationIds');
       final List<ChatHistoryModel> historyItems = [];
 
       // 2. Fetch details for each conversation

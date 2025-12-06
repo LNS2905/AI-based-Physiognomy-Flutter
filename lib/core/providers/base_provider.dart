@@ -346,6 +346,13 @@ abstract class BaseProvider extends ChangeNotifier {
     AppLogger.logStateChange(runtimeType.toString(), 'dispose', null);
     super.dispose();
   }
+
+  @override
+  void notifyListeners() {
+    // CRITICAL: Prevent notifyListeners after dispose to avoid "used after being disposed" error
+    if (_isDisposed) return;
+    super.notifyListeners();
+  }
 }
 
 /// Extension for ApiResult pattern matching

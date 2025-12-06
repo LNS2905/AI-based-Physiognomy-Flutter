@@ -1,9 +1,9 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/logger.dart';
-import '../../../../core/widgets/fixed_bottom_navigation.dart';
 import '../../../../core/widgets/standard_back_button.dart';
 import '../../data/models/chart_data_models.dart';
 import '../../data/models/cloudinary_analysis_response_model.dart';
@@ -32,9 +32,7 @@ class AnalysisResultsPage extends StatelessWidget {
       body: Stack(
         children: [
           SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 100),
-              child: Column(
+            child: Column(
                 children: [
                   // Custom Header
                   _buildHeader(context),
@@ -87,10 +85,6 @@ class AnalysisResultsPage extends StatelessWidget {
                 ],
               ),
             ),
-          ),
-          FixedBottomNavigation(
-            currentRoute: '/face-analysis-results',
-          ),
         ],
       ),
     );
@@ -860,6 +854,51 @@ class AnalysisResultsPage extends StatelessWidget {
   }
 
   Widget _buildImageWidget(String imageUrl) {
+    if (imageUrl.startsWith('data:image')) {
+      final base64String = imageUrl.split(',')[1];
+      final bytes = base64Decode(base64String);
+      return Container(
+        width: double.infinity,
+        constraints: const BoxConstraints(
+          minHeight: 200,
+          maxHeight: 400,
+        ),
+        child: Image.memory(
+          bytes,
+          fit: BoxFit.fitWidth,
+          width: double.infinity,
+          errorBuilder: (context, error, stackTrace) {
+            AppLogger.error('Failed to decode base64 image', error);
+            return Container(
+              height: 200,
+              color: AppColors.surfaceVariant,
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.error_outline,
+                      size: 48,
+                      color: AppColors.textSecondary,
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      'Không thể hiển thị hình ảnh',
+                      style: TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      );
+    }
+    
     return Container(
       width: double.infinity,
       constraints: const BoxConstraints(

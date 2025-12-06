@@ -86,12 +86,7 @@ class _PalmScanPageState extends State<PalmScanPage> {
                           const SizedBox(height: 12),
 
                           // Main Content Section
-                          _buildMainContent(),
-
-                          const SizedBox(height: 16),
-
-                          // Call-to-Action Text
-                          _buildCallToActionText(),
+                          _buildMainContent(provider),
 
                           const SizedBox(height: 16),
 
@@ -158,7 +153,7 @@ class _PalmScanPageState extends State<PalmScanPage> {
                 const SizedBox(width: 16),
                 const Expanded(
                   child: Text(
-                    'Quét vân tay',
+                    'Quét đường chỉ tay',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
@@ -223,100 +218,16 @@ class _PalmScanPageState extends State<PalmScanPage> {
             ),
           ),
 
-          const SizedBox(height: 12),
-
-          // Large title with gradient
-          ShaderMask(
-            shaderCallback: (bounds) => LinearGradient(
-              colors: [AppColors.primary, AppColors.primaryDark],
-            ).createShader(bounds),
-            child: const Text(
-              'QUÉT VÂN TAY',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.w800,
-                color: Colors.white,
-                letterSpacing: 2.0,
-              ),
-            ),
-          ),
         ],
       ),
     );
   }
 
-  Widget _buildMainContent() {
+  Widget _buildMainContent(FaceScanProvider provider) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 60),
-      child: Column(
-        children: [
-          const Text(
-            'PHÂN TÍCH CHỈ TAY AI',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
-            ),
-          ),
-          const SizedBox(height: 40),
-          const PalmAnalysisDemo(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCallToActionText() {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 40),
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            AppColors.primary.withOpacity(0.1),
-            AppColors.primary.withOpacity(0.05),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: AppColors.primary.withOpacity(0.2),
-          width: 1,
-        ),
-      ),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.auto_awesome,
-                color: AppColors.primary,
-                size: 20,
-              ),
-              const SizedBox(width: 8),
-              Flexible(
-                child: Text(
-                  'Khám phá vận mệnh của bạn',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          const Text(
-            'thông qua phân tích đường chỉ tay!',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: AppColors.primary,
-            ),
-          ),
-        ],
+      child: PalmAnalysisDemo(
+        onTap: () => _handleBeginAnalysis(provider),
       ),
     );
   }
@@ -578,7 +489,7 @@ class _PalmScanPageState extends State<PalmScanPage> {
                         ),
                         const SizedBox(height: 2),
                         const Text(
-                          'Hướng dẫn từng bước để quét vân tay',
+                          'Hướng dẫn từng bước để quét đường chỉ tay',
                           style: TextStyle(
                             fontSize: 11,
                             color: AppColors.textSecondary,

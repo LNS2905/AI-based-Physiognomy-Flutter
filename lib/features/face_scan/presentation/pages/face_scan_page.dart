@@ -199,23 +199,6 @@ class _FaceScanPageState extends State<FaceScanPage> {
             ),
           ),
 
-          const SizedBox(height: 12),
-
-          // Large title with gradient
-          ShaderMask(
-            shaderCallback: (bounds) => LinearGradient(
-              colors: [AppColors.primary, AppColors.primaryDark],
-            ).createShader(bounds),
-            child: const Text(
-              'QUÉT KHUÔN MẶT',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.w800,
-                color: Colors.white,
-                letterSpacing: 2.0,
-              ),
-            ),
-          ),
         ],
       ),
     );
@@ -224,19 +207,8 @@ class _FaceScanPageState extends State<FaceScanPage> {
   Widget _buildMainContent() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 60),
-      child: Column(
-        children: [
-          const Text(
-            'PHÂN TÍCH TƯỚNG HỌC AI',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
-            ),
-          ),
-          const SizedBox(height: 40),
-          const FaceAnalysisDemo(),
-        ],
+      child: FaceAnalysisDemo(
+        onTap: _handleBeginAnalysis,
       ),
     );
   }
@@ -250,13 +222,13 @@ class _FaceScanPageState extends State<FaceScanPage> {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            AppColors.primary.withOpacity(0.1),
-            AppColors.primary.withOpacity(0.05),
+            AppColors.primary.withValues(alpha: 0.1),
+            AppColors.primary.withValues(alpha: 0.05),
           ],
         ),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: AppColors.primary.withOpacity(0.2),
+          color: AppColors.primary.withValues(alpha: 0.2),
           width: 1,
         ),
       ),
