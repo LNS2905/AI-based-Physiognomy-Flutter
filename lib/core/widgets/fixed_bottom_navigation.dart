@@ -157,19 +157,25 @@ class FixedBottomNavigation extends StatelessWidget {
 
   void _navigateToScan(BuildContext context) {
     if (!_isActive('/face-scanning')) {
-      context.push('/face-scanning');
+      // Use go instead of push to replace the current route
+      // This prevents multiple instances of the same page in the navigation stack
+      context.go('/face-scanning');
     }
   }
 
   void _navigateToTuVi(BuildContext context) {
     if (!_isActive('/tu-vi-input')) {
-      context.push('/tu-vi-input');
+      // Use go instead of push to replace the current route
+      // This prevents multiple instances of the same page in the navigation stack
+      context.go('/tu-vi-input');
     }
   }
 
   void _navigateToProfile(BuildContext context) {
     if (!_isActive('/profile')) {
-      context.push('/profile');
+      // Use go instead of push to replace the current route
+      // This prevents multiple instances of the same page in the navigation stack
+      context.go('/profile');
     }
   }
 }

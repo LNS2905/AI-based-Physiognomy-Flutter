@@ -3,6 +3,7 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../data/models/chat_message_model.dart';
+import 'contextual_suggestions.dart';
 
 /// Message bubble widget for displaying chat messages
 class MessageBubble extends StatelessWidget {
@@ -10,6 +11,8 @@ class MessageBubble extends StatelessWidget {
   final bool showAvatar;
   final bool showTimestamp;
   final VoidCallback? onLongPress;
+  final bool isLastAiMessage;
+  final Function(String)? onSuggestionTap;
 
   const MessageBubble({
     super.key,
@@ -17,48 +20,63 @@ class MessageBubble extends StatelessWidget {
     this.showAvatar = true,
     this.showTimestamp = false,
     this.onLongPress,
+    this.isLastAiMessage = false,
+    this.onSuggestionTap,
   });
 
   @override
   Widget build(BuildContext context) {
     final isUser = message.sender == MessageSender.user;
     final isSystem = message.sender == MessageSender.system;
+    final isAi = message.sender == MessageSender.ai;
 
     if (isSystem) {
       return _buildSystemMessage(context);
     }
 
-    return Container(
-      margin: const EdgeInsets.symmetric(
-        horizontal: AppConstants.defaultPadding,
-        vertical: AppConstants.smallPadding,
-      ),
-      child: Row(
-        mainAxisAlignment: isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          if (!isUser && showAvatar) ...[
-            _buildAvatar(context, isUser),
-            const SizedBox(width: AppConstants.smallPadding),
-          ],
-          Flexible(
-            child: Column(
-              crossAxisAlignment: isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-              children: [
-                _buildMessageBubble(context, isUser),
-                if (showTimestamp) ...[
-                  const SizedBox(height: 4),
-                  _buildTimestamp(context, isUser),
-                ],
-              ],
-            ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          margin: const EdgeInsets.symmetric(
+            horizontal: AppConstants.defaultPadding,
+            vertical: AppConstants.smallPadding,
           ),
-          if (isUser && showAvatar) ...[
-            const SizedBox(width: AppConstants.smallPadding),
-            _buildAvatar(context, isUser),
-          ],
-        ],
-      ),
+          child: Row(
+            mainAxisAlignment: isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              if (!isUser && showAvatar) ...[
+                _buildAvatar(context, isUser),
+                const SizedBox(width: AppConstants.smallPadding),
+              ],
+              Flexible(
+                child: Column(
+                  crossAxisAlignment: isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                  children: [
+                    _buildMessageBubble(context, isUser),
+                    if (showTimestamp) ...[
+                      const SizedBox(height: 4),
+                      _buildTimestamp(context, isUser),
+                    ],
+                  ],
+                ),
+              ),
+              if (isUser && showAvatar) ...[
+                const SizedBox(width: AppConstants.smallPadding),
+                _buildAvatar(context, isUser),
+              ],
+            ],
+          ),
+        ),
+        // Contextual suggestions for last AI message
+        if (isAi && isLastAiMessage && onSuggestionTap != null)
+          ContextualSuggestions(
+            messageContent: message.content,
+            onSuggestionTap: onSuggestionTap!,
+            isLastMessage: isLastAiMessage,
+          ),
+      ],
     );
   }
 

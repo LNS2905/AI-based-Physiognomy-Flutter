@@ -10,6 +10,22 @@ import '../../../auth/data/models/auth_models.dart';
 import '../../../ai_conversation/presentation/providers/chat_provider.dart';
 import '../../../../core/theme/app_colors.dart';
 
+/// Giải nghĩa ngắn gọn cho 12 cung tử vi
+const Map<String, String> houseInterpretations = {
+  'Mệnh': 'Cung quan trọng nhất, thể hiện bản mệnh, tính cách cốt lõi và định hướng cuộc đời. Các sao trong cung này ảnh hưởng sâu sắc đến vận mệnh tổng quan.',
+  'Phụ Mẫu': 'Thể hiện mối quan hệ với cha mẹ, ông bà và bề trên. Cung này còn cho thấy sự hỗ trợ từ người lớn tuổi trong cuộc sống.',
+  'Phúc Đức': 'Biểu thị phúc đức tổ tiên, may mắn tích lũy và đời sống tinh thần. Cung tốt mang lại bình an và sự che chở từ tổ tiên.',
+  'Điền Trạch': 'Liên quan đến tài sản cố định, nhà cửa, đất đai. Thể hiện khả năng tích lũy của cải và môi trường sống.',
+  'Quan Lộc': 'Cung sự nghiệp và công danh. Cho thấy con đường nghề nghiệp, địa vị xã hội và thành tựu trong công việc.',
+  'Nô Bộc': 'Thể hiện mối quan hệ với bạn bè, đồng nghiệp và cấp dưới. Cung này cũng cho thấy khả năng lãnh đạo và được người khác hỗ trợ.',
+  'Thiên Di': 'Liên quan đến di chuyển, xuất ngoại và thay đổi môi trường. Cho thấy vận may khi xa nhà và khả năng thích nghi.',
+  'Tật Ách': 'Cung sức khỏe và bệnh tật. Thể hiện thể chất, các vấn đề sức khỏe tiềm ẩn và cách phòng tránh.',
+  'Tài Bạch': 'Cung tiền bạc và tài chính. Cho thấy khả năng kiếm tiền, quản lý tài chính và nguồn thu nhập.',
+  'Tử Tức': 'Liên quan đến con cái và hậu duệ. Thể hiện số con, mối quan hệ với con cái và phúc đức cho đời sau.',
+  'Phu Thê': 'Cung hôn nhân và tình duyên. Cho thấy đặc điểm người bạn đời, hạnh phúc hôn nhân và quan hệ vợ chồng.',
+  'Huynh Đệ': 'Thể hiện mối quan hệ với anh chị em ruột. Cũng liên quan đến bạn bè thân thiết như anh em.',
+};
+
 /// Result page displaying Tu Vi chart
 class TuViResultPage extends StatefulWidget {
   final String chartId;
@@ -639,6 +655,51 @@ class _TuViResultPageState extends State<TuViResultPage> {
           ),
         ),
         children: [
+          // Interpretation section
+          Container(
+            margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppColors.iconBgYellow.withOpacity(0.5),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AppColors.borderYellow.withOpacity(0.5)),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  Icons.lightbulb_outline,
+                  color: AppColors.primaryDark,
+                  size: 18,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Ý nghĩa',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primaryDark,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        houseInterpretations[house.name] ?? 'Cung này thể hiện một khía cạnh quan trọng trong lá số tử vi của bạn.',
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: AppColors.textSecondary,
+                          height: 1.4,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
           if (house.stars.isNotEmpty)
             Padding(
               padding: const EdgeInsets.all(16),

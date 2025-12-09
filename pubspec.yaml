@@ -64,6 +64,9 @@ dependencies:
   # Payment & URL Launcher
   url_launcher: ^6.2.1
   flutter_stripe: ^10.1.1
+  
+  # Share functionality
+  share_plus: ^7.0.0
 
 dev_dependencies:
   flutter_test:

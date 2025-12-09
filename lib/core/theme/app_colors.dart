@@ -122,9 +122,18 @@ class AppColors {
   static const Color darkBackground = Color(0xFF121212);
   static const Color darkSurface = Color(0xFF1E1E1E);
   static const Color darkSurfaceVariant = Color(0xFF2C2C2C);
-  static const Color darkTextPrimary = Color(0xFFF5D547);
-  static const Color darkTextSecondary = Color(0xFFE0E0E0);
+  static const Color darkTextPrimary = Color(0xFFFFFFFF); // White for primary text
+  static const Color darkTextSecondary = Color(0xFFB3B3B3); // Light grey for secondary
+  static const Color darkTextTertiary = Color(0xFF8A8A8A); // Medium grey for tertiary
+  static const Color darkTextHint = Color(0xFF6B6B6B); // Darker grey for hints
   static const Color darkBorder = Color(0xFF3A3A3A);
+  static const Color darkBorderLight = Color(0xFF2A2A2A);
+  static const Color darkDivider = Color(0xFF3A3A3A);
+  static const Color darkCardColor = Color(0xFF1E1E1E);
+  static const Color darkNavBackground = Color(0xFF1E1E1E);
+  static const Color darkNavInactive = Color(0xFF8A8A8A);
+  static const Color darkShadow = Color(0x40000000); // 25% black
+  static const Color darkRipple = Color(0x1FFFFFFF); // White ripple
 
   // ============================================
   // GRADIENT DEFINITIONS

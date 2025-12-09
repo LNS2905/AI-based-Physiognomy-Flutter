@@ -18,8 +18,11 @@ import '../../../auth/presentation/providers/enhanced_auth_provider.dart';
 
 /// Provider for face scanning functionality
 class FaceScanProvider extends BaseProvider {
-  final FaceScanRepository _repository;
-  final EnhancedAuthProvider? _authProvider;
+  FaceScanRepository _repository;
+  EnhancedAuthProvider? _authProvider;
+  
+  // Disposal tracking
+  bool _faceScanDisposed = false;
 
   /// Expose repository for direct access when needed
   FaceScanRepository get repository => _repository;
@@ -31,6 +34,25 @@ class FaceScanProvider extends BaseProvider {
     EnhancedAuthProvider? authProvider,
   })  : _repository = repository ?? FaceScanRepository(),
         _authProvider = authProvider;
+
+  /// Update the auth provider dependency when ProxyProvider calls update
+  /// This pattern avoids creating a new FaceScanProvider instance on auth changes
+  void updateAuthProvider(EnhancedAuthProvider? newAuthProvider) {
+    if (_faceScanDisposed) return;
+    
+    // Check if authProvider actually changed
+    if (_authProvider == newAuthProvider) {
+      AppLogger.info('FaceScanProvider.updateAuthProvider: Same provider, skipping update');
+      return;
+    }
+    
+    AppLogger.info('FaceScanProvider.updateAuthProvider: Updating auth provider dependency');
+    
+    // Update references
+    _authProvider = newAuthProvider;
+    
+    AppLogger.info('FaceScanProvider.updateAuthProvider: Auth provider dependency updated successfully');
+  }
 
   // Current scan state
   FaceScanResponseModel? _currentScan;
@@ -861,12 +883,17 @@ class FaceScanProvider extends BaseProvider {
 
   @override
   void dispose() {
+    AppLogger.info('FaceScanProvider.dispose() called');
+    // CRITICAL: Set disposed flag FIRST to prevent any callbacks
+    _faceScanDisposed = true;
+    
     _currentScan = null;
     _scanHistory.clear();
     _selectedImagePath = null;
     _isCameraActive = false;
     _currentPalmResult = null;
     _palmHistory.clear();
+    AppLogger.info('FaceScanProvider.dispose() completed');
     super.dispose();
   }
 }

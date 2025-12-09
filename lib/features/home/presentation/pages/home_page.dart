@@ -35,8 +35,8 @@ class HomePage extends StatelessWidget {
 
                         const SizedBox(height: 28),
 
-                        // Feature Categories Section
-                        _buildCategorySection(context),
+                        // Quick Shortcuts Section
+                        _buildQuickShortcuts(context),
 
                         const SizedBox(height: 28),
 
@@ -150,26 +150,20 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  /// Build welcome banner
+  /// Build welcome banner - Tử Vi theme with app's golden color palette
   Widget _buildWelcomeBanner(BuildContext context) {
+    // Using app's primary golden color with dark text for good contrast
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            AppColors.primary,
-            AppColors.primaryDark,
-          ],
-        ),
+        color: AppColors.primary, // Solid golden yellow - no gradient
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withOpacity(0.3),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
+            color: AppColors.shadowYellow,
+            blurRadius: 16,
+            offset: const Offset(0, 6),
           ),
         ],
       ),
@@ -184,48 +178,48 @@ class HomePage extends StatelessWidget {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
+                    color: AppColors.textPrimary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
-                    '✨ Khám phá ngay',
+                    '🔮 Tử Vi Đẩu Số',
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      color: Colors.white,
+                      color: AppColors.textPrimary,
                     ),
                   ),
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'Khám phá\ncon người bạn',
+                  'Giải Mã Vận Mệnh\nVới Tử Vi AI',
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.w700,
-                    color: Colors.white,
+                    color: AppColors.textPrimary,
                     height: 1.2,
                     letterSpacing: -0.5,
                   ),
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  'AI phân tích tướng mặt và chỉ tay để khám phá tính cách.',
+                  'Khám phá bí ẩn cuộc đời qua lá số tử vi cổ xưa, kết hợp trí tuệ nhân tạo hiện đại. Mỗi vì sao đều kể một câu chuyện...',
                   style: TextStyle(
                     fontSize: 14,
-                    color: Colors.white.withOpacity(0.9),
+                    color: AppColors.textPrimary.withValues(alpha: 0.8),
                     height: 1.4,
                   ),
                 ),
                 const SizedBox(height: 20),
                 GestureDetector(
-                  onTap: () => context.push('/face-scanning'),
+                  onTap: () => context.push('/tu-vi-input'),
                   child: Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 20,
                       vertical: 12,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: AppColors.textPrimary,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Row(
@@ -236,14 +230,14 @@ class HomePage extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
-                            color: AppColors.primaryDark,
+                            color: AppColors.primary,
                           ),
                         ),
                         const SizedBox(width: 8),
                         Icon(
                           Icons.arrow_forward_rounded,
                           size: 18,
-                          color: AppColors.primaryDark,
+                          color: AppColors.primary,
                         ),
                       ],
                     ),
@@ -258,13 +252,13 @@ class HomePage extends StatelessWidget {
             child: Container(
               height: 140,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.15),
+                color: AppColors.textPrimary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Stack(
                 alignment: Alignment.center,
                 children: [
-                  // Decorative shapes
+                  // Decorative shapes - using app colors
                   Positioned(
                     top: 20,
                     right: 20,
@@ -272,7 +266,7 @@ class HomePage extends StatelessWidget {
                       width: 30,
                       height: 30,
                       decoration: BoxDecoration(
-                        color: AppColors.secondary.withOpacity(0.8),
+                        color: AppColors.secondary,
                         shape: BoxShape.circle,
                       ),
                     ),
@@ -284,16 +278,25 @@ class HomePage extends StatelessWidget {
                       width: 20,
                       height: 20,
                       decoration: BoxDecoration(
-                        color: AppColors.accent.withOpacity(0.8),
+                        color: AppColors.accent,
                         borderRadius: BorderRadius.circular(6),
                       ),
                     ),
                   ),
+                  Positioned(
+                    top: 50,
+                    left: 25,
+                    child: Icon(
+                      Icons.star_rounded,
+                      size: 16,
+                      color: AppColors.textPrimary.withValues(alpha: 0.5),
+                    ),
+                  ),
                   // Main icon
                   Icon(
-                    Icons.face_retouching_natural_rounded,
+                    Icons.auto_awesome_rounded,
                     size: 60,
-                    color: Colors.white,
+                    color: AppColors.textPrimary,
                   ),
                 ],
               ),
@@ -304,114 +307,132 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  /// Build category section (horizontal scroll)
-  Widget _buildCategorySection(BuildContext context) {
-    final categories = [
-      {'icon': Icons.face_outlined, 'label': 'Khuôn mặt', 'color': AppColors.iconBgTeal},
-      {'icon': Icons.back_hand_outlined, 'label': 'Chỉ tay', 'color': AppColors.iconBgPeach},
-      {'icon': Icons.auto_awesome_outlined, 'label': 'Tử vi', 'color': AppColors.iconBgBlue},
-      {'icon': Icons.chat_bubble_outline_rounded, 'label': 'AI Chat', 'color': AppColors.iconBgGreen},
-      {'icon': Icons.history_rounded, 'label': 'Lịch sử', 'color': AppColors.iconBgPurple},
+  /// Build quick shortcuts section with 4 buttons
+  Widget _buildQuickShortcuts(BuildContext context) {
+    final shortcuts = [
+      {
+        'icon': Icons.face_retouching_natural_rounded,
+        'label': 'Khuôn mặt',
+        'route': '/face-scanning',
+        'bgColor': AppColors.iconBgTeal,
+        'iconColor': AppColors.secondaryDark,
+        'isPremium': false, // FREE feature
+        'showBadge': true,
+      },
+      {
+        'icon': Icons.back_hand_rounded,
+        'label': 'Chỉ tay',
+        'route': '/palm-scanning',
+        'bgColor': AppColors.iconBgPeach,
+        'iconColor': AppColors.accentDark,
+        'isPremium': false, // FREE feature
+        'showBadge': true,
+      },
+      {
+        'icon': Icons.chat_bubble_rounded,
+        'label': 'Chatbot',
+        'route': '/ai-conversation',
+        'bgColor': AppColors.iconBgGreen,
+        'iconColor': AppColors.success,
+        'isPremium': true, // PAID feature
+        'showBadge': true,
+      },
+      {
+        'icon': Icons.history_rounded,
+        'label': 'Lịch sử',
+        'route': '/history',
+        'bgColor': AppColors.iconBgPurple,
+        'iconColor': const Color(0xFF7B1FA2), // Purple dark
+        'isPremium': false,
+        'showBadge': false, // No badge for History
+      },
     ];
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Text(
-            'Danh mục',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: shortcuts.map((shortcut) {
+          final shortcutWidget = GestureDetector(
+            onTap: () => context.push(shortcut['route'] as String),
+            child: Column(
+              children: [
+                Container(
+                  width: 64,
+                  height: 64,
+                  decoration: BoxDecoration(
+                    color: shortcut['bgColor'] as Color,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: (shortcut['iconColor'] as Color).withValues(alpha: 0.2),
+                      width: 1.5,
+                    ),
+                  ),
+                  child: Icon(
+                    shortcut['icon'] as IconData,
+                    size: 28,
+                    color: shortcut['iconColor'] as Color,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  shortcut['label'] as String,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ],
             ),
-          ),
-        ),
-        const SizedBox(height: 16),
-        SizedBox(
-          height: 100,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            physics: const BouncingScrollPhysics(),
-            itemCount: categories.length,
-            itemBuilder: (context, index) {
-              final category = categories[index];
-              return Padding(
-                padding: EdgeInsets.only(
-                  right: index == categories.length - 1 ? 0 : 16,
-                ),
-                child: _buildCategoryItem(
-                  context,
-                  icon: category['icon'] as IconData,
-                  label: category['label'] as String,
-                  backgroundColor: category['color'] as Color,
-                  onTap: () {
-                    // Navigate based on category
-                    switch (index) {
-                      case 0:
-                        context.push('/face-scanning');
-                        break;
-                      case 1:
-                        context.push('/palm-scanning');
-                        break;
-                      case 2:
-                        context.push('/tu-vi-input');
-                        break;
-                      case 3:
-                        context.push('/ai-conversation');
-                        break;
-                      case 4:
-                        context.push('/history');
-                        break;
-                    }
-                  },
-                ),
-              );
-            },
-          ),
-        ),
-      ],
+          );
+
+          return _buildShortcutWithBadge(
+            child: shortcutWidget,
+            isPremium: shortcut['isPremium'] as bool,
+            showBadge: shortcut['showBadge'] as bool,
+          );
+        }).toList(),
+      ),
     );
   }
 
-  /// Build category item
-  Widget _buildCategoryItem(
-    BuildContext context, {
-    required IconData icon,
-    required String label,
-    required Color backgroundColor,
-    required VoidCallback onTap,
+  /// Build shortcut with free/premium badge
+  Widget _buildShortcutWithBadge({
+    required Widget child,
+    required bool isPremium,
+    bool showBadge = true,
   }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Column(
-        children: [
-          Container(
-            width: 64,
-            height: 64,
+    if (!showBadge) return child;
+
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        child,
+        Positioned(
+          top: -4,
+          right: -4,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
             decoration: BoxDecoration(
-              color: backgroundColor,
-              borderRadius: BorderRadius.circular(20),
+              color: isPremium ? AppColors.warning : AppColors.success,
+              borderRadius: BorderRadius.circular(8),
+              boxShadow: [
+                BoxShadow(
+                  color: (isPremium ? AppColors.warning : AppColors.success)
+                      .withOpacity(0.3),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
-            child: Icon(
-              icon,
-              size: 28,
-              color: AppColors.textPrimary.withOpacity(0.8),
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              color: AppColors.textSecondary,
+            child: Text(
+              isPremium ? '💎' : '✨',
+              style: const TextStyle(fontSize: 10),
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 

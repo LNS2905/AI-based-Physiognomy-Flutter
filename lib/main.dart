@@ -88,9 +88,16 @@ class MyApp extends StatelessWidget {
         // Face Scan Provider
         ChangeNotifierProxyProvider<EnhancedAuthProvider, FaceScanProvider>(
           create: (context) => FaceScanProvider(),
-          update: (context, authProvider, previous) => FaceScanProvider(
-            authProvider: authProvider,
-          ),
+          update: (context, authProvider, previous) {
+            // Use updateDependency pattern to avoid lifecycle issues
+            // This prevents '_dependents.isEmpty' assertion error
+            if (previous == null) {
+              return FaceScanProvider(authProvider: authProvider);
+            }
+            // Update the auth provider dependency on the existing instance
+            previous.updateAuthProvider(authProvider);
+            return previous;
+          },
         ),
 
         // AI Chat Provider - initialized when user logs in
@@ -106,14 +113,16 @@ class MyApp extends StatelessWidget {
             return HistoryProvider(authProvider: authProvider);
           },
           update: (context, authProvider, previous) {
-            // IMPORTANT: Do NOT dispose previous manually!
-            // ChangeNotifierProxyProvider handles disposal automatically.
-            // Just return the existing provider - it already listens to auth changes internally.
+            // Use updateDependency pattern to avoid lifecycle issues
+            // This prevents '_dependents.isEmpty' assertion error on Samsung S23 Note
             if (previous == null) {
               AppLogger.warning('HistoryProvider UPDATE called with NULL previous - creating new instance');
               return HistoryProvider(authProvider: authProvider);
             }
-            AppLogger.info('HistoryProvider UPDATE called - reusing existing instance');
+            // Update the auth provider dependency on the existing instance
+            // instead of creating a new instance
+            previous.updateAuthProvider(authProvider);
+            AppLogger.info('HistoryProvider UPDATE called - updated auth dependency on existing instance');
             return previous;
           },
         ),

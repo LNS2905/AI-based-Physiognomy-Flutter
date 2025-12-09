@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../data/models/tu_vi_chart_request.dart';
 import '../providers/tu_vi_provider.dart';
@@ -19,24 +18,43 @@ class TuViInputPage extends StatefulWidget {
 class _TuViInputPageState extends State<TuViInputPage> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
-  final _dayController = TextEditingController();
-  final _monthController = TextEditingController();
-  final _yearController = TextEditingController();
 
-  DateTime _selectedDate = DateTime.now();
+  // Scroll controllers for date pickers
+  late FixedExtentScrollController _dayScrollController;
+  late FixedExtentScrollController _monthScrollController;
+  late FixedExtentScrollController _yearScrollController;
+
+  // Selected date values
+  int _selectedDay = 1;
+  int _selectedMonth = 1;
+  int _selectedYear = 2000;
+
   int _selectedHourBranch = 1;
   int _selectedGender = 1;
   bool _isSolarCalendar = true;
   bool _isForSelf = true;
 
+  // Date ranges
+  static const int _minYear = 1900;
+  static const int _maxYear = 2100;
+
   @override
   void initState() {
     super.initState();
-    
-    // Initialize date controllers
-    _dayController.text = _selectedDate.day.toString();
-    _monthController.text = _selectedDate.month.toString();
-    _yearController.text = _selectedDate.year.toString();
+
+    // Initialize with current date
+    final now = DateTime.now();
+    _selectedDay = now.day;
+    _selectedMonth = now.month;
+    _selectedYear = now.year;
+
+    // Initialize scroll controllers
+    _dayScrollController =
+        FixedExtentScrollController(initialItem: _selectedDay - 1);
+    _monthScrollController =
+        FixedExtentScrollController(initialItem: _selectedMonth - 1);
+    _yearScrollController =
+        FixedExtentScrollController(initialItem: _selectedYear - _minYear);
 
     // Auto-fill user info if default is self
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -47,15 +65,16 @@ class _TuViInputPageState extends State<TuViInputPage> {
   }
 
   void _fillUserInfo() {
-    final authProvider = Provider.of<EnhancedAuthProvider>(context, listen: false);
+    final authProvider =
+        Provider.of<EnhancedAuthProvider>(context, listen: false);
     final user = authProvider.currentUser;
-    
+
     if (user != null) {
       setState(() {
         if (user.firstName != null || user.lastName != null) {
           _nameController.text = user.fullName;
         }
-        
+
         if (user.gender != null) {
           _selectedGender = user.gender == auth_models.Gender.male ? 1 : -1;
         }
@@ -89,29 +108,18 @@ class _TuViInputPageState extends State<TuViInputPage> {
   @override
   void dispose() {
     _nameController.dispose();
-    _dayController.dispose();
-    _monthController.dispose();
-    _yearController.dispose();
+    _dayScrollController.dispose();
+    _monthScrollController.dispose();
+    _yearScrollController.dispose();
     super.dispose();
   }
 
   Future<void> _selectDate(BuildContext context) async {
-    // Parse current values from controllers if valid to set initial date
-    DateTime initialDate = _selectedDate;
-    try {
-      final d = int.parse(_dayController.text);
-      final m = int.parse(_monthController.text);
-      final y = int.parse(_yearController.text);
-      initialDate = DateTime(y, m, d);
-    } catch (_) {
-      // If invalid, use current _selectedDate or now
-    }
-
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: initialDate,
-      firstDate: DateTime(1900),
-      lastDate: DateTime(2100),
+      initialDate: DateTime(_selectedYear, _selectedMonth, _selectedDay),
+      firstDate: DateTime(_minYear),
+      lastDate: DateTime(_maxYear),
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
@@ -128,10 +136,14 @@ class _TuViInputPageState extends State<TuViInputPage> {
     );
     if (picked != null) {
       setState(() {
-        _selectedDate = picked;
-        _dayController.text = picked.day.toString();
-        _monthController.text = picked.month.toString();
-        _yearController.text = picked.year.toString();
+        _selectedDay = picked.day;
+        _selectedMonth = picked.month;
+        _selectedYear = picked.year;
+
+        // Update scroll controllers
+        _dayScrollController.jumpToItem(_selectedDay - 1);
+        _monthScrollController.jumpToItem(_selectedMonth - 1);
+        _yearScrollController.jumpToItem(_selectedYear - _minYear);
       });
     }
   }
@@ -141,22 +153,12 @@ class _TuViInputPageState extends State<TuViInputPage> {
       return;
     }
 
-    // Parse date from controllers
-    final day = int.parse(_dayController.text);
-    final month = int.parse(_monthController.text);
-    final year = int.parse(_yearController.text);
-    
-    // Update state for consistency
-    setState(() {
-      _selectedDate = DateTime(year, month, day);
-    });
-
     final provider = Provider.of<TuViProvider>(context, listen: false);
 
     final request = TuViChartRequest(
-      day: day,
-      month: month,
-      year: year,
+      day: _selectedDay,
+      month: _selectedMonth,
+      year: _selectedYear,
       hourBranch: _selectedHourBranch,
       gender: _selectedGender,
       name: _nameController.text.trim().isNotEmpty
@@ -196,9 +198,104 @@ class _TuViInputPageState extends State<TuViInputPage> {
     }
   }
 
+  /// Build a scroll wheel picker - compact flat design
+  Widget _buildScrollPicker({
+    required String label,
+    required List<String> items,
+    required int selectedIndex,
+    required FixedExtentScrollController controller,
+    required ValueChanged<int> onChanged,
+    double itemWidth = 60,
+  }) {
+    const double itemHeight = 32.0;
+    const double containerHeight = 96.0; // Show 3 items
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        // Label
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: AppColors.textSecondary,
+          ),
+        ),
+        const SizedBox(height: 6),
+        // Picker container
+        Container(
+          width: itemWidth,
+          height: containerHeight,
+          decoration: BoxDecoration(
+            color: AppColors.surfaceVariant,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppColors.border),
+          ),
+          child: Stack(
+            children: [
+              // Center highlight
+              Positioned(
+                top: 32,
+                left: 4,
+                right: 4,
+                child: Container(
+                  height: itemHeight,
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryLight,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              ),
+              // Flat scroll view using useMagnifier for flat appearance
+              ListWheelScrollView.useDelegate(
+                controller: controller,
+                itemExtent: itemHeight,
+                perspective: 0.0001, // Nearly flat
+                diameterRatio: 100, // Very large = flat
+                useMagnifier: false,
+                physics: const FixedExtentScrollPhysics(),
+                onSelectedItemChanged: onChanged,
+                childDelegate: ListWheelChildBuilderDelegate(
+                  childCount: items.length,
+                  builder: (context, index) {
+                    final isSelected = index == selectedIndex;
+                    return Container(
+                      height: itemHeight,
+                      alignment: Alignment.center,
+                      child: Text(
+                        items[index],
+                        style: TextStyle(
+                          fontSize: isSelected ? 16 : 13,
+                          fontWeight:
+                              isSelected ? FontWeight.bold : FontWeight.w400,
+                          color: isSelected
+                              ? AppColors.textPrimary
+                              : AppColors.textTertiary,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<TuViProvider>(context);
+
+    // Generate picker items
+    final dayItems =
+        List.generate(31, (index) => (index + 1).toString().padLeft(2, '0'));
+    final monthItems =
+        List.generate(12, (index) => (index + 1).toString().padLeft(2, '0'));
+    final yearItems = List.generate(
+        _maxYear - _minYear + 1, (index) => (_minYear + index).toString());
 
     return Scaffold(
       backgroundColor: AppColors.backgroundWarm,
@@ -292,7 +389,9 @@ class _TuViInputPageState extends State<TuViInputPage> {
                           duration: const Duration(milliseconds: 200),
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           decoration: BoxDecoration(
-                            color: _isForSelf ? AppColors.primary : Colors.transparent,
+                            color: _isForSelf
+                                ? AppColors.primary
+                                : Colors.transparent,
                             borderRadius: BorderRadius.circular(16),
                             boxShadow: _isForSelf
                                 ? [
@@ -310,14 +409,20 @@ class _TuViInputPageState extends State<TuViInputPage> {
                               Icon(
                                 Icons.person_rounded,
                                 size: 20,
-                                color: _isForSelf ? AppColors.textOnPrimary : AppColors.textSecondary,
+                                color: _isForSelf
+                                    ? AppColors.textOnPrimary
+                                    : AppColors.textSecondary,
                               ),
                               const SizedBox(width: 8),
                               Text(
                                 'Bản thân',
                                 style: TextStyle(
-                                  fontWeight: _isForSelf ? FontWeight.bold : FontWeight.w500,
-                                  color: _isForSelf ? AppColors.textOnPrimary : AppColors.textSecondary,
+                                  fontWeight: _isForSelf
+                                      ? FontWeight.bold
+                                      : FontWeight.w500,
+                                  color: _isForSelf
+                                      ? AppColors.textOnPrimary
+                                      : AppColors.textSecondary,
                                   fontSize: 15,
                                 ),
                               ),
@@ -338,7 +443,9 @@ class _TuViInputPageState extends State<TuViInputPage> {
                           duration: const Duration(milliseconds: 200),
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           decoration: BoxDecoration(
-                            color: !_isForSelf ? AppColors.primary : Colors.transparent,
+                            color: !_isForSelf
+                                ? AppColors.primary
+                                : Colors.transparent,
                             borderRadius: BorderRadius.circular(16),
                             boxShadow: !_isForSelf
                                 ? [
@@ -356,14 +463,20 @@ class _TuViInputPageState extends State<TuViInputPage> {
                               Icon(
                                 Icons.people_rounded,
                                 size: 20,
-                                color: !_isForSelf ? AppColors.textOnPrimary : AppColors.textSecondary,
+                                color: !_isForSelf
+                                    ? AppColors.textOnPrimary
+                                    : AppColors.textSecondary,
                               ),
                               const SizedBox(width: 8),
                               Text(
                                 'Người khác',
                                 style: TextStyle(
-                                  fontWeight: !_isForSelf ? FontWeight.bold : FontWeight.w500,
-                                  color: !_isForSelf ? AppColors.textOnPrimary : AppColors.textSecondary,
+                                  fontWeight: !_isForSelf
+                                      ? FontWeight.bold
+                                      : FontWeight.w500,
+                                  color: !_isForSelf
+                                      ? AppColors.textOnPrimary
+                                      : AppColors.textSecondary,
                                   fontSize: 15,
                                 ),
                               ),
@@ -443,7 +556,8 @@ class _TuViInputPageState extends State<TuViInputPage> {
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide(color: AppColors.primary, width: 2),
+                          borderSide:
+                              BorderSide(color: AppColors.primary, width: 2),
                         ),
                         filled: true,
                         fillColor: AppColors.surfaceVariant,
@@ -483,119 +597,14 @@ class _TuViInputPageState extends State<TuViInputPage> {
                             color: AppColors.textPrimary,
                           ),
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Date inputs
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          flex: 2,
-                          child: TextFormField(
-                            controller: _dayController,
-                            keyboardType: TextInputType.number,
-                            decoration: InputDecoration(
-                              labelText: 'Ngày',
-                              filled: true,
-                              fillColor: AppColors.surfaceVariant,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide(color: AppColors.border),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide(color: AppColors.border),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide(color: AppColors.primary, width: 2),
-                              ),
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
-                              labelStyle: TextStyle(color: AppColors.textSecondary, fontSize: 14),
-                            ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) return 'Thiếu';
-                              final n = int.tryParse(value);
-                              if (n == null || n < 1 || n > 31) return 'Sai';
-                              return null;
-                            },
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          flex: 2,
-                          child: TextFormField(
-                            controller: _monthController,
-                            keyboardType: TextInputType.number,
-                            decoration: InputDecoration(
-                              labelText: 'Tháng',
-                              filled: true,
-                              fillColor: AppColors.surfaceVariant,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide(color: AppColors.border),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide(color: AppColors.border),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide(color: AppColors.primary, width: 2),
-                              ),
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
-                              labelStyle: TextStyle(color: AppColors.textSecondary, fontSize: 14),
-                            ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) return 'Thiếu';
-                              final n = int.tryParse(value);
-                              if (n == null || n < 1 || n > 12) return 'Sai';
-                              return null;
-                            },
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          flex: 3,
-                          child: TextFormField(
-                            controller: _yearController,
-                            keyboardType: TextInputType.number,
-                            decoration: InputDecoration(
-                              labelText: 'Năm',
-                              filled: true,
-                              fillColor: AppColors.surfaceVariant,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide(color: AppColors.border),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide(color: AppColors.border),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide(color: AppColors.primary, width: 2),
-                              ),
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
-                              labelStyle: TextStyle(color: AppColors.textSecondary, fontSize: 14),
-                            ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) return 'Thiếu';
-                              final n = int.tryParse(value);
-                              if (n == null || n < 1900 || n > 2100) return 'Sai';
-                              return null;
-                            },
-                          ),
-                        ),
-                        const SizedBox(width: 10),
+                        const Spacer(),
+                        // Calendar picker button
                         Container(
-                          height: 56,
-                          width: 56,
+                          height: 40,
+                          width: 40,
                           decoration: BoxDecoration(
                             color: AppColors.iconBgYellow,
-                            borderRadius: BorderRadius.circular(16),
+                            borderRadius: BorderRadius.circular(12),
                             border: Border.all(color: AppColors.borderYellow),
                           ),
                           child: IconButton(
@@ -603,13 +612,69 @@ class _TuViInputPageState extends State<TuViInputPage> {
                             icon: Icon(
                               Icons.calendar_month_rounded,
                               color: AppColors.primaryDark,
+                              size: 20,
                             ),
+                            padding: EdgeInsets.zero,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Scroll Wheel Date Pickers
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // Day picker
+                        Expanded(
+                          child: _buildScrollPicker(
+                            label: 'Ngày',
+                            items: dayItems,
+                            selectedIndex: _selectedDay - 1,
+                            controller: _dayScrollController,
+                            onChanged: (index) {
+                              setState(() {
+                                _selectedDay = index + 1;
+                              });
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        // Month picker
+                        Expanded(
+                          child: _buildScrollPicker(
+                            label: 'Tháng',
+                            items: monthItems,
+                            selectedIndex: _selectedMonth - 1,
+                            controller: _monthScrollController,
+                            onChanged: (index) {
+                              setState(() {
+                                _selectedMonth = index + 1;
+                              });
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        // Year picker
+                        Expanded(
+                          flex: 2,
+                          child: _buildScrollPicker(
+                            label: 'Năm',
+                            items: yearItems,
+                            selectedIndex: _selectedYear - _minYear,
+                            controller: _yearScrollController,
+                            onChanged: (index) {
+                              setState(() {
+                                _selectedYear = _minYear + index;
+                              });
+                            },
+                            itemWidth: 80,
                           ),
                         ),
                       ],
                     ),
 
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 20),
 
                     // Hour branch dropdown
                     DropdownButtonFormField<int>(
@@ -630,7 +695,8 @@ class _TuViInputPageState extends State<TuViInputPage> {
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide(color: AppColors.primary, width: 2),
+                          borderSide:
+                              BorderSide(color: AppColors.primary, width: 2),
                         ),
                         filled: true,
                         fillColor: AppColors.surfaceVariant,
@@ -700,13 +766,13 @@ class _TuViInputPageState extends State<TuViInputPage> {
                               duration: const Duration(milliseconds: 200),
                               padding: const EdgeInsets.symmetric(vertical: 16),
                               decoration: BoxDecoration(
-                                color: _selectedGender == 1 
-                                    ? AppColors.iconBgBlue 
+                                color: _selectedGender == 1
+                                    ? AppColors.iconBgBlue
                                     : AppColors.surfaceVariant,
                                 borderRadius: BorderRadius.circular(16),
                                 border: Border.all(
-                                  color: _selectedGender == 1 
-                                      ? AppColors.info 
+                                  color: _selectedGender == 1
+                                      ? AppColors.info
                                       : AppColors.border,
                                   width: _selectedGender == 1 ? 2 : 1,
                                 ),
@@ -716,8 +782,8 @@ class _TuViInputPageState extends State<TuViInputPage> {
                                 children: [
                                   Icon(
                                     Icons.male_rounded,
-                                    color: _selectedGender == 1 
-                                        ? AppColors.info 
+                                    color: _selectedGender == 1
+                                        ? AppColors.info
                                         : AppColors.textSecondary,
                                     size: 24,
                                   ),
@@ -725,11 +791,11 @@ class _TuViInputPageState extends State<TuViInputPage> {
                                   Text(
                                     'Nam',
                                     style: TextStyle(
-                                      fontWeight: _selectedGender == 1 
-                                          ? FontWeight.bold 
+                                      fontWeight: _selectedGender == 1
+                                          ? FontWeight.bold
                                           : FontWeight.w500,
-                                      color: _selectedGender == 1 
-                                          ? AppColors.info 
+                                      color: _selectedGender == 1
+                                          ? AppColors.info
                                           : AppColors.textSecondary,
                                       fontSize: 15,
                                     ),
@@ -747,13 +813,13 @@ class _TuViInputPageState extends State<TuViInputPage> {
                               duration: const Duration(milliseconds: 200),
                               padding: const EdgeInsets.symmetric(vertical: 16),
                               decoration: BoxDecoration(
-                                color: _selectedGender == -1 
-                                    ? AppColors.iconBgPeach 
+                                color: _selectedGender == -1
+                                    ? AppColors.iconBgPeach
                                     : AppColors.surfaceVariant,
                                 borderRadius: BorderRadius.circular(16),
                                 border: Border.all(
-                                  color: _selectedGender == -1 
-                                      ? AppColors.accent 
+                                  color: _selectedGender == -1
+                                      ? AppColors.accent
                                       : AppColors.border,
                                   width: _selectedGender == -1 ? 2 : 1,
                                 ),
@@ -763,8 +829,8 @@ class _TuViInputPageState extends State<TuViInputPage> {
                                 children: [
                                   Icon(
                                     Icons.female_rounded,
-                                    color: _selectedGender == -1 
-                                        ? AppColors.accent 
+                                    color: _selectedGender == -1
+                                        ? AppColors.accent
                                         : AppColors.textSecondary,
                                     size: 24,
                                   ),
@@ -772,11 +838,11 @@ class _TuViInputPageState extends State<TuViInputPage> {
                                   Text(
                                     'Nữ',
                                     style: TextStyle(
-                                      fontWeight: _selectedGender == -1 
-                                          ? FontWeight.bold 
+                                      fontWeight: _selectedGender == -1
+                                          ? FontWeight.bold
                                           : FontWeight.w500,
-                                      color: _selectedGender == -1 
-                                          ? AppColors.accent 
+                                      color: _selectedGender == -1
+                                          ? AppColors.accent
                                           : AppColors.textSecondary,
                                       fontSize: 15,
                                     ),
@@ -808,21 +874,22 @@ class _TuViInputPageState extends State<TuViInputPage> {
                   ],
                 ),
                 child: ListTile(
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   leading: Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: _isSolarCalendar 
-                          ? AppColors.iconBgYellow 
+                      color: _isSolarCalendar
+                          ? AppColors.iconBgYellow
                           : AppColors.iconBgPurple,
                       borderRadius: BorderRadius.circular(14),
                     ),
                     child: Icon(
-                      _isSolarCalendar 
-                          ? Icons.wb_sunny_rounded 
+                      _isSolarCalendar
+                          ? Icons.wb_sunny_rounded
                           : Icons.nightlight_round,
-                      color: _isSolarCalendar 
-                          ? AppColors.primaryDark 
+                      color: _isSolarCalendar
+                          ? AppColors.primaryDark
                           : Colors.purple.shade400,
                       size: 22,
                     ),
@@ -836,7 +903,9 @@ class _TuViInputPageState extends State<TuViInputPage> {
                     ),
                   ),
                   subtitle: Text(
-                    _isSolarCalendar ? 'Dương lịch (Gregorian)' : 'Âm lịch (Lunar)',
+                    _isSolarCalendar
+                        ? 'Dương lịch (Gregorian)'
+                        : 'Âm lịch (Lunar)',
                     style: TextStyle(
                       color: AppColors.textSecondary,
                       fontSize: 13,
@@ -844,8 +913,9 @@ class _TuViInputPageState extends State<TuViInputPage> {
                   ),
                   trailing: Switch(
                     value: _isSolarCalendar,
-                    onChanged: (value) => setState(() => _isSolarCalendar = value),
-                    activeColor: AppColors.primary,
+                    onChanged: (value) =>
+                        setState(() => _isSolarCalendar = value),
+                    activeThumbColor: AppColors.primary,
                     activeTrackColor: AppColors.primaryLight,
                   ),
                 ),
@@ -935,7 +1005,7 @@ class _TuViInputPageState extends State<TuViInputPage> {
                   ],
                 ),
               ),
-              
+
               const SizedBox(height: 20),
             ],
           ),

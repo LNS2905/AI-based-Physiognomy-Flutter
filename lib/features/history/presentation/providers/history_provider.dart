@@ -12,10 +12,10 @@ import '../../data/repositories/history_repository.dart';
 
 /// Provider for managing history state and operations
 class HistoryProvider extends BaseProvider {
-  final HistoryRepository _historyRepository;
-  final PalmAnalysisHistoryService _palmAnalysisHistoryService;
-  final FacialAnalysisHistoryService _facialAnalysisHistoryService;
-  final EnhancedAuthProvider _authProvider;
+  HistoryRepository _historyRepository;
+  PalmAnalysisHistoryService _palmAnalysisHistoryService;
+  FacialAnalysisHistoryService _facialAnalysisHistoryService;
+  EnhancedAuthProvider _authProvider;
 
   // History data
   List<HistoryItemModel> _allHistoryItems = [];
@@ -40,6 +40,38 @@ class HistoryProvider extends BaseProvider {
         _palmAnalysisHistoryService = PalmAnalysisHistoryService(authProvider: authProvider),
         _facialAnalysisHistoryService = FacialAnalysisHistoryService(authProvider: authProvider) {
     _setupAuthListener();
+  }
+
+  /// Update the auth provider dependency when ProxyProvider calls update
+  /// This pattern avoids creating a new HistoryProvider instance on auth changes
+  void updateAuthProvider(EnhancedAuthProvider newAuthProvider) {
+    if (_historyDisposed) return;
+    
+    // Check if authProvider actually changed
+    if (_authProvider == newAuthProvider) {
+      AppLogger.info('HistoryProvider.updateAuthProvider: Same provider, skipping update');
+      return;
+    }
+    
+    AppLogger.info('HistoryProvider.updateAuthProvider: Updating auth provider dependency');
+    
+    // Remove listener from old provider
+    try {
+      _authProvider.removeListener(_onAuthStateChanged);
+    } catch (e) {
+      AppLogger.warning('HistoryProvider: Error removing old auth listener: $e');
+    }
+    
+    // Update references
+    _authProvider = newAuthProvider;
+    _historyRepository = HistoryRepository(authProvider: newAuthProvider);
+    _palmAnalysisHistoryService = PalmAnalysisHistoryService(authProvider: newAuthProvider);
+    _facialAnalysisHistoryService = FacialAnalysisHistoryService(authProvider: newAuthProvider);
+    
+    // Setup listener on new provider
+    _setupAuthListener();
+    
+    AppLogger.info('HistoryProvider.updateAuthProvider: Auth provider dependency updated successfully');
   }
 
   // Getters

@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/error_handler.dart';
+import '../../../../core/utils/logger.dart';
 import '../../../../core/widgets/standard_back_button.dart';
 import '../../../auth/presentation/providers/enhanced_auth_provider.dart';
+import '../../../referral/data/services/referral_api_service.dart';
 import '../providers/chat_provider.dart';
 import '../../data/models/chat_message_model.dart';
 import '../widgets/message_bubble.dart';
@@ -737,18 +740,32 @@ class _AIConversationPageState extends State<AIConversationPage>
   Widget _buildChatItem(BuildContext context, ChatProvider chatProvider, int index) {
     if (chatProvider.messages.isEmpty) {
       if (index == 0) {
-        return _buildInitialAIGreeting();
+        return _buildInitialAIGreeting(chatProvider);
       }
     }
 
     int currentIndex = 0;
+    
+    // Find the last AI message index
+    int lastAiMessageIndex = -1;
+    for (int i = chatProvider.messages.length - 1; i >= 0; i--) {
+      if (chatProvider.messages[i].sender == MessageSender.ai) {
+        lastAiMessageIndex = i;
+        break;
+      }
+    }
 
     for (int i = 0; i < chatProvider.messages.length; i++) {
       if (currentIndex == index) {
+        final message = chatProvider.messages[i];
+        final isLastAiMessage = i == lastAiMessageIndex && !chatProvider.isAiTyping;
+        
         return MessageBubble(
-          message: chatProvider.messages[i],
+          message: message,
           showTimestamp: true,
-          onLongPress: () => _showMessageOptions(chatProvider.messages[i]),
+          onLongPress: () => _showMessageOptions(message),
+          isLastAiMessage: isLastAiMessage,
+          onSuggestionTap: isLastAiMessage ? _handleSuggestionTap : null,
         );
       }
       currentIndex++;
@@ -767,7 +784,12 @@ class _AIConversationPageState extends State<AIConversationPage>
     return const SizedBox.shrink();
   }
 
-  Widget _buildInitialAIGreeting() {
+  void _handleSuggestionTap(String suggestion) {
+    _messageController.text = suggestion;
+    _onSendMessage();
+  }
+
+  Widget _buildInitialAIGreeting(ChatProvider chatProvider) {
     final greetingMessage = ChatMessageModel.ai(
       id: 'greeting',
       content: "Xin chào! 🌟 Tôi là trợ lý Tử Vi AI của bạn. Tôi sẽ giúp bạn hiểu rõ về lá số tử vi và vận mệnh của mình.",
@@ -776,6 +798,8 @@ class _AIConversationPageState extends State<AIConversationPage>
     return MessageBubble(
       message: greetingMessage,
       showTimestamp: true,
+      isLastAiMessage: true,
+      onSuggestionTap: _handleSuggestionTap,
     );
   }
 
@@ -1237,93 +1261,262 @@ class _AIConversationPageState extends State<AIConversationPage>
   void _showInsufficientCreditsDialog() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => Dialog(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(24),
         ),
         backgroundColor: AppColors.surface,
-        titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
-        contentPadding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
-        actionsPadding: const EdgeInsets.all(16),
-        title: Row(
-          children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: AppColors.warningLight,
-                borderRadius: BorderRadius.circular(14),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Header
+              Row(
+                children: [
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: AppColors.warningLight,
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: const Icon(
+                      Icons.account_balance_wallet_outlined,
+                      color: AppColors.warning,
+                      size: 22,
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  const Expanded(
+                    child: Text(
+                      'Hết tín dụng',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              child: const Icon(
-                Icons.account_balance_wallet_outlined,
-                color: AppColors.warning,
-                size: 22,
-              ),
-            ),
-            const SizedBox(width: 14),
-            const Expanded(
-              child: Text(
-                'Hết tín dụng',
+              const SizedBox(height: 16),
+              const Text(
+                'Tài khoản đã hết tín dụng để sử dụng AI Chatbot. Chọn một trong các cách dưới đây để tiếp tục:',
                 style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
+                  fontSize: 14,
+                  color: AppColors.textSecondary,
+                  height: 1.5,
                 ),
               ),
-            ),
-          ],
-        ),
-        content: const Text(
-          'Tài khoản đã hết tín dụng để sử dụng AI Chatbot. Vui lòng nạp thêm tín dụng để tiếp tục.',
-          style: TextStyle(
-            fontSize: 14,
-            color: AppColors.textSecondary,
-            height: 1.5,
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            style: TextButton.styleFrom(
-              foregroundColor: AppColors.textSecondary,
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            child: const Text(
-              'Hủy',
-              style: TextStyle(fontWeight: FontWeight.w600),
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              context.pushNamed('payment-packages');
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: AppColors.textOnPrimary,
-              elevation: 0,
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            child: const Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.add_circle_outline, size: 18),
-                SizedBox(width: 8),
-                Text(
-                  'Nạp ngay',
-                  style: TextStyle(fontWeight: FontWeight.w600),
+              const SizedBox(height: 20),
+              
+              // Card 1: Chia sẻ nhận Credit
+              Material(
+                color: AppColors.successLight,
+                borderRadius: BorderRadius.circular(16),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(16),
+                  onTap: () {
+                    Navigator.pop(dialogContext);
+                    _shareAppLink();
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: AppColors.success,
+                        width: 1.5,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 48,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            color: AppColors.success.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Center(
+                            child: Text(
+                              '🎉',
+                              style: TextStyle(fontSize: 24),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 14),
+                        const Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Chia sẻ nhận Credit',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
+                              SizedBox(height: 4),
+                              Text(
+                                'Mời bạn bè, nhận 5 credit miễn phí',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const Icon(
+                          Icons.arrow_forward_ios_rounded,
+                          size: 16,
+                          color: AppColors.success,
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-              ],
-            ),
+              ),
+              
+              const SizedBox(height: 12),
+              
+              // Card 2: Nạp Credit
+              Material(
+                color: AppColors.iconBgYellow,
+                borderRadius: BorderRadius.circular(16),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(16),
+                  onTap: () {
+                    Navigator.pop(dialogContext);
+                    context.pushNamed('payment-packages');
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: AppColors.primary,
+                        width: 1.5,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 48,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withValues(alpha: 0.3),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Center(
+                            child: Text(
+                              '💳',
+                              style: TextStyle(fontSize: 24),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 14),
+                        const Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Nạp Credit',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
+                              SizedBox(height: 4),
+                              Text(
+                                'Mua gói credit từ 10.000đ',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const Icon(
+                          Icons.arrow_forward_ios_rounded,
+                          size: 16,
+                          color: AppColors.primary,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              
+              const SizedBox(height: 20),
+              
+              // Button: Để sau
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext),
+                style: TextButton.styleFrom(
+                  foregroundColor: AppColors.textSecondary,
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text(
+                  'Để sau',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 15,
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
+  }
+
+  Future<void> _shareAppLink() async {
+    // Try to get personalized referral code from API
+    String appLink = 'https://tuonghoc.ai/download';
+    String referralCode = '';
+    
+    try {
+      final referralService = ReferralApiService();
+      final referralData = await referralService.getReferralCode();
+      appLink = referralData.link;
+      referralCode = referralData.code;
+      AppLogger.info('Got referral code: $referralCode');
+    } catch (e) {
+      AppLogger.error('Failed to get referral code, using default link: $e');
+      // Continue with default link if API fails
+    }
+
+    final message = '''
+🌟 Khám phá Tướng Học AI - App xem tử vi và phân tích khuôn mặt bằng AI!
+
+📲 Tải ngay: $appLink
+${referralCode.isNotEmpty ? '\n🎁 Mã giới thiệu: $referralCode (nhận 5 credit miễn phí!)' : ''}
+✨ Sử dụng app để khám phá vận mệnh của bạn!
+''';
+
+    await Share.share(message, subject: 'Tướng Học AI - App Tử Vi & Nhân Tướng Học');
+    
+    // Show snackbar after sharing
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(referralCode.isNotEmpty 
+            ? 'Cảm ơn bạn đã chia sẻ! Bạn sẽ nhận 5 credit khi bạn bè đăng ký với mã $referralCode'
+            : 'Cảm ơn bạn đã chia sẻ!'),
+          backgroundColor: AppColors.success,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 
 
